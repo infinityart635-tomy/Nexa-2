@@ -149,6 +149,27 @@
       border-color:rgba(255,255,255,.10);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
+    .authCard select.input{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right:42px;
+      color:var(--text);
+      background:
+        linear-gradient(45deg, transparent 50%, rgba(241,241,244,.78) 50%),
+        linear-gradient(135deg, rgba(241,241,244,.78) 50%, transparent 50%),
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.22));
+      background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px),
+        0 0;
+      background-size:6px 6px, 6px 6px, 100% 100%;
+      background-repeat:no-repeat;
+    }
+    .authCard select.input option{
+      color:var(--text);
+      background:#161a1e;
+    }
     .authCard .input:focus{
       border-color:rgba(120,240,190,.45);
       box-shadow: 0 0 0 3px rgba(120,240,190,.10), inset 0 1px 0 rgba(255,255,255,.03);
@@ -199,7 +220,7 @@
             <div class="authSub" id="viewSub">Usuario o mail y contrasena.</div>
           </div>
         </div>
-        <div class="statusBar" id="statusBar">Cargando...</div>
+        <div class="statusBar" id="statusBar" style="display:none;" aria-hidden="true"></div>
       </div>
       <div class="tabRow" role="tablist" aria-label="Cuenta">
         <button class="tabBtn active" type="button" data-tab="login">Ingresar</button>
@@ -401,12 +422,10 @@
           api("/api/auth/status"),
           api("/api/auth/me")
         ]);
-        $("statusBar").textContent = status.userCount ? "Listo" : "Sin cuentas";
         if (me && me.authenticated) {
           location.replace(profileUrl());
         }
       } catch (error) {
-        $("statusBar").textContent = "No se pudo leer el estado del sistema.";
         showMessage(errorText(error.message), "error");
       }
     }
