@@ -498,19 +498,54 @@
       gap:10px;
     }
     .registerTermsRow{
-      display:grid;
-      grid-template-columns:auto minmax(0,1fr);
-      gap:10px;
+      display:flex;
+      gap:12px;
       align-items:flex-start;
       color:rgba(232,239,248,.66);
       font-size:12px;
       line-height:1.28;
+      user-select:none;
     }
-    .registerTermsRow input{
-      margin-top:3px;
+    .registerTermsCheck{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+    .registerTermsToggle{
+      width:42px;
+      height:24px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      position:relative;
+      flex:0 0 auto;
+      margin-top:1px;
+      transition:background .18s ease, border-color .18s ease;
+      cursor:pointer;
+    }
+    .registerTermsToggle::after{
+      content:"";
+      position:absolute;
+      top:2px;
+      left:2px;
       width:18px;
       height:18px;
-      accent-color:#8deec2;
+      border-radius:999px;
+      background:#eaf1f7;
+      box-shadow:0 2px 8px rgba(0,0,0,.28);
+      transition:transform .18s ease, background .18s ease;
+    }
+    .registerTermsCheck:checked + .registerTermsToggle{
+      background:rgba(120,240,190,.18);
+      border-color:rgba(120,240,190,.44);
+    }
+    .registerTermsCheck:checked + .registerTermsToggle::after{
+      transform:translateX(18px);
+      background:#8deec2;
+    }
+    .registerTermsText{
+      flex:1;
+      min-width:0;
     }
     .registerTermsRow a{
       color:#8deec2;
@@ -780,8 +815,9 @@
             </div>
             <div class="registerTerms">
               <label class="registerTermsRow">
-                <input id="registerTerms" type="checkbox"/>
-                <span>Acepto los <a href="#" onclick="return false;">Terminos del servicio</a> y las <a href="#" onclick="return false;">Politicas de privacidad</a> de NEXA.</span>
+                <input id="registerTerms" class="registerTermsCheck" type="checkbox"/>
+                <span class="registerTermsToggle" aria-hidden="true"></span>
+                <span class="registerTermsText">Acepto los <a href="#" onclick="return false;">Terminos del servicio</a> y las <a href="#" onclick="return false;">Politicas de privacidad</a> de NEXA.</span>
               </label>
             </div>
             <div class="formActions">
