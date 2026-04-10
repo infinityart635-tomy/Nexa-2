@@ -16,9 +16,12 @@
   const THEME_KEY = "nexa_theme";
   const ACTIVITY_KEY = "nexa_last_active_at";
   const PWA_DISMISSED_KEY = "nexa_pwa_install_dismissed";
+  const UPDATE_DISMISSED_KEY = "nexa_update_dismissed_build";
   const THEMES = ["noir","ember","mint","cobalt","sand"];
   let notifications = [];
   let installPromptEvent = null;
+  let currentBuildId = "";
+  let pendingBuildId = "";
 
   function loadNotifications(){
     try{
@@ -379,6 +382,73 @@
       toast("App instalada correctamente.", "success");
     });
   }
+  function ensureUpdatePrompt(){
+    if(document.getElementById("appUpdateCard")) return document.getElementById("appUpdateCard");
+    const card = document.createElement("div");
+    card.id = "appUpdateCard";
+    card.className = "appUpdateCard";
+    card.style.display = "none";
+    card.innerHTML = `
+      <div class="appUpdateTitle">Actualizacion disponible</div>
+      <div class="appUpdateText">Hay una version nueva de NEXA lista para usar.</div>
+      <div class="appUpdateActions">
+        <button class="btn primary" id="appUpdateBtn" type="button">Actualizar</button>
+        <button class="btn" id="appUpdateClose" type="button">Despues</button>
+      </div>
+    `;
+    document.body.appendChild(card);
+    document.getElementById("appUpdateBtn").addEventListener("click", forceAppRefresh);
+    document.getElementById("appUpdateClose").addEventListener("click", ()=>{
+      if(pendingBuildId){
+        try{ localStorage.setItem(UPDATE_DISMISSED_KEY, pendingBuildId); }catch{}
+      }
+      hideUpdatePrompt();
+    });
+    return card;
+  }
+  function showUpdatePrompt(){
+    const card = ensureUpdatePrompt();
+    card.style.display = "block";
+  }
+  function hideUpdatePrompt(){
+    const card = document.getElementById("appUpdateCard");
+    if(card) card.style.display = "none";
+  }
+  async function forceAppRefresh(){
+    const btn = document.getElementById("appUpdateBtn");
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = "Actualizando...";
+    }
+    hideUpdatePrompt();
+    try{
+      if("serviceWorker" in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(reg => reg.unregister().catch(()=>false)));
+      }
+      if("caches" in window){
+        const keys = await caches.keys();
+        await Promise.all(keys.map(key => caches.delete(key).catch(()=>false)));
+      }
+    }catch{}
+    try{ localStorage.removeItem(UPDATE_DISMISSED_KEY); }catch{}
+    const nextUrl = new URL(location.href);
+    nextUrl.searchParams.set("_update", String(Date.now()));
+    location.replace(nextUrl.toString());
+  }
+  function handleBuildInfo(info){
+    const buildId = String((info && info.buildId) || "").trim();
+    if(!buildId) return;
+    if(!currentBuildId){
+      currentBuildId = buildId;
+      return;
+    }
+    if(buildId === currentBuildId) return;
+    pendingBuildId = buildId;
+    const dismissedBuild = (()=>{ try{ return localStorage.getItem(UPDATE_DISMISSED_KEY) || ""; }catch{ return ""; } })();
+    if(dismissedBuild === buildId) return;
+    showUpdatePrompt();
+  }
 
   // Aviso global de caja/turno abierto al reabrir la app
   const CASH_NOTICE_KEY = "nexa_cash_open_notice";
@@ -387,6 +457,7 @@
       const r = await fetch("/api/info", { cache: "no-store" });
       if(!r.ok) return;
       const j = await r.json();
+      handleBuildInfo(j);
       const cs = j && j.cashStatus ? j.cashStatus : null;
       if(!cs || !cs.openAny) return;
       const key = `${cs.dateKey}|open`;

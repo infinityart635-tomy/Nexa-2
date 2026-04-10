@@ -17,9 +17,18 @@ const {
   parseDataUrl,
   seedPostgresFromDisk,
 } = require("./postgres_storage");
+const PACKAGE_JSON = require("./package.json");
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const STORAGE_MODE = process.env.DATABASE_URL ? "postgres" : "file";
+const APP_VERSION = String(PACKAGE_JSON.version || "0.0.0");
+const SERVER_BUILD_ID =
+  String(
+    process.env.RAILWAY_DEPLOYMENT_ID ||
+    process.env.RAILWAY_GIT_COMMIT_SHA ||
+    process.env.SOURCE_VERSION ||
+    `local-${Date.now()}`
+  );
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_DIR = path.join(__dirname, "data");
 const IMAGES_DIR = path.join(DATA_DIR, "images");
@@ -4272,7 +4281,8 @@ function handleApi(req, res, url) {
       urls: urls.map(x => x.url),
       serverTime: Date.now(),
       app: "resto-pos-wifi",
-      version: "v9"
+      version: APP_VERSION,
+      buildId: SERVER_BUILD_ID
     }), "application/json; charset=utf-8");
   }
 

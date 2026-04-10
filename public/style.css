@@ -65,12 +65,54 @@
 .pwaInstallActions .btn{
   flex:1;
 }
+.appUpdateCard{
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  z-index:1300;
+  width:min(460px, calc(100vw - 24px));
+  padding:14px 14px 12px;
+  border:1px solid rgba(120,220,255,.28);
+  border-radius:16px;
+  background:
+    linear-gradient(180deg, rgba(18,22,28,.97), rgba(10,12,16,.98)),
+    linear-gradient(135deg, rgba(120,220,255,.10), rgba(120,240,190,.08));
+  box-shadow:0 20px 48px rgba(0,0,0,.42);
+}
+.appUpdateTitle{
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#eefaff;
+}
+.appUpdateText{
+  margin-top:6px;
+  color:var(--muted);
+  line-height:1.45;
+}
+.appUpdateActions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+.appUpdateActions .btn{
+  flex:1;
+}
 @media (max-width: 640px){
   .pwaInstallCard{
     left:12px;
     right:12px;
     bottom:12px;
     width:auto;
+  }
+  .appUpdateCard{
+    left:12px;
+    right:12px;
+    bottom:12px;
+    width:auto;
+    transform:none;
   }
 }
 /* Themes */

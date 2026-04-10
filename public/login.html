@@ -247,7 +247,18 @@
             <input id="registerPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
           </div>
           <div class="field full">
-            <label class="small" for="registerQuestion">Pregunta de seguridad</label>
+            <label class="small" for="registerQuestionPreset">Pregunta de seguridad</label>
+            <select id="registerQuestionPreset" class="input">
+              <option value="Nombre de mi primera mascota">Nombre de mi primera mascota</option>
+              <option value="Ciudad donde naci">Ciudad donde naci</option>
+              <option value="Nombre de mi escuela primaria">Nombre de mi escuela primaria</option>
+              <option value="Segundo nombre de mi madre">Segundo nombre de mi madre</option>
+              <option value="Marca de mi primer auto o moto">Marca de mi primer auto o moto</option>
+              <option value="custom">Escribir una pregunta personalizada</option>
+            </select>
+          </div>
+          <div class="field full" id="registerQuestionCustomWrap" style="display:none;">
+            <label class="small" for="registerQuestion">Pregunta personalizada</label>
             <input id="registerQuestion" class="input" placeholder="Ej: Nombre de mi primera mascota"/>
           </div>
           <div class="field full">
@@ -302,6 +313,7 @@
       tab: "login",
       recoveryQuestion: ""
     };
+    const CUSTOM_QUESTION_VALUE = "custom";
 
     if (next) sessionStorage.setItem("nexa_next", next);
 
@@ -331,6 +343,27 @@
         $("viewTitle").textContent = "Recuperar acceso";
         $("viewSub").textContent = "Usuario o mail, respuesta y nueva contrasena.";
       }
+    }
+
+    function getRegisterSecurityQuestion() {
+      const preset = $("registerQuestionPreset");
+      const custom = ($("registerQuestion").value || "").trim();
+      if (!preset) return custom;
+      const selected = String(preset.value || "").trim();
+      if (!selected) return "";
+      if (selected === CUSTOM_QUESTION_VALUE) return custom;
+      return selected;
+    }
+
+    function updateRegisterQuestionMode() {
+      const preset = $("registerQuestionPreset");
+      const wrap = $("registerQuestionCustomWrap");
+      const input = $("registerQuestion");
+      if (!preset || !wrap || !input) return;
+      const customMode = preset.value === CUSTOM_QUESTION_VALUE;
+      wrap.style.display = customMode ? "" : "none";
+      input.disabled = !customMode;
+      if (!customMode) input.value = "";
     }
 
     function errorText(error) {
@@ -402,7 +435,7 @@
         username: ($("registerUsername").value || "").trim(),
         email: ($("registerEmail").value || "").trim(),
         password: $("registerPassword").value || "",
-        securityQuestion: ($("registerQuestion").value || "").trim(),
+        securityQuestion: getRegisterSecurityQuestion(),
         securityAnswer: ($("registerAnswer").value || "").trim()
       };
       const password2 = $("registerPassword2").value || "";
@@ -471,6 +504,7 @@
     }
 
     $$('[data-tab]').forEach((btn) => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+    $("registerQuestionPreset").addEventListener("change", updateRegisterQuestionMode);
     $("btnLogin").addEventListener("click", submitLogin);
     $("btnRegister").addEventListener("click", submitRegister);
     $("btnToLogin").addEventListener("click", () => setTab("login"));
@@ -478,6 +512,7 @@
     $("btnRecover").addEventListener("click", submitRecover);
     $("loginPassword").addEventListener("keydown", (ev) => { if (ev.key === "Enter") submitLogin(); });
 
+    updateRegisterQuestionMode();
     loadStatus();
   </script>
 </body>
