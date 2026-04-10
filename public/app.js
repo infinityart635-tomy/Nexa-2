@@ -23,6 +23,11 @@
   let currentBuildId = "";
   let pendingBuildId = "";
 
+  function isAuthScreen(){
+    const path = (location && location.pathname ? location.pathname : "").toLowerCase();
+    return path === "/login.html" || path === "/login" || path === "/";
+  }
+
   function loadNotifications(){
     try{
       const raw = localStorage.getItem(NOTIF_KEY);
@@ -135,6 +140,7 @@
     return el;
   }
   function updateCashGateBanner(){
+    if(isAuthScreen()) return;
     const el = ensureCashGateBanner();
     const path = (location && location.pathname) ? location.pathname.toLowerCase() : "";
     if(path === "/admin_stats.html" || path === "/admin_caja.html" || path === "/admin_caja_test.html"){
@@ -453,6 +459,7 @@
   // Aviso global de caja/turno abierto al reabrir la app
   const CASH_NOTICE_KEY = "nexa_cash_open_notice";
   async function checkCashOpenNotice(){
+    if(isAuthScreen()) return;
     try{
       const r = await fetch("/api/info", { cache: "no-store" });
       if(!r.ok) return;
@@ -472,6 +479,7 @@
     try{ return new Date(ts||Date.now()).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); }catch{ return ""; }
   }
   function ensureNotifDock(){
+    if(isAuthScreen()) return;
     if(document.getElementById("notifDock")) return;
     const dock = document.createElement("div");
     dock.id = "notifDock";

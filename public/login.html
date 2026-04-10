@@ -9,6 +9,11 @@
   <title>NEXA - Cuenta</title>
   <link rel="stylesheet" href="/style.css"/>
   <style>
+    html,
+    body{
+      height:100%;
+      overflow:hidden;
+    }
     .top{display:none;}
     .accessShell{
       min-height:100dvh;
@@ -19,6 +24,8 @@
     .authCard{
       width:min(100%, 1180px);
       min-height:100dvh;
+      height:100dvh;
+      max-height:100dvh;
       border:none;
       border-radius:0;
       background:
@@ -130,8 +137,9 @@
       border:none;
       border-radius:0;
       background:transparent;
+      min-height:0;
     }
-    .panel.active{display:block;}
+    .panel.active{display:grid; align-content:start; min-height:0;}
     .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px;}
     @media (max-width: 720px){
       .formGrid{grid-template-columns:minmax(0,1fr);}
@@ -199,6 +207,8 @@
       gap:18px;
       align-items:stretch;
       min-height:calc(100dvh - 36px);
+      height:calc(100dvh - 36px);
+      overflow:hidden;
     }
     .registerHero{
       position:relative;
@@ -216,6 +226,7 @@
       display:grid;
       align-content:start;
       height:100%;
+      overflow:hidden;
     }
     .registerHeroBrand{
       display:inline-flex;
@@ -415,6 +426,7 @@
       align-content:start;
       min-height:0;
       height:100%;
+      overflow:hidden;
     }
     .registerFormHead{
       display:flex;
@@ -595,6 +607,56 @@
       padding:0;
       font:inherit;
     }
+    body[data-auth-view="register"] .registerFormKicker,
+    body[data-auth-view="register"] .registerFormSub,
+    body[data-auth-view="register"] .registerHint,
+    body[data-auth-view="register"] .registerFootNote{
+      display:none;
+    }
+    body[data-auth-view="register"] .authHeader{
+      margin-bottom:6px;
+    }
+    body[data-auth-view="register"] .authTitle{
+      font-size:22px;
+    }
+    body[data-auth-view="register"] .authSub{
+      display:none;
+    }
+    body[data-auth-view="register"] .panel{
+      margin-top:8px;
+    }
+    body[data-auth-view="register"] .registerFormTitle{
+      font-size:21px;
+      margin:0 0 8px;
+    }
+    body[data-auth-view="register"] .formGrid{
+      gap:7px 8px;
+    }
+    body[data-auth-view="register"] .field{
+      gap:4px;
+    }
+    body[data-auth-view="register"] .authCard .small{
+      font-size:10px;
+      letter-spacing:.10em;
+    }
+    body[data-auth-view="register"] .authCard .input{
+      padding:8px 10px;
+      min-height:38px;
+    }
+    body[data-auth-view="register"] .registerTerms{
+      margin-top:7px;
+    }
+    body[data-auth-view="register"] .registerTermsRow{
+      align-items:center;
+      font-size:11px;
+    }
+    body[data-auth-view="register"] .registerFormCard .btn.primary{
+      padding:10px 14px;
+    }
+    body[data-auth-view="register"] .registerLoginLink,
+    body[data-auth-view="register"] .formActions[style]{
+      display:none;
+    }
     @media (max-height: 820px){
       .authCard{padding:12px 14px;}
       .authTitle{font-size:24px;}
@@ -621,21 +683,31 @@
       .formActions .btn{width:100%;}
     }
     @media (max-width: 980px){
+      html,
+      body{
+        overflow:auto;
+      }
       .authCard{
         padding:18px 14px 24px;
         min-height:auto;
+        height:auto;
+        max-height:none;
       }
       .registerShowcase{
         grid-template-columns:minmax(0,1fr);
         min-height:auto;
+        height:auto;
+        overflow:visible;
       }
       .registerHero{
         min-height:520px;
         height:auto;
+        overflow:hidden;
       }
       .registerFormCard{
         min-height:auto;
         height:auto;
+        overflow:visible;
       }
       .registerSocialRow{
         grid-template-columns:repeat(2, minmax(0,1fr));
