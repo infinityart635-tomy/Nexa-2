@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ?? QR Mesas</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .qrGrid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); margin-top:14px;}
+    .qrCard{display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;}
+    .qrImg{width:180px; height:180px; border-radius:12px; border:1px solid var(--line); background:#0b0b0d;}
+    .qrTitle{font-weight:800;}
+    .qrMeta{font-size:.82em;}
+    .qrControls{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    @media print{
+      header.top,.qrControls,#qrHint{display:none !important;}
+      body{background:#fff; color:#111;}
+      .wrap{max-width:none; padding:0 10px;}
+      .card{box-shadow:none; border:1px solid #ddd;}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>QR por mesa (menu cliente)</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center; gap:12px;">
+        <div>
+          <div class="h2">Zona QR</div>
+          <div class="mini muted">Genera QRs del menu por mesa. Si conectas mesas en Salon, podes agruparlas en un solo QR.</div>
+          <div class="mini muted" id="qrBase">URL base: -</div>
+        </div>
+        <div class="qrControls">
+          <label class="mini" style="display:flex; align-items:center; gap:8px;">
+            Base QR:
+            <input id="qrBaseInput" type="text" placeholder="http://192.168.0.10:3000" style="min-width:220px;"/>
+          </label>
+          <button id="btnBaseSave" class="btn" type="button">Usar</button>
+          <button id="btnBaseClear" class="btn" type="button">Auto</button>
+          <label class="mini" style="display:flex; align-items:center; gap:8px;">
+            <input id="groupLinks" type="checkbox" checked/>
+            Agrupar mesas conectadas
+          </label>
+          <button id="btnGenerate" class="btn primary" type="button">Generar</button>
+          <button id="btnDownload" class="btn" type="button">Descargar</button>
+        </div>
+      </div>
+      <div class="hr" style="margin-top:12px;"></div>
+      <div class="mini muted" id="qrHint">Tip: al escanear, la mesa queda pre-cargada para pedir la cuenta.</div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="row" style="justify-content:space-between; align-items:center; gap:12px;">
+        <div>
+          <div class="h2">QR generales</div>
+          <div class="mini muted">Menu cliente y acceso Mozo.</div>
+        </div>
+      </div>
+      <div class="hr" style="margin-top:12px;"></div>
+      <div class="row" style="gap:18px; flex-wrap:wrap;">
+        <div class="qrCard" style="min-width:220px;">
+          <div class="qrTitle">QR Carta</div>
+          <div class="mini muted qrMeta" id="qrMenuUrl">-</div>
+          <img id="qrMenuImg" class="qrImg" alt="QR Carta" width="180" height="180"/>
+          <a id="qrMenuDl" class="btn" download="qr-carta.png">Descargar PNG</a>
+        </div>
+        <div class="qrCard" style="min-width:220px;">
+          <div class="qrTitle">QR Mozo</div>
+          <div class="mini muted qrMeta" id="qrMozoUrl">-</div>
+          <img id="qrMozoImg" class="qrImg" alt="QR Mozo" width="180" height="180"/>
+          <a id="qrMozoDl" class="btn" download="qr-mozo.png">Descargar PNG</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="qrStatus" class="mini muted" style="margin-top:10px;"></div>
+    <div id="qrGrid" class="qrGrid"></div>
+  </main>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    const qrGrid = $("qrGrid");
+    const qrStatus = $("qrStatus");
+    const qrBase = $("qrBase");
+    const qrBaseInput = $("qrBaseInput");
+    let baseUrl = "";
+    let tables = [];
+
+    function normalizeBaseUrl(raw){
+      const v = String(raw || "").trim();
+      if (!v) return "";
+      if (/^https?:\/\//i.test(v)) return v.replace(/\/+$/,"");
+      return ("http://" + v).replace(/\/+$/,"");
+    }
+
+    function getBaseOverride(){
+      const params = new URLSearchParams(location.search);
+      const fromQuery = normalizeBaseUrl(params.get("base"));
+      if (fromQuery) {
+        localStorage.setItem("qrBaseUrl", fromQuery);
+        return fromQuery;
+      }
+      return normalizeBaseUrl(localStorage.getItem("qrBaseUrl"));
+    }
+
+    function pickBaseUrl(info){
+      const override = getBaseOverride();
+      if (override) return override;
+      const origin = (location && location.origin) ? location.origin : "";
+      const pref = info && info.preferred ? String(info.preferred) : "";
+      const urls = (info && Array.isArray(info.urls)) ? info.urls.map(String) : [];
+      const candidates = [pref, ...urls, origin].filter(Boolean);
+      const bad = (u)=>/localhost|127\.0\.0\.1/.test(u);
+      return candidates.find(u=>!bad(u)) || candidates[0] || "";
+    }
+
+    function esc(str){
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+      })[m]);
+    }
+
+    function getTableLabel(t){
+      return (t && t.name) ? t.name : (t && t.id ? t.id : "");
+    }
+
+    function buildGroups(list, groupLinks){
+      const ordered = Array.isArray(list) ? list.filter(t=>t && t.id) : [];
+      const map = new Map(ordered.map(t=>[String(t.id), t]));
+      if(!groupLinks){
+        return ordered.map(t=>({ tables:[t] }));
+      }
+      const visited = new Set();
+      const groups = [];
+      for (const t of ordered){
+        const id = String(t.id);
+        if(visited.has(id)) continue;
+        const stack = [id];
+        const group = [];
+        while(stack.length){
+          const cur = stack.pop();
+          if(visited.has(cur)) continue;
+          visited.add(cur);
+          const item = map.get(cur);
+          if(!item) continue;
+          group.push(item);
+          const links = Array.isArray(item.links) ? item.links.map(String) : [];
+          for (const l of links){
+            if(map.has(l) && !visited.has(l)) stack.push(l);
+          }
+        }
+        if(group.length) groups.push({ tables: group });
+      }
+      return groups;
+    }
+
+    function renderQrs(){
+      if(!qrGrid) return;
+      if(!baseUrl){
+        qrGrid.innerHTML = "";
+        if(qrStatus) qrStatus.textContent = "No se pudo detectar la URL base.";
+        return;
+      }
+      const groupLinks = $("groupLinks") ? $("groupLinks").checked : true;
+      const groups = buildGroups(tables, groupLinks);
+      if(!groups.length){
+        qrGrid.innerHTML = "";
+        if(qrStatus) qrStatus.textContent = "No hay mesas cargadas.";
+        return;
+      }
+      if(qrStatus) qrStatus.textContent = groups.length + " QR generados.";
+      qrGrid.innerHTML = groups.map((g, idx)=>{
+        const names = g.tables.map(getTableLabel).filter(Boolean);
+        const label = names.join(" + ");
+        const safeLabel = label ? label.slice(0, 40) : ("Mesa " + (idx + 1));
+        const menuUrl = baseUrl + "/menu.html?qr=1&mesa=" + encodeURIComponent(safeLabel);
+        const qrSrc = "/qr.png?u=" + encodeURIComponent(menuUrl);
+        const ids = g.tables.map(t=>t.id).filter(Boolean).join(", ");
+        const zones = Array.from(new Set(g.tables.map(t=>t.zone).filter(Boolean)));
+        const zoneLabel = zones.length ? (zones.length === 1 ? ("Zona: " + zones[0]) : ("Zonas: " + zones.join(" ?? "))) : "";
+        const fileName = ("qr-" + safeLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + ".png");
+        return `
+          <div class="card qrCard">
+            <div class="qrTitle">${esc(label || safeLabel)}</div>
+            <div class="mini muted qrMeta">${esc(ids)}</div>
+            ${zoneLabel ? `<div class="mini muted qrMeta">${esc(zoneLabel)}</div>` : ""}
+            <img class="qrImg" src="${qrSrc}" alt="QR ${esc(label || safeLabel)}" width="180" height="180"/>
+            <div class="row" style="gap:8px; margin-top:6px; flex-wrap:wrap;">
+              <a class="btn" href="${qrSrc}" download="${esc(fileName)}">Descargar PNG</a>
+              <button class="btn" type="button" data-copy="${esc(menuUrl)}">Copiar link</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      [...qrGrid.querySelectorAll("[data-copy]")].forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          const url = btn.getAttribute("data-copy") || "";
+          try{
+            await navigator.clipboard.writeText(url);
+            alert("Link copiado");
+          }catch(e){
+            prompt("Copia este link:", url);
+          }
+        });
+      });
+    }
+
+    async function loadData(){
+      try{
+        const info = await fetch("/api/info", {cache:"no-store"}).then(r=>r.json());
+        baseUrl = pickBaseUrl(info) || ("http://localhost:" + info.port);
+        if (qrBaseInput) qrBaseInput.value = getBaseOverride() || baseUrl;
+        if(qrBase) qrBase.textContent = "URL base: " + baseUrl;
+        const menuUrl = baseUrl + "/menu.html?qr=1";
+        const mozoUrl = baseUrl + "/login.html?role=mozo&next=" + encodeURIComponent("/mozo.html");
+        const qrMenuUrl = $("qrMenuUrl");
+        const qrMozoUrl = $("qrMozoUrl");
+        const qrMenuImg = $("qrMenuImg");
+        const qrMozoImg = $("qrMozoImg");
+        const qrMenuDl = $("qrMenuDl");
+        const qrMozoDl = $("qrMozoDl");
+        if(qrMenuUrl) qrMenuUrl.textContent = menuUrl;
+        if(qrMozoUrl) qrMozoUrl.textContent = mozoUrl;
+        if(qrMenuImg) qrMenuImg.src = "/qr.png?u=" + encodeURIComponent(menuUrl);
+        if(qrMozoImg) qrMozoImg.src = "/qr.png?u=" + encodeURIComponent(mozoUrl);
+        if(qrMenuDl) qrMenuDl.href = "/qr.png?u=" + encodeURIComponent(menuUrl);
+        if(qrMozoDl) qrMozoDl.href = "/qr.png?u=" + encodeURIComponent(mozoUrl);
+      }catch(e){
+        baseUrl = "";
+      }
+      try{
+        const r = await fetch("/api/state", {cache:"no-store"});
+        if(!r.ok) throw new Error("unauthorized");
+        const db = await r.json();
+        tables = Array.isArray(db.tables) ? db.tables : [];
+      }catch(e){
+        tables = [];
+        if(qrStatus) qrStatus.textContent = "Necesitas iniciar sesion como mozo/admin para ver las mesas.";
+      }
+    }
+
+    $("btnGenerate")?.addEventListener("click", async ()=>{
+      await loadData();
+      renderQrs();
+    });
+
+    $("btnBaseSave")?.addEventListener("click", ()=>{
+      const next = normalizeBaseUrl(qrBaseInput ? qrBaseInput.value : "");
+      if (next) {
+        localStorage.setItem("qrBaseUrl", next);
+      } else {
+        localStorage.removeItem("qrBaseUrl");
+      }
+      loadData().then(renderQrs);
+    });
+
+    $("btnBaseClear")?.addEventListener("click", ()=>{
+      localStorage.removeItem("qrBaseUrl");
+      if (qrBaseInput) qrBaseInput.value = "";
+      loadData().then(renderQrs);
+    });
+
+    $("btnDownload")?.addEventListener("click", ()=>{
+      if(!qrGrid || !qrGrid.children.length){
+        alert("Primero genera los QR.");
+        return;
+      }
+      window.print();
+    });
+
+    (async ()=>{
+      await loadData();
+      renderQrs();
+    })();
+  </script>
+  <script src="/app.js"></script>
+</body>
+</html>
+
+

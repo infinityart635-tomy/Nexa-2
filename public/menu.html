@@ -1,0 +1,304 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0b0d" />
+  <title>Menu - NEXA</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .wrap{max-width:1120px;margin:0 auto;padding:22px 16px 40px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .brand{font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+    .sub{color:var(--muted);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+    .muted{color:var(--muted)}
+    .right{display:flex;align-items:center;gap:10px}
+    .right a{color:var(--muted);text-decoration:none}
+    .right a:hover{color:var(--text)}
+    .langBtn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700;letter-spacing:.06em}
+    .menuTileDesc{color:var(--muted);font-size:12px;line-height:1.35;margin-top:6px}
+    .menuEmpty{padding:12px}
+    .menuRequest{margin-top:14px}
+    body[data-menu-mode="qr"] .topbar{display:none}
+    body[data-menu-mode="qr"] .menuRequest{display:none}
+    body[data-menu-mode="qr"] .wrap{padding-top:16px}
+    body[data-menu-mode="qr-table"] .topbar{display:none}
+    body[data-menu-mode="qr-table"] .wrap{padding-top:16px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="brand" id="resto">MENU</div>
+        <div class="sub" id="sub">Catalogo</div>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="langBtn" type="button" aria-label="Idioma">EN</button>
+        <a href="/profile.html" title="Acceso personal">Usuarios</a>
+      </div>
+    </div>
+
+    <div class="menuBoard">
+      <div class="menuSidebar">
+        <div class="menuSideTitle">Rubros</div>
+        <div id="cats"></div>
+      </div>
+      <div class="menuContent">
+        <div class="menuTop">
+          <div class="menuTitle" id="menuTitle">Todo</div>
+          <div class="badge2">Productos <strong id="menuCount">0</strong></div>
+        </div>
+        <div class="menuGrid" id="grid"></div>
+      </div>
+    </div>
+
+    <div class="card menuRequest">
+      <div class="menuTitle" id="billTitle">Pedir la cuenta</div>
+      <div class="menuTileDesc" id="billDesc">Avisamos al personal. Opcional: indica mesa o ubicacion.</div>
+      <div class="row" style="margin-top:10px;">
+        <input id="billTable" class="input" placeholder="Mesa (opcional)" style="flex:1; min-width:180px"/>
+        <button id="btnBill" class="btn primary" type="button">Pedir</button>
+      </div>
+      <div class="muted" id="billHint" style="font-size:.85em; margin-top:8px;">No hace falta iniciar sesion.</div>
+    </div>
+
+    <div id="toast" class="toast" style="display:none"></div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const tableParamRaw = qs.get('mesa') || qs.get('table') || '';
+    const tableParam = tableParamRaw ? tableParamRaw.trim().slice(0, 40) : '';
+    const qrMode = qs.get('qr') === '1' || qs.get('kiosk') === '1';
+    if(qrMode){
+      document.body.setAttribute('data-menu-mode', tableParam ? 'qr-table' : 'qr');
+    }
+
+    const $cats = document.getElementById('cats');
+    const $grid = document.getElementById('grid');
+    const $resto = document.getElementById('resto');
+    const $sub = document.getElementById('sub');
+    const $langToggle = document.getElementById('langToggle');
+    const $menuTitle = document.getElementById('menuTitle');
+    const $menuCount = document.getElementById('menuCount');
+    const $billInput = document.getElementById('billTable');
+    const $billHint = document.getElementById('billHint');
+
+    if(tableParam && $billInput){
+      $billInput.value = tableParam;
+      if($billHint) $billHint.textContent = "Mesa detectada desde el QR.";
+    }
+
+    let state = {categories:[], products:[], currency:'ARS'};
+    let currentCat = 'all';
+    let lang = (localStorage.getItem('menu_lang') || 'es').toLowerCase() === 'en' ? 'en' : 'es';
+
+    const i18n = {
+      es: {
+        all: "Todo",
+        billTitle: "Pedir la cuenta",
+        billDesc: "Avisamos al personal. Opcional: indica mesa o ubicacion.",
+        billPlaceholder: "Mesa (opcional)",
+        billBtn: "Pedir",
+        billHint: "No hace falta iniciar sesion.",
+        billSent: "Listo: avisamos al personal",
+        billErr: "No se pudo enviar",
+        menuFail: "No se pudo cargar el menu.",
+        noProducts: "No hay productos en esta categoria.",
+        catalog: "Catalogo",
+        access: "Acceso",
+        rubros: "Rubros"
+      },
+      en: {
+        all: "All",
+        billTitle: "Ask for the bill",
+        billDesc: "We notify staff. Optional: add your table or location.",
+        billPlaceholder: "Table (optional)",
+        billBtn: "Request",
+        billHint: "No login required.",
+        billSent: "Done: we notified staff",
+        billErr: "Could not send",
+        menuFail: "Could not load the menu.",
+        noProducts: "No products in this category.",
+        catalog: "Catalog",
+        access: "Access",
+        rubros: "Categories"
+      }
+    };
+
+    function t(key){
+      return (i18n[lang] && i18n[lang][key]) || (i18n.es && i18n.es[key]) || key;
+    }
+
+    function applyLang(){
+      document.documentElement.lang = lang;
+      const billTitle = document.getElementById('billTitle');
+      if(billTitle) billTitle.textContent = t('billTitle');
+      const billDesc = document.getElementById('billDesc');
+      if(billDesc) billDesc.textContent = t('billDesc');
+      const billHint = document.getElementById('billHint');
+      if(billHint) billHint.textContent = t('billHint');
+      const billInput = document.getElementById('billTable');
+      if(billInput) billInput.placeholder = t('billPlaceholder');
+      const billBtn = document.getElementById('btnBill');
+      if(billBtn) billBtn.textContent = t('billBtn');
+      const access = document.querySelector('.right a');
+      if(access) access.textContent = t('access');
+      if($langToggle) $langToggle.textContent = (lang === 'es' ? 'EN' : 'ES');
+      if($sub) $sub.textContent = t('catalog');
+      const rubroTitle = document.querySelector('.menuSideTitle');
+      if(rubroTitle) rubroTitle.textContent = t('rubros');
+    }
+
+    const $toast = document.getElementById('toast');
+    let toastTimer = null;
+    function toast(msg){
+      if(!$toast) return;
+      $toast.textContent = String(msg||'');
+      $toast.style.display = 'block';
+      $toast.classList.add('show');
+      if(toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>{ $toast.classList.remove('show'); $toast.style.display='none'; }, 2600);
+    }
+
+    async function requestBill(){
+      const table = (document.getElementById('billTable')?.value || '').trim().slice(0,40);
+      const btn = document.getElementById('btnBill');
+      if(btn) btn.disabled = true;
+      try{
+        const r = await fetch('/api/customer/requestBill', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ table })
+        });
+        const j = await r.json().catch(()=>({}));
+        if(!r.ok) throw new Error((j && j.error) ? j.error : t('billErr'));
+        toast(t('billSent') + (table ? (' - ' + table) : ''));
+        const inp = document.getElementById('billTable');
+        if(inp) inp.value = '';
+      }catch(e){
+        toast('Error: ' + (e.message || 'offline'));
+      }finally{
+        if(btn) btn.disabled = false;
+      }
+    }
+
+    document.getElementById('btnBill')?.addEventListener('click', requestBill);
+
+    function money(n){
+      const v = Number(n||0);
+      return v.toLocaleString('es-AR', { style:'currency', currency: state.currency || 'ARS', maximumFractionDigits:0 });
+    }
+
+    function catTitle(c){
+      if(!c) return '';
+      if(lang === 'en' && c.titleEn) return c.titleEn;
+      return c.title || '';
+    }
+
+    function hexToRgba(hex, alpha){
+      const h = String(hex || '').trim().replace('#', '');
+      if(h.length === 3){
+        const r = parseInt(h[0]+h[0], 16);
+        const g = parseInt(h[1]+h[1], 16);
+        const b = parseInt(h[2]+h[2], 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      if(h.length === 6){
+        const r = parseInt(h.slice(0,2), 16);
+        const g = parseInt(h.slice(2,4), 16);
+        const b = parseInt(h.slice(4,6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      return '';
+    }
+
+    function catStyle(color){
+      const bg = hexToRgba(color, 0.12);
+      const border = hexToRgba(color, 0.5);
+      const ring = hexToRgba(color, 0.25);
+      if(!bg || !border) return '';
+      return `--cat-bg:${bg}; --cat-border:${border}; --cat-ring:${ring};`;
+    }
+
+    function renderCats(){
+      const cats = [{id:'all', title:t('all')}].concat(state.categories||[]);
+      $cats.innerHTML = cats.map(c => {
+        const active = (c.id === currentCat) ? 'active' : '';
+        const style = (c.id !== 'all' && c.color) ? ` style="${catStyle(c.color)}"` : '';
+        return `<button class="menuCat ${active}" type="button" data-id="${c.id}"${style}>${catTitle(c)}</button>`;
+      }).join('');
+      [...$cats.querySelectorAll('.menuCat')].forEach(el => {
+        el.addEventListener('click', () => {
+          currentCat = el.getAttribute('data-id') || 'all';
+          renderCats();
+          renderGrid();
+        });
+      });
+    }
+
+    function renderGrid(){
+      const list = (state.products||[]).filter(p => currentCat==='all' || String(p.categoryId||'')===String(currentCat));
+      if (!list.length){
+        $grid.innerHTML = `<div class="menuEmpty small muted">${t('noProducts')}</div>`;
+        return;
+      }
+      const catMap = new Map((state.categories||[]).map(c=>[String(c.id), c]));
+      const currentCatObj = catMap.get(String(currentCat));
+      const title = currentCat === 'all' ? t('all') : (currentCatObj ? catTitle(currentCatObj) : t('all'));
+      if($menuTitle) $menuTitle.textContent = title;
+      if($menuCount) $menuCount.textContent = String(list.length);
+
+      $grid.innerHTML = list.map(p => {
+        const catObj = catMap.get(String(p.categoryId||""));
+        const catLabel = catObj ? catTitle(catObj) : "Otros";
+        const desc = (lang==='en' && p.descriptionEn) ? p.descriptionEn : p.description;
+        return `
+          <div class="menuTile">
+            ${p.imageUrl ? `<div class="menuTileThumb" style="background-image:url('${escapeHtml(p.imageUrl)}')"></div>` : ''}
+            <div class="menuTileName">${escapeHtml((lang==='en' && p.nameEn) ? p.nameEn : p.name)}</div>
+            <div class="menuTileMeta">${escapeHtml(catLabel)} - ${money(p.price)}</div>
+            ${desc ? `<div class="menuTileDesc">${escapeHtml(desc)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(s){
+      return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    async function boot(){
+      try{
+        const r = await fetch('/api/public/menu', { cache:'no-store' });
+        const data = await r.json();
+        state = data;
+        document.title = `${lang === 'en' ? 'Menu' : 'Menu'} - ${data.restaurantName || 'NEXA'}`;
+        $resto.textContent = (data.restaurantName || 'Menu').toUpperCase();
+        $sub.textContent = t('catalog');
+        applyLang();
+        renderCats();
+        renderGrid();
+      }catch(e){
+        $grid.innerHTML = `<div class="menuEmpty small muted">${t('menuFail')}</div>`;
+      }
+    }
+
+    if($langToggle){
+      $langToggle.addEventListener('click', ()=>{
+        lang = (lang === 'es') ? 'en' : 'es';
+        localStorage.setItem('menu_lang', lang);
+        applyLang();
+        renderCats();
+        renderGrid();
+        document.title = `${lang === 'en' ? 'Menu' : 'Menu'} - ${state.restaurantName || 'NEXA'}`;
+      });
+    }
+
+    applyLang();
+    boot();
+  </script>
+</body>
+</html>

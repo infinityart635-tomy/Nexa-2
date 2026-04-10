@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Fiscal</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Fiscal ? emisi?n manual (PDF)</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div style="font-weight:900; letter-spacing:.18em; text-transform:uppercase;">Emisi?n manual (PDF)</div>
+
+      <div class="row" style="margin-top:10px; flex-wrap:wrap;">
+        <label class="badge2" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="fEnabled"/>
+          Habilitar emisi?n manual
+        </label>
+
+        <div style="min-width:140px;">
+          <div class="small">Punto de venta</div>
+          <input id="fPos" class="input" placeholder="0001" />
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div style="font-weight:900; letter-spacing:.18em; text-transform:uppercase;">Datos del emisor</div>
+      <div class="row" style="margin-top:10px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:240px">
+          <div class="small">Raz?n social</div>
+          <input id="cRazon" class="input" placeholder="Mi Empresa S.A."/>
+        </div>
+        <div style="min-width:220px">
+          <div class="small">CUIT</div>
+          <input id="cCuit" class="input" placeholder="20-00000000-0"/>
+        </div>
+        <div style="flex:1; min-width:240px">
+          <div class="small">Domicilio</div>
+          <input id="cDom" class="input" placeholder="Calle 123, CABA"/>
+        </div>
+        <div style="min-width:220px">
+          <div class="small">Condici?n IVA</div>
+          <input id="cIva" class="input" placeholder="Responsable Inscripto / Monotributo / Exento"/>
+        </div>
+        <div style="min-width:220px">
+          <div class="small">IIBB (opcional)</div>
+          <input id="cIibb" class="input" placeholder="Ingresos Brutos"/>
+        </div>
+        <div style="min-width:220px">
+          <div class="small">Inicio actividades (opcional)</div>
+          <input id="cInicio" class="input" type="date"/>
+        </div>
+      </div>
+      <div class="mini" style="margin-top:10px;">
+        Nota: esta pantalla genera comprobantes PDF para cargar manualmente en ARCA. Luego pod?s completar CAE/CAI y datos a mano.
+      </div>
+      <div class="mini" style="margin-top:6px;">
+        Pasos: 1) Habilit? emisi?n manual. 2) En Cobro eleg? ?Manual (PDF)? y complet? los datos del receptor. 3) Cerr? la venta y volv? ac? para imprimir.
+      </div>
+
+      <div class="row" style="margin-top:12px; justify-content:flex-end;">
+        <button id="btnSave" class="btn primary" type="button">Guardar configuraci?n</button>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Resumen para carga manual</h2>
+          <p class="hint">Listado listo para copiar/pegar en otra app. Usa ?Buscar? para filtrar.</p>
+        </div>
+        <div style="min-width:220px; display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap;">
+          <label class="badge2" style="display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="genAll" checked/>
+            Incluir ventas no fiscales
+          </label>
+          <button id="btnGenerate" class="btn" type="button">Generar desde ventas</button>
+          <button id="copySummary" class="btn" type="button">Copiar resumen</button>
+        </div>
+      </div>
+      <div class="panelBody">
+        <textarea id="summaryText" class="input" rows="6" style="font-size:.85em; min-height:140px;" readonly></textarea>
+        <div id="summaryNote" class="mini" style="margin-top:6px;"></div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Comprobantes (PDF)</h2>
+          <p class="hint">Generados al cerrar una venta en modo ?Manual (PDF)?. Imprime y/o marca emitido.</p>
+        </div>
+        <div style="min-width:220px;">
+          <div class="small">Buscar</div>
+          <input id="q" class="input" placeholder="N?, ticket, cliente, CAE?" autocomplete="off"/>
+        </div>
+      </div>
+      <div class="panelBody" id="list"></div>
+    </section>
+  </main>
+
+  <!-- Modal: marcar emitido -->
+  <div class="modalOverlay" id="issueModal" style="display:none;">
+    <div class="modal" style="width:min(720px, 100%);">
+      <div class="modalHeader">
+        <h3 id="issueTitle">Marcar emitido</h3>
+        <button class="btn" type="button" id="btnIssueClose">Cerrar</button>
+      </div>
+      <div class="hr"></div>
+
+      <div class="row" style="flex-wrap:wrap;">
+        <div style="min-width:220px; flex:1">
+          <div class="small">CAE (codAut)</div>
+          <input id="iCAE" class="input" placeholder="61123000000000"/>
+        </div>
+        <div style="min-width:220px; flex:1">
+          <div class="small">Vto. CAE</div>
+          <input id="iCAEVto" class="input" type="date"/>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px; flex-wrap:wrap;">
+        <div style="min-width:220px; flex:1">
+          <div class="small">CAI / N? controlador (opcional)</div>
+          <input id="iCAI" class="input" placeholder="CAI o N? interno"/>
+        </div>
+        <div style="min-width:220px; flex:1">
+          <div class="small">Observaci?n (opcional)</div>
+          <input id="iObs" class="input" placeholder="Ej: emitido desde sistema externo"/>
+        </div>
+      </div>
+
+      <div class="modalFooter">
+        <button id="btnIssueSave" class="btn primary" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+    const $ = (id)=>document.getElementById(id);
+    connect("admin", "Fiscal");
+    let currentDocId = null;
+    function cleanText(v){
+      return String(v||"").replace(/\s+/g, " ").trim();
+    }
+    function formatDate(value){
+      if (!value) return "";
+      if (typeof value === "string") return value;
+      try{
+        return new Date(value).toISOString().slice(0,10);
+      }catch{
+        return "";
+      }
+    }
+    function buildSummaryFromSales(sales, settings, docBySaleId){
+      const fiscal = (settings && settings.fiscal) ? settings.fiscal : {};
+      const c = fiscal.company || {};
+      const header = [
+        "Fecha","Tipo","PtoVta","Numero","Total","Receptor","DocTipo","DocNro","IVA receptor",
+        "Emisor","CUIT emisor","IVA emisor","IIBB","Inicio actividades"
+      ].join("\t");
+      const lines = sales.map(s=>{
+        const doc = docBySaleId ? docBySaleId[String(s.id||"")] : null;
+        const pos = doc ? doc.pos : "";
+        const number = doc ? doc.number : "";
+        const num = (pos || number) ? `${String(pos||"").padStart(4,"0")}-${String(number||"").padStart(8,"0")}` : "";
+        const r = s.receiver || {};
+        return [
+          cleanText(s.dateKey || formatDate(s.at)),
+          cleanText((doc && doc.docType) || r.docType || ""),
+          cleanText(pos || ""),
+          cleanText(num),
+          cleanText(s.total),
+          cleanText(r.receiverName || r.name || s.customerName || "Consumidor final"),
+          cleanText(r.receiverDocType || r.docType || ""),
+          cleanText(r.receiverDocNumber || r.docNumber || ""),
+          cleanText(r.receiverIva || r.iva || ""),
+          cleanText(c.razonSocial),
+          cleanText(c.cuit),
+          cleanText(c.ivaCondicion),
+          cleanText(c.iibb),
+          cleanText(c.inicioActividades),
+        ].join("\t");
+      });
+      return [header, ...lines].join("\n");
+    }
+    function buildSummary(docs, settings){
+      const fiscal = (settings && settings.fiscal) ? settings.fiscal : {};
+      const c = fiscal.company || {};
+      const header = [
+        "Fecha","Tipo","PtoVta","Numero","Total","Receptor","DocTipo","DocNro","IVA receptor",
+        "Emisor","CUIT emisor","IVA emisor","IIBB","Inicio actividades"
+      ].join("\t");
+      const lines = docs.map(d=>{
+        const num = `${String(d.pos||"0001").padStart(4,"0")}-${String(d.number||0).padStart(8,"0")}`;
+        return [
+          cleanText(d.issueDate),
+          cleanText(d.docType),
+          cleanText(d.pos),
+          cleanText(num),
+          cleanText(d.total),
+          cleanText(d.receiverName || "Consumidor final"),
+          cleanText(d.receiverDocType),
+          cleanText(d.receiverDocNumber),
+          cleanText(d.receiverIva),
+          cleanText(c.razonSocial),
+          cleanText(c.cuit),
+          cleanText(c.ivaCondicion),
+          cleanText(c.iibb),
+          cleanText(c.inicioActividades),
+        ].join("\t");
+      });
+      return [header, ...lines].join("\n");
+    }
+
+    function fillForm(f){
+      const fiscal = f || {};
+      $("fEnabled").checked = !!fiscal.enabled;
+      $("fPos").value = fiscal.pos || "0001";
+
+      const c = fiscal.company || {};
+      $("cRazon").value = c.razonSocial || "";
+      $("cCuit").value = c.cuit || "";
+      $("cDom").value = c.domicilio || "";
+      $("cIva").value = c.ivaCondicion || "";
+      $("cIibb").value = c.iibb || "";
+      $("cInicio").value = c.inicioActividades || "";
+    }
+
+    
+function collectForm(){
+      return {
+        fiscal: {
+          enabled: $("fEnabled").checked,
+          provider: "manual",
+          environment: "manual",
+          pos: $("fPos").value,
+          company: {
+            razonSocial: $("cRazon").value,
+            cuit: $("cCuit").value,
+            domicilio: $("cDom").value,
+            ivaCondicion: $("cIva").value,
+            iibb: $("cIibb").value,
+            inicioActividades: $("cInicio").value,
+          }
+        }
+      };
+    }
+
+    $("btnSave").addEventListener("click", ()=>{
+      sendAction("settings:update", collectForm());
+      toast("Configuraci?n guardada");
+    });
+
+    function openIssueModal(doc){
+      currentDocId = doc.id;
+      $("issueTitle").textContent = `Marcar emitido ? ${doc.docType} ${doc.pos}-${String(doc.number||0).padStart(8,"0")}`;
+      $("iCAE").value = doc.cae || "";
+      $("iCAEVto").value = doc.caeDue || "";
+      $("iCAI").value = doc.cai || "";
+      $("iObs").value = doc.observations || "";
+      $("issueModal").style.display = "flex";
+    }
+
+    function closeIssueModal(){
+      $("issueModal").style.display = "none";
+      currentDocId = null;
+    }
+
+    $("btnIssueClose").addEventListener("click", closeIssueModal);
+    $("issueModal").addEventListener("click", (e)=>{ if(e.target.id==="issueModal") closeIssueModal(); });
+
+    $("btnIssueSave").addEventListener("click", ()=>{
+      if(!currentDocId) return closeIssueModal();
+      const patch = {
+        status: "emitido",
+        cae: $("iCAE").value.trim(),
+        caeDue: $("iCAEVto").value.trim(),
+        cai: $("iCAI").value.trim(),
+        observations: $("iObs").value.trim(),
+      };
+      sendAction("fiscal:markIssued", { docId: currentDocId, patch });
+      toast("Actualizado");
+      closeIssueModal();
+    });
+
+    function rowDoc(d){
+      const num = `${String(d.pos||"0001").padStart(4,"0")}-${String(d.number||0).padStart(8,"0")}`;
+      const st = d.status || "pendiente";
+      const who = d.createdBy || "-";
+      const rec = d.receiverName || (d.receiverDocNumber ? (d.receiverDocType + " " + d.receiverDocNumber) : "Consumidor final");
+      const search = (String(num)+" "+String(d.docType)+" "+String(d.ticketId)+" "+String(rec)+" "+String(d.cae||"")).toLowerCase();
+      const observations = (d.observations || []).slice(-2).map(esc).filter(Boolean).join(" ? ");
+      return { html: `
+        <div class="card" style="margin:0 0 10px 0;">
+          <div class="row" style="align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-weight:900;">${esc(d.docType||"DOC")} ? ${esc(num)} ? ${money(d.total||0)}</div>
+              <div class="small">${esc(st)} ? ${esc(d.issueDate||"")} ? Ticket ${esc(d.ticketId||"")} ? Por ${esc(who)}</div>
+              <div class="mini">Receptor: ${esc(rec)}${d.cae ? (" ? CAE "+esc(d.cae)) : ""}</div>
+              ${observations ? `<div class="mini">Obs: ${observations}</div>` : ""}
+            </div>
+            <div class="row" style="gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+              <a class="btn" href="/print_fiscal.html?id=${encodeURIComponent(d.id)}" target="_blank">Imprimir</a>
+              <button class="btn" type="button" data-issue="${esc(d.id)}">Marcar emitido</button>
+            </div>
+          </div>
+        </div>
+      `, search };
+    }
+
+    function render(db, ok){
+      if(!db) return;
+
+      fillForm((db.settings||{}).fiscal || {});
+      const docs = (db.fiscalDocs || []).slice().sort((a,b)=>String(b.issueDate||"").localeCompare(String(a.issueDate||"")) || Number(b.createdAt||0)-Number(a.createdAt||0));
+
+      const q = ($("q").value||"").trim().toLowerCase();
+      const rows = docs.map(rowDoc).filter(r => !q || r.search.includes(q));
+      $("list").innerHTML = rows.map(r=>r.html).join("") || '<div class="small">No hay comprobantes.</div>';
+      const filtered = docs.filter(d=>{
+        const num = `${String(d.pos||"0001").padStart(4,"0")}-${String(d.number||0).padStart(8,"0")}`;
+        const rec = d.receiverName || (d.receiverDocNumber ? (d.receiverDocType + " " + d.receiverDocNumber) : "Consumidor final");
+        const search = (String(num)+" "+String(d.docType)+" "+String(d.ticketId)+" "+String(rec)+" "+String(d.cae||"")).toLowerCase();
+        return !q || search.includes(q);
+      });
+      if (filtered.length) {
+        $("summaryText").value = buildSummary(filtered, db.settings || {});
+        $("summaryNote").textContent = `Comprobantes: ${filtered.length} ? Ventas: ${(db.sales||[]).length}`;
+      } else {
+        const sales = (db.sales || []).slice().filter(s=>{
+          const r = s.receiver || {};
+          const rec = r.receiverName || r.name || s.customerName || "Consumidor final";
+          const search = (String(s.id||"")+" "+String(s.dateKey||"")+" "+String(rec)).toLowerCase();
+          return !q || search.includes(q);
+        });
+        const docBySaleId = {};
+        (db.fiscalDocs || []).forEach(d=>{ if(d && d.saleId) docBySaleId[String(d.saleId)] = d; });
+        $("summaryText").value = buildSummaryFromSales(sales, db.settings || {}, docBySaleId);
+        $("summaryNote").textContent = `No hay comprobantes fiscales generados. Mostrando resumen basado en ventas. Ventas: ${sales.length}`;
+      }
+
+      $("list").querySelectorAll("[data-issue]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-issue");
+          const d = (db.fiscalDocs||[]).find(x=>x.id===id);
+          if(d) openIssueModal(d);
+        });
+      });
+    }
+
+    $("q").addEventListener("input", ()=>render(window.__db||null, true));
+    $("copySummary").addEventListener("click", ()=>{
+      const value = $("summaryText").value || "";
+      if (!value) return toast("No hay resumen para copiar");
+      navigator.clipboard?.writeText(value).then(()=>toast("Resumen copiado")).catch(()=>toast("No pude copiar el resumen"));
+    });
+    $("btnGenerate").addEventListener("click", ()=>{
+      const includeAll = !!$("genAll").checked;
+      sendAction("fiscal:generateFromSales", { includeAll });
+      toast("Generando comprobantes...");
+    });
+
+    onState((db, ok)=>{ window.__db = db; render(db, ok); });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

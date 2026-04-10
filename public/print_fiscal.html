@@ -1,0 +1,147 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#ffffff"/>
+  <title>Ticket fiscal</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    :root{ --ticket-w: 80mm; }
+    body{background:#fff; color:#000}
+    .doc{
+      width: var(--ticket-w);
+      max-width: var(--ticket-w);
+      margin: 0 auto;
+      padding: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .h{font-weight:900; font-size:16px; text-align:center;}
+    .sub{text-align:center; margin-top:2px}
+    .line{display:flex; justify-content:space-between; gap:10px;}
+    .muted{opacity:.75}
+    .mini{font-size:12px; opacity:.9}
+    .qr{display:flex; justify-content:center; margin-top:10px;}
+    table{width:100%; border-collapse:collapse; margin-top:10px;}
+    td{padding:4px 0; border-bottom:1px dashed rgba(0,0,0,.25);}
+    @page{ size: var(--ticket-w) auto; margin: 6mm; }
+    @media print{
+      body{margin:0;}
+      .doc{padding: 6mm;}
+      .noPrint{display:none !important;}
+    }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <div class="noPrint" style="display:flex; gap:10px; justify-content:space-between; align-items:center;">
+      <a class="btn" href="/admin_fiscal_test.html">Volver</a>
+      <button class="btn primary" id="btnPrint" type="button">Imprimir</button>
+    </div>
+
+    <div class="hr noPrint"></div>
+
+    <div id="content">Cargando…</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const $ = (id)=>document.getElementById(id);
+
+    $("btnPrint").addEventListener("click", ()=>window.print());
+
+    function esc(s){ return String(s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+    function money(n){
+      const v = Number(n||0);
+      try{ return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(v); }
+      catch{ return "$"+Math.round(v); }
+    }
+    function pad(n, w){ return String(n||"").padStart(w,"0"); }
+
+    function autoPrintSoon(){ setTimeout(()=>window.print(), 400); }
+
+    fetch("/api/fiscalDoc?id="+encodeURIComponent(id||""))
+      .then(r=>r.json())
+      .then(data=>{
+        const d = data.doc;
+        const settings = data.settings || {};
+        const wmm = settings.printing && settings.printing.ticketWidthMm ? Number(settings.printing.ticketWidthMm) : 80;
+        const root = document.documentElement;
+        if(root) root.style.setProperty("--ticket-w", (wmm === 58 ? "58mm" : "80mm"));
+        if(!d){ $("content").textContent = "No existe el comprobante."; return; }
+
+        const c = d.company || {};
+        const num = `${pad(d.pos||"0001",4)}-${pad(d.number||0,8)}`;
+        const rec = d.receiverName || "Consumidor final";
+        const recDoc = d.receiverDocNumber ? `${d.receiverDocType||""} ${d.receiverDocNumber}` : "";
+        const cae = d.cae || "";
+        const caeDue = d.caeDue || "";
+        const total = money(d.total||0);
+
+        const rows = (d.items||[]).map(it=>{
+          const mods = (it.modifiers||[]).map(m=>{
+            const tag = (String(m.kind||"")==="remove") ? `Sin ${m.optionName}` : m.optionName;
+            const price = Number(m.price||0);
+            return price>0 ? `${tag} (+${money(price)})` : String(tag);
+          }).join(" · ");
+          return `
+            <tr>
+              <td style="width:42px; vertical-align:top;"><strong>${esc(it.qty||0)}x</strong></td>
+              <td style="vertical-align:top;">
+                ${esc(it.name||"")}
+                ${mods ? `<div class="mini">${esc(mods)}</div>` : ``}
+              </td>
+              <td style="width:90px; text-align:right; vertical-align:top;">${esc(money((it.qty||0)*(it.unitPrice||0)))}</td>
+            </tr>
+          `;
+        }).join("");
+
+        const qrImg = (cae) ? `<img alt="QR" src="/api/arcaQrSvg?id=${encodeURIComponent(d.id)}" style="width:160px; height:160px;"/>` : "";
+
+        const officialName = c.razonSocial || settings.restaurantName || "Comprobante fiscal";
+        const headerName = settings.ownerDisplayName ? `${officialName} - ${settings.ownerDisplayName}` : officialName;
+
+        $("content").innerHTML = `
+          <div class="h">${esc(headerName)}</div>
+          <div class="sub muted">${esc(c.domicilio || "")}</div>
+          <div class="sub muted">CUIT: ${esc(c.cuit || "—")} · IVA: ${esc(c.ivaCondicion || "—")}</div>
+          <div class="sub muted">IIBB: ${esc(c.iibb || "—")} · Inicio: ${esc(c.inicioActividades || "—")}</div>
+
+          <div class="hr"></div>
+
+          <div class="h">${esc(d.docType || "DOC")} · ${esc(num)}</div>
+          <div class="sub muted">Fecha: ${esc(d.issueDate || "")} · Estado: ${esc(d.status || "pendiente")}</div>
+
+          <div class="hr"></div>
+
+          <div class="mini">Receptor: <strong>${esc(rec)}</strong> ${recDoc?`· ${esc(recDoc)}`:""}</div>
+          ${d.receiverIva ? `<div class="mini">IVA receptor: ${esc(d.receiverIva)}</div>` : ``}
+
+          <table>${rows || "<tr><td class='muted'>Sin items</td></tr>"}</table>
+
+          <div class="hr"></div>
+
+          <div class="line" style="font-weight:900;"><span>TOTAL</span><span>${esc(total)}</span></div>
+
+          ${cae ? `
+            <div class="hr"></div>
+            <div class="mini">CAE: <strong>${esc(cae)}</strong></div>
+            <div class="mini">Vto. CAE: <strong>${esc(caeDue || "—")}</strong></div>
+            <div class="qr">${qrImg}</div>
+            <div class="sub muted">Escanea para validar</div>
+          ` : `
+            <div class="hr"></div>
+            <div class="muted mini">Sin CAE. Puedes marcar emitido desde Fiscal.</div>
+          `}
+        `;
+
+        autoPrintSoon();
+      })
+      .catch(()=>{
+        $("content").textContent = "Error cargando comprobante.";
+      });
+  </script>
+</body>
+</html>
+

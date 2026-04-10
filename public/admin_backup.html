@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Backups</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Backups ? exportar / importar base de datos</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div style="font-weight:900;">Exportar</div>
+      <div class="small" style="margin-top:6px;">Descarga un JSON completo (productos, ventas, caja, stock?)</div>
+      <div class="row" style="margin-top:12px;">
+        <a class="btn primary" href="/api/exportDb" style="text-align:center; flex:1;">Descargar backup</a>
+        <a class="btn" href="/salon_pc.html" style="text-align:center; flex:1;">Volver</a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:12px;">
+      <div style="font-weight:900;">Importar</div>
+      <div class="small" style="margin-top:6px;">Cargar un JSON exportado (sobrescribe la base actual).</div>
+      <div class="hr"></div>
+      <input id="file" class="input" type="file" accept="application/json"/>
+      <div class="row" style="margin-top:10px;">
+        <button id="btnImport" class="btn primary" type="button" style="flex:1;">Importar</button>
+        <div class="badge2" style="flex:1;">Estado <strong id="status">?</strong></div>
+      </div>
+      <div class="mini" style="margin-top:10px;">Consejo: antes de importar, exporta el estado actual por seguridad.</div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    $("btnImport").addEventListener("click", async ()=>{
+      const f = $("file").files && $("file").files[0];
+      if(!f) return $("status").textContent = "Selecciona un JSON";
+      $("status").textContent = "Importando?";
+      const txt = await f.text();
+      try{ JSON.parse(txt); }catch{ $("status").textContent = "JSON inv?lido"; return; }
+      fetch("/api/importDb", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: txt
+      }).then(r=>r.json()).then(j=>{
+        $("status").textContent = j && j.ok ? "OK" : "Error";
+        if(j && j.ok) location.href = "/salon_pc.html";
+      }).catch(()=>{
+        $("status").textContent = "Error";
+      });
+    });
+  </script>
+  <script src="/app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

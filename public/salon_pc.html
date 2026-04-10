@@ -1,0 +1,2466 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Sal?n (PC)</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body class="salonPc">
+  <header class="top">
+    <div class="wrap fullWidth" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Sal?n (PC) ? monitor en vivo + edici?n</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <span id="adminLinks" style="display:none">
+          <div class="navGroup">
+            <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+            
+          
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+          
+        </span>
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+      <main class="wrap fullWidth salonWrap">
+    <div class="salonLayout">
+      <section class="card kitchenNotice" id="kitchenNotice" style="display:none;"></section>
+      <section class="card salonFloor">
+        <div class="floorWrap" id="floorWrap">
+          <div class="floorZoomWrap" id="floorZoomWrap">
+            <div class="floorPlan" id="floor"></div>
+          </div>
+        </div>
+        <div class="mini" style="margin-top:10px;">Tip: esta pantalla es ideal para dejarla abierta en el PC y ver el sal??n en vivo.</div>
+      </section>
+      <section class="card salonActions">
+      <div class="panelResizeHandle" id="actionsResize" title="Ajustar ancho"></div>
+      <div class="panel">
+        <div class="panelHead">
+          <div><h2>Acciones de comanda</h2><p class="hint">Descuentos, cobro y salon</p></div>
+        </div>
+        <div class="panelBody">
+          <div id="cart" style="margin-top:10px;"></div>
+          <div class="row" style="gap:8px; align-items:center; margin-top:10px;">
+            <select id="discountType" class="input" style="flex:1; min-width:130px;">
+              <option value="none">Sin descuento</option>
+              <option value="percent">Descuento %</option>
+              <option value="amount">Descuento $</option>
+            </select>
+            <input id="discountValue" class="input" inputmode="decimal" placeholder="0" style="flex:1; min-width:120px;"/>
+            <button id="btnApplyDiscount" class="btn" type="button">Aplicar</button>
+          </div>
+          <div class="row" style="gap:8px; align-items:center; margin-top:8px;">
+            <select id="discountScope" class="input" style="flex:1; min-width:140px;">
+              <option value="ticket">Aplicar a cuenta</option>
+              <option value="line">Aplicar a producto</option>
+            </select>
+            <select id="discountItem" class="input" style="flex:2; min-width:200px;"></select>
+          </div>
+          <div class="mini muted" id="discountInfo" style="margin-top:6px;">-</div>
+          <div class="hr"></div>
+          <div class="row">
+            <button id="btnOpen" class="btn yellow primary" type="button" style="flex:1;">Abrir mesa</button>
+            <button id="btnSendKitchen" class="btn" type="button" style="flex:1;">Enviar a cocina</button>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button id="btnCharge" class="btn chargeBtn" type="button" style="flex:1;">Cobrar</button>
+          </div>
+          <div class="row" style="align-items:center; margin-top:8px;">
+            <label class="badge2" style="gap:8px; cursor:pointer;">
+              <span>Cobro requiere imprimir</span>
+              <input id="requirePrintToggle" type="checkbox" style="accent-color:#fff; transform: translateY(1px);"/>
+            </label>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button id="btnMoveTable" class="btn" type="button" style="flex:1;">Mover / transferir mesa</button>
+            <button id="btnCancel" class="btn danger" type="button" style="flex:1;">Anular</button>
+          </div>
+          <div id="ticketMeta"></div>
+          <div class="panel" style="margin-top:12px;"><details id="salonTools" class="salonToolsDrop">
+    <summary>Salon y acciones</summary>
+    <div class="salonToolsBody">
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <div class="small" style="letter-spacing:.22em; text-transform:uppercase;">Salon</div>
+        <div class="badge2">Estado <strong id="wsStatus">???</strong></div>
+      </div>
+      <div class="hr"></div>
+      <div class="row" style="align-items:center;">
+        <div class="badge2">Mesas <strong id="tablesCount">-</strong></div>
+        <div class="badge2">Ocupadas <strong id="tablesBusy">-</strong></div>
+        <div class="badge2">Listas <strong id="tablesReady">-</strong></div>
+        <div class="badge2">Modo edicion <strong id="editModeLabel">Activo</strong></div>
+        <button id="btnEditTools" class="btn" type="button">Editar salon</button>
+        <button id="btnDetails" class="btn" type="button">Detalles</button>
+        <button id="btnResetTables" class="btn danger" type="button">Reiniciar mesas</button>
+      </div>
+    </div>
+  </details>
+      <div id="tableDetails" class="panel" style="margin-top:12px; display:none;">
+        <div class="panelHead">
+          <div><h2>Detalle de mesa</h2><p class="hint">Estado y consumo</p></div>
+        </div>
+        <div class="panelBody">
+          <div class="row">
+            <div class="badge2">Mesa <strong id="dName">-</strong></div>
+            <div class="badge2">Estado <strong id="dStatus">-</strong></div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div style="flex:1">
+              <div class="small">Renombrar</div>
+              <input id="dRename" class="input" placeholder="Ej: Mesa VIP"/>
+            </div>
+            <button id="btnRename" class="btn primary" type="button">Guardar nombre</button>
+          </div>
+          <div class="hr" style="margin-top:12px;"></div>
+          <div class="small">Consumo actual</div>
+          <div id="dItems" class="mini" style="margin-top:8px;">-</div>
+        </div>
+      </div>
+      <div id="editTools" class="panel" style="margin-top:12px; display:none;">
+        <div class="panelHead">
+          <div><h2>Edicion de salon</h2><p class="hint">Cantidad, fijar mesas e iman activo</p></div>
+        </div>
+        <div class="panelBody">
+          <div class="row">
+            <input id="tablesNewCount" class="input" type="number" inputmode="numeric" placeholder="Cantidad de mesas" style="flex:1; min-width:160px"/>
+            <button id="btnApplyTableCount" class="btn primary" type="button" style="flex:1">Aplicar cantidad</button>
+          </div>
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <div class="badge2">Mesa <strong id="selTableLabel">-</strong></div>
+            <label class="badge2" style="gap:8px; cursor:pointer;">
+              <span>Fijar mesa</span>
+              <input id="fixToggle" type="checkbox" style="accent-color:#fff; transform: translateY(1px);"/>
+            </label>
+            <label class="badge2" style="gap:8px; cursor:pointer;">
+              <span>Iman activo</span>
+              <input id="snapToggle" type="checkbox" style="accent-color:#fff; transform: translateY(1px);"/>
+            </label>
+          </div>
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <div class="badge2">Tamano</div>
+            <input id="tableW" class="input" type="number" inputmode="numeric" placeholder="Ancho" style="max-width:120px;"/>
+            <input id="tableH" class="input" type="number" inputmode="numeric" placeholder="Alto" style="max-width:120px;"/>
+            <select id="tableShape" class="input" style="max-width:160px;">
+              <option value="square">Cuadrada</option>
+              <option value="round">Redonda</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <div class="badge2">Planta</div>
+            <select id="tableFloor" class="input" style="max-width:200px;"></select>
+            <button id="btnApplyTableFloor" class="btn" type="button">Aplicar planta</button>
+          </div>
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <button id="btnLinkTables" class="btn" type="button">Conectar mesas (arrastrar)</button>
+            <div class="mini" id="linkHint" style="margin-left:8px;"></div>
+          </div>
+          <div class="mini" style="margin-top:8px;">Tip: arrastra el plano para moverte. Rueda para hacer scroll.</div>
+        </div>
+      </div></div>
+        </div>
+      </div>
+      </section>
+      
+      <aside class="salonSide">
+      <div class="panelResizeHandle left" id="sideResize" title="Ajustar ancho"></div>
+      <section class="card salonFilters">
+        <details class="filterDrop">
+          <summary>Filtros</summary>
+          <div class="filterBody">
+          <div class="row" style="align-items:center;">
+            <div class="chips" id="tableFilters">
+              <button class="chip active" data-filter="all">Todas</button>
+              <button class="chip" data-filter="libre">Libres</button>
+              <button class="chip" data-filter="borrador">En carga</button>
+              <button class="chip" data-filter="ocupada">Ocupadas</button>
+              <button class="chip" data-filter="lista">Listas</button>
+            </div>
+          </div>
+          <div class="row" style="align-items:center; margin-top:10px; gap:8px;">
+            <div class="badge2">Plantas</div>
+            <select id="floorManageSelect" class="input" style="min-width:200px;"></select>
+            <input id="floorNewName" class="input" placeholder="Nueva planta" style="flex:1; min-width:180px"/>
+            <button id="btnAddFloor" class="btn" type="button">Agregar</button>
+            <button id="btnRemoveFloor" class="btn danger" type="button">Eliminar</button>
+          </div>
+          <div class="row" style="align-items:center; margin-top:10px;">
+            <div style="flex:1">
+              <div class="small">Buscar mesa</div>
+              <input id="tableSearch" class="input" placeholder="Numero o nombre"/>
+            </div>
+            </div>
+          </div>
+        </details>
+      </section>
+<!-- Columna Comanda (detalle) -->
+      <section class="card salonOrder">
+  <div class="orderHeader" style="display:none;">
+    <div>
+      <div style="font-weight:800; letter-spacing:.18em; text-transform:uppercase;">Comanda</div>
+      <div class="small" id="subtitle">Selecciona una mesa</div>
+    </div>
+    <div class="row" style="gap:8px;">
+      <button id="btnClear" class="btn" type="button">Cerrar vista</button>
+      <a id="btnPrint" class="btn" href="#" style="display:none;">Imprimir</a>
+    </div>
+  </div>
+  <div class="row" style="align-items:center;">
+    <div style="flex:1">
+      <div class="small">Buscar producto</div>
+      <input id="q" class="input" placeholder="Buscar" autocomplete="off"/>
+    </div>
+    <div class="badge2" style="align-self:flex-end;">Carrito <strong id="cartCount">0</strong></div>
+  </div>
+  <div id="menu" style="margin-top:12px;"></div>
+  <div class="mini" style="margin-top:10px;" id="statusText">-</div>
+</section>
+        
+      </aside>
+    </div>
+  </main>
+
+  <!-- Modal Cobro (reutiliza el mismo flujo que Mozo) -->
+  <div class="modalOverlay" id="payModal">
+    <div class="modal printCard">
+      <div class="modalHeader">
+        <h3>Cobro</h3>
+        <button class="btn" type="button" id="payClose">Cerrar</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div style="flex:1">
+          <div class="small">M?todo de pago</div>
+          <select id="payMethod" class="input">
+            <option value="efectivo">Efectivo</option>
+            <option value="mercadopago">Mercado Pago</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta">Tarjeta</option>
+          </select>
+        </div>
+          <div style="flex:1">
+            <div class="small">Comprobante</div>
+            <select id="payFiscal" class="input">
+              <option value="no_fiscal">Modo interno</option>
+              <option value="manual">Manual (PDF)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="fiscalExtra" style="display:none; margin-top:10px;">
+          <div class="row">
+            <div style="flex:1">
+              <div class="small">Tipo comprobante</div>
+              <select id="fDocType" class="input">
+                <option value="FACTURA_C">Factura C</option>
+                <option value="FACTURA_B">Factura B</option>
+                <option value="FACTURA_A">Factura A</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <div class="small">Doc receptor</div>
+              <select id="rDocType" class="input">
+                <option value="DNI">DNI</option>
+                <option value="CUIT">CUIT</option>
+                <option value="ConsumidorFinal">Consumidor final</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div style="flex:1">
+              <div class="small">N? documento</div>
+              <input id="rDocNum" class="input" placeholder="Ej: 40123456"/>
+            </div>
+            <div style="flex:1">
+              <div class="small">Nombre (opcional)</div>
+              <input id="rName" class="input" placeholder="Cliente / Raz?n social"/>
+            </div>
+            <div style="flex:1">
+              <div class="small">IVA receptor (opcional)</div>
+              <input id="rIva" class="input" placeholder="Responsable Inscripto / Consumidor Final"/>
+            </div>
+          </div>
+
+          <div class="mini" style="margin-top:8px;">
+            Si eliges ?Consumidor final?, se omite identificaci?n. El comprobante queda listo para imprimir en Fiscal.
+          </div>
+        </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1">
+          <div class="small">Total</div>
+          <input id="payTotal" class="input" disabled/>
+        </div>
+        <div style="flex:1">
+          <div class="small">Paga con</div>
+          <input id="payPaid" class="input" inputmode="decimal" placeholder="Ej: 15000"/>
+        </div>
+      </div>
+
+      <div class="mini" id="payChange" style="margin-top:8px;">?</div>
+
+      <div class="modalFooter">
+        <button id="payConfirm" class="btn primary" type="button">Confirmar cobro</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modalOverlay" id="modsPickModal" style="display:none;">
+    <div class="modal">
+      <div class="modalHeader">
+        <h3 id="modsPickTitle">Personalizar</h3>
+        <button class="btn" type="button" id="modsPickClose">Cerrar</button>
+      </div>
+      <div class="hr"></div>
+      <div id="modsPickBody"></div>
+      <div class="modalFooter">
+        <button class="btn" type="button" id="modsPickCancel">Cancelar</button>
+        <button class="btn primary" type="button" id="modsPickAdd">Anadir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+    const $ = (id)=>document.getElementById(id);
+
+    async function setupRoleUI(){
+      try{
+        const me = await fetch('/api/auth/me', {cache:'no-store'}).then(r=>r.json());
+        const el = document.getElementById('adminLinks');
+        if(el) el.style.display = (me && me.role==='admin') ? '' : 'none';
+      }catch(e){}
+    }
+
+    // LocalStorage separado del modo Mozo (para no pisarse)
+    const LS_NAME  = "nexa_pc_name";
+    const LS_TABLE = "nexa_pc_table";
+    const LS_REQUIRE_PRINT = "nexa_pc_require_print";
+    const LS_LAST_PRINT = "nexa_pc_last_print";
+    const LS_FLOOR_POS = "nexa_pc_floor_pos";
+    const LS_ACTIONS_WIDTH = "nexa_pc_actions_width";
+    const LS_TABLE_SCALE = "nexa_pc_table_scale";
+    const LS_FLOOR_ZOOM = "nexa_pc_floor_zoom";
+    const LS_SIDE_WIDTH = "nexa_pc_side_width";
+    const LS_FLOOR_LIST = "nexa_pc_floor_list";
+    const LS_FLOOR_ACTIVE = "nexa_pc_floor_active";
+
+    setupRoleUI();
+
+    const customerReqs = [];
+    function normalizeTableKey(v){
+      return String(v || "").toLowerCase().replace(/\s+/g, "");
+    }
+    function getReqForTable(t){
+      if(!t) return null;
+      const key = normalizeTableKey(t.name || t.id || "");
+      if(!key) return null;
+      return customerReqs.find(r=>{
+        if(!r || r.status === "done") return false;
+        const rk = normalizeTableKey(r.table || "");
+        return rk === key;
+      }) || null;
+    }
+    async function loadCustomerReqs(){
+      try{
+        const list = await fetch("/api/customer/requests", {cache:"no-store"}).then(r=>r.json());
+        customerReqs.splice(0, customerReqs.length, ...(Array.isArray(list) ? list : []));
+        renderTables(window.__db || null);
+      }catch(e){}
+    }
+
+    let selectedTableId = localStorage.getItem(LS_TABLE) || "";
+    let editMode = false;
+    let linkMode = false;
+    let linkSourceId = null;
+    let linkDrag = null;
+    const LS_SNAP = "nexa_pc_snap";
+    let snapGrid = localStorage.getItem(LS_SNAP);
+    snapGrid = (snapGrid === null) ? true : (snapGrid === "1");
+    let lastTicketId = "";
+    let detailsOpen = false;
+
+    // --- Motor de modificadores (modal de selecci?n) ---
+    let modsCtx = null; // { product, context:{type:'table', tableId}, selections:{} }
+
+    function productById(db, pid){
+      return (db && db.products) ? db.products.find(p=>p.id===pid && p.active!==false) : null;
+    }
+    function hasModifiers(p){
+      return !!(p && Array.isArray(p.modifiers) && p.modifiers.length);
+    }
+    function initDefaultSelections(product){
+      const sel = {};
+      const groups = Array.isArray(product.modifiers) ? product.modifiers : [];
+      for(const g of groups){
+        const gid = String(g.id||"");
+        const opts = Array.isArray(g.options) ? g.options : [];
+        const defs = opts.filter(o=>o && o.default).map(o=>String(o.id));
+        if(defs.length) sel[gid] = defs;
+      }
+      return sel;
+    }
+    function openModsPick(product, context){
+      modsCtx = { product, context, selections: initDefaultSelections(product) };
+      $("modsPickTitle").textContent = "Personalizar ? " + (product.name || "Producto");
+      renderModsPick();
+      $("modsPickModal").style.display = "flex";
+    }
+    function closeModsPick(){
+      $("modsPickModal").style.display = "none";
+      modsCtx = null;
+    }
+    $("modsPickClose").addEventListener("click", closeModsPick);
+    $("modsPickCancel").addEventListener("click", closeModsPick);
+    $("modsPickModal").addEventListener("click", (e)=>{ if(e.target === $("modsPickModal")) closeModsPick(); });
+
+    function moneyLite(n){
+      const v = Number(n||0);
+      if(!isFinite(v) || v===0) return "";
+      return (v>0 ? ("+"+money(v)) : money(v));
+    }
+
+    function renderModsPick(){
+      if(!modsCtx) return;
+      const product = modsCtx.product;
+      const sel = modsCtx.selections;
+      const groups = Array.isArray(product.modifiers) ? product.modifiers : [];
+      const body = $("modsPickBody");
+
+      const html = groups.map(g=>{
+        const gid = String(g.id||"");
+        const modeG = String(g.mode||"single");
+        const required = !!g.required || Number(g.min||0) > 0;
+        const min = Number(g.min||0);
+        const max = Number(g.max||0) || (modeG==="single" ? 1 : 999);
+        const chosen = Array.isArray(sel[gid]) ? sel[gid].map(String) : [];
+        const title = `${esc(g.name||gid)} <span class="small">(${modeG==="single" ? "elige 1" : "multi"}${required ? ", requerido" : ""}${modeG!=="single" ? (", max "+max) : ""})</span>`;
+        const opts = (Array.isArray(g.options) ? g.options : []).map(o=>{
+          const oid = String(o.id||"");
+          const active = chosen.includes(oid);
+          const price = Number(o.price||0);
+          const label = `${esc(o.name||oid)}${price ? ` <span class="small">(${esc(moneyLite(price))})</span>` : ""}`;
+          return `<div class="chip ${active?"active":""}" data-mod-opt="1" data-g="${esc(gid)}" data-o="${esc(oid)}">${label}</div>`;
+        }).join("");
+
+        const note = required && chosen.length===0 ? `<div class="mini" style="margin-top:6px; color:#ffb3b3;">Falta seleccionar</div>` : ``;
+        return `<div style="margin-top:12px;">
+          <div style="font-weight:900;">${title}</div>
+          <div class="chips" style="margin-top:8px; flex-wrap:wrap;">${opts || '<div class="small">Sin opciones</div>'}</div>
+          ${note}
+        </div>`;
+      }).join("");
+
+      body.innerHTML = html || `<div class="small">Este producto no tiene modificadores.</div>`;
+
+      body.querySelectorAll("[data-mod-opt]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          if(!modsCtx) return;
+          const gid = el.getAttribute("data-g");
+          const oid = el.getAttribute("data-o");
+          const g = groups.find(x=>String(x.id)===String(gid));
+          if(!g) return;
+          const modeG = String(g.mode||"single");
+          const max = Number(g.max||0) || (modeG==="single" ? 1 : 999);
+          let chosen = Array.isArray(modsCtx.selections[gid]) ? modsCtx.selections[gid].map(String) : [];
+
+          if(modeG === "single"){
+            chosen = [oid];
+          } else {
+            const on = chosen.includes(oid);
+            if(on) chosen = chosen.filter(x=>x!==oid);
+            else {
+              if(chosen.length >= max) return toast(`Maximo ${max} en ${g.name||gid}`);
+              chosen = [...chosen, oid];
+            }
+          }
+          modsCtx.selections[gid] = chosen;
+          renderModsPick();
+        });
+      });
+    }
+
+    function validateModsSelections(product, selections){
+      const groups = Array.isArray(product.modifiers) ? product.modifiers : [];
+      for(const g of groups){
+        const gid = String(g.id||"");
+        const modeG = String(g.mode||"single");
+        const required = !!g.required || Number(g.min||0) > 0;
+        const min = Number(g.min||0) || (required ? 1 : 0);
+        const max = Number(g.max||0) || (modeG==="single" ? 1 : 999);
+        const chosen = Array.isArray(selections[gid]) ? selections[gid].map(String) : [];
+        if(required && chosen.length < min) return `Falta seleccionar en: ${g.name||gid}`;
+        if(chosen.length > max) return `Demasiadas opciones en: ${g.name||gid}`;
+      }
+      return "";
+    }
+
+    $("modsPickAdd").addEventListener("click", ()=>{
+      if(!modsCtx) return closeModsPick();
+      const { product, context, selections } = modsCtx;
+      const err = validateModsSelections(product, selections);
+      if(err) return toast(err);
+      if(context && context.type === "table" && context.tableId){
+        const db = window.__db;
+        const table = (db && db.tables) ? db.tables.find(t=>t.id===context.tableId) : null;
+        if(!table || !table.ticketId) return toast("No hay comanda abierta");
+        sendAction("ticket:addItemEx", { ticketId: table.ticketId, productId: product.id, qty: 1, selections });
+      }
+      closeModsPick();
+    });
+
+    const operatorName = (localStorage.getItem(LS_NAME) || "PC").trim() || "PC";
+    connect("admin", operatorName);
+    const floorWrap = $("floorWrap");
+    const floorScroll = $("floorScroll");
+    const floor = $("floor");
+    const floorZoomWrap = $("floorZoomWrap");
+    const salonLayout = document.querySelector(".salonLayout");
+    const salonActions = document.querySelector(".salonActions");
+    const actionsResize = $("actionsResize");
+    const salonSide = document.querySelector(".salonSide");
+    const sideResize = $("sideResize");
+    let actionsResizeRaf = null;
+    let actionsResizeWidth = null;
+    let sideResizeRaf = null;
+    let sideResizeWidth = null;
+    let floorZoom = 1;
+    function clampFloorZoom(v){
+      return Math.max(0.6, Math.min(1.8, Number(v || 1)));
+    }
+    function applyFloorZoom(next, anchor){
+      if(!floor || !floorZoomWrap || !floorWrap) return;
+      const baseW = floor.offsetWidth || 2600;
+      const baseH = floor.offsetHeight || 900;
+      const prevZoom = floorZoom;
+      floorZoom = clampFloorZoom(next);
+      floor.style.transform = "scale(" + floorZoom + ")";
+      floorZoomWrap.style.width = Math.round(baseW * floorZoom) + "px";
+      floorZoomWrap.style.height = Math.round(baseH * floorZoom) + "px";
+      if(anchor){
+        const baseX = (floorWrap.scrollLeft + anchor.x) / prevZoom;
+        const baseY = (floorWrap.scrollTop + anchor.y) / prevZoom;
+        floorWrap.scrollLeft = Math.max(0, baseX * floorZoom - anchor.x);
+        floorWrap.scrollTop = Math.max(0, baseY * floorZoom - anchor.y);
+      }
+    }
+    function clampActionsWidth(px){
+      if(!salonLayout || !salonActions) return px;
+      const layoutRect = salonLayout.getBoundingClientRect();
+      const sideW = salonSide ? salonSide.getBoundingClientRect().width : 420;
+      const minW = 320;
+      const minFloor = 360;
+      const gap = 28;
+      const maxW = Math.max(minW, Math.floor(layoutRect.width - sideW - gap - minFloor));
+      return Math.max(minW, Math.min(maxW, Math.round(px)));
+    }
+    function clampSideWidth(px){
+      if(!salonLayout || !salonSide) return px;
+      const layoutRect = salonLayout.getBoundingClientRect();
+      const actionsW = salonActions ? salonActions.getBoundingClientRect().width : 420;
+      const minW = 320;
+      const minFloor = 360;
+      const gap = 28;
+      const maxW = Math.max(minW, Math.floor(layoutRect.width - actionsW - gap - minFloor));
+      return Math.max(minW, Math.min(maxW, Math.round(px)));
+    }
+    function applyActionsWidth(px, save){
+      if(!salonLayout) return;
+      const w = clampActionsWidth(px);
+      salonLayout.style.setProperty("--actions-width", w + "px");
+      if(save) localStorage.setItem(LS_ACTIONS_WIDTH, String(w));
+    }
+    function queueActionsWidth(px){
+      actionsResizeWidth = px;
+      if(actionsResizeRaf) return;
+      actionsResizeRaf = requestAnimationFrame(()=>{
+        applyActionsWidth(actionsResizeWidth, false);
+        actionsResizeRaf = null;
+      });
+    }
+    function applySideWidth(px, save){
+      if(!salonLayout) return;
+      const w = clampSideWidth(px);
+      salonLayout.style.setProperty("--side-width", w + "px");
+      if(save) localStorage.setItem(LS_SIDE_WIDTH, String(w));
+    }
+    function queueSideWidth(px){
+      sideResizeWidth = px;
+      if(sideResizeRaf) return;
+      sideResizeRaf = requestAnimationFrame(()=>{
+        applySideWidth(sideResizeWidth, false);
+        sideResizeRaf = null;
+      });
+    }
+    const savedActionsWidth = Number(localStorage.getItem(LS_ACTIONS_WIDTH));
+    if(Number.isFinite(savedActionsWidth) && savedActionsWidth > 0){
+      applyActionsWidth(savedActionsWidth, false);
+    }
+    const savedSideWidth = Number(localStorage.getItem(LS_SIDE_WIDTH));
+    if(Number.isFinite(savedSideWidth) && savedSideWidth > 0){
+      applySideWidth(savedSideWidth, false);
+    }
+    let floorSaveRaf = null;
+    function saveFloorPos(){
+      if(!floorWrap) return;
+      if(floorSaveRaf) return;
+      floorSaveRaf = requestAnimationFrame(()=>{
+        const pos = {
+          x: Math.round(floorWrap.scrollLeft),
+          y: Math.round(floorWrap.scrollTop)
+        };
+        localStorage.setItem(LS_FLOOR_POS, JSON.stringify(pos));
+        floorSaveRaf = null;
+      });
+    }
+    function applySavedFloorPos(){
+      if(!floorWrap) return false;
+      const raw = localStorage.getItem(LS_FLOOR_POS);
+      if(!raw) return false;
+      try{
+        const pos = JSON.parse(raw);
+        const x = Number(pos && pos.x);
+        const y = Number(pos && pos.y);
+        if(Number.isFinite(x) && Number.isFinite(y)){
+          floorWrap.scrollLeft = Math.max(0, x);
+          floorWrap.scrollTop = Math.max(0, y);
+          return true;
+        }
+      }catch(_){ }
+      return false;
+    }
+    function syncFloorScroll(){
+      if(!floorWrap || !floorScroll) return;
+      const max = Math.max(0, floorWrap.scrollHeight - floorWrap.clientHeight);
+      floorScroll.max = String(max);
+      floorScroll.value = String(Math.min(max, floorWrap.scrollTop));
+      floorScroll.disabled = (max === 0);
+    }
+    const savedFloorZoom = Number(localStorage.getItem(LS_FLOOR_ZOOM));
+    if(Number.isFinite(savedFloorZoom)){
+      applyFloorZoom(savedFloorZoom);
+    } else {
+      applyFloorZoom(floorZoom);
+    }
+    if(floorWrap){
+      floorWrap.addEventListener("wheel", (ev)=>{
+        if(!floor || !floorZoomWrap) return;
+        ev.preventDefault();
+        const dir = Math.sign(ev.deltaY || 0);
+        if(dir === 0) return;
+        const step = ev.ctrlKey ? 0.15 : 0.08;
+        const rect = floorWrap.getBoundingClientRect();
+        const anchor = { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+        applyFloorZoom(floorZoom + (-dir * step), anchor);
+        localStorage.setItem(LS_FLOOR_ZOOM, String(floorZoom));
+        syncFloorScroll();
+        saveFloorPos();
+      }, { passive: false });
+
+      floorWrap.addEventListener("pointerdown", (ev)=>{
+        if(ev.button !== 0) return;
+        if(ev.target && ev.target.closest && ev.target.closest(".tableNode")) return;
+        floorWrap.classList.add("dragging");
+        floorWrap.setPointerCapture(ev.pointerId);
+        const startX = ev.clientX, startY = ev.clientY;
+        let moved = false;
+        const sx = floorWrap.scrollLeft, sy = floorWrap.scrollTop;
+        function move(e){
+          if(!moved){
+            const dx = Math.abs(e.clientX - startX);
+            const dy = Math.abs(e.clientY - startY);
+            moved = (dx + dy) > 4;
+          }
+          floorWrap.scrollLeft = sx - (e.clientX - startX);
+          floorWrap.scrollTop = sy - (e.clientY - startY);
+        }
+        function up(){
+          floorWrap.removeEventListener("pointermove", move);
+          floorWrap.removeEventListener("pointerup", up);
+          floorWrap.classList.remove("dragging");
+          if(!moved){
+            selectedTableId = "";
+            localStorage.removeItem(LS_TABLE);
+            floorWrap.querySelectorAll(".tableNode.selected").forEach(el=>el.classList.remove("selected"));
+            renderCurrent(window.__db || null);
+            renderTableDetails(window.__db || null);
+          }
+        }
+      floorWrap.addEventListener("pointermove", move);
+      floorWrap.addEventListener("pointerup", up);
+      });
+    }
+    if(floorWrap){
+      floorWrap.addEventListener("scroll", ()=>{
+        if(floorScroll) floorScroll.value = String(floorWrap.scrollTop);
+        saveFloorPos();
+      });
+    }
+    if(floorWrap && floorScroll){
+      floorScroll.addEventListener("input", ()=>{
+        floorWrap.scrollTop = Number(floorScroll.value||0);
+      });
+      window.addEventListener("resize", syncFloorScroll);
+      syncFloorScroll();
+    }
+    if(actionsResize && salonActions){
+      actionsResize.addEventListener("pointerdown", (ev)=>{
+        if(ev.button !== 0) return;
+        if(window.matchMedia("(max-width: 1100px)").matches) return;
+        ev.preventDefault();
+        actionsResize.setPointerCapture(ev.pointerId);
+        const startX = ev.clientX;
+        const startW = salonActions.getBoundingClientRect().width;
+        function move(e){
+          queueActionsWidth(startW + (e.clientX - startX));
+        }
+        function up(){
+          actionsResize.removeEventListener("pointermove", move);
+          actionsResize.removeEventListener("pointerup", up);
+          actionsResize.releasePointerCapture(ev.pointerId);
+          if(actionsResizeWidth !== null){
+            applyActionsWidth(actionsResizeWidth, true);
+          }
+        }
+        actionsResize.addEventListener("pointermove", move);
+        actionsResize.addEventListener("pointerup", up);
+      });
+    }
+    if(sideResize && salonSide){
+      sideResize.addEventListener("pointerdown", (ev)=>{
+        if(ev.button !== 0) return;
+        if(window.matchMedia("(max-width: 1100px)").matches) return;
+        ev.preventDefault();
+        sideResize.setPointerCapture(ev.pointerId);
+        const startX = ev.clientX;
+        const startW = salonSide.getBoundingClientRect().width;
+        function move(e){
+          queueSideWidth(startW + (startX - e.clientX));
+        }
+        function up(){
+          sideResize.removeEventListener("pointermove", move);
+          sideResize.removeEventListener("pointerup", up);
+          sideResize.releasePointerCapture(ev.pointerId);
+          if(sideResizeWidth !== null){
+            applySideWidth(sideResizeWidth, true);
+          }
+        }
+        sideResize.addEventListener("pointermove", move);
+        sideResize.addEventListener("pointerup", up);
+      });
+    }
+    window.addEventListener("resize", ()=>{
+      const current = Number(localStorage.getItem(LS_ACTIONS_WIDTH));
+      if(Number.isFinite(current) && current > 0){
+        applyActionsWidth(current, false);
+      }
+      const currentSide = Number(localStorage.getItem(LS_SIDE_WIDTH));
+      if(Number.isFinite(currentSide) && currentSide > 0){
+        applySideWidth(currentSide, false);
+      }
+    });
+
+    let editToolsOpen = false;
+    let floorCentered = false;
+    const editTools = $("editTools");
+    const btnEditTools = $("btnEditTools");
+    const btnResetTables = $("btnResetTables");
+    const salonTools = $("salonTools");
+    const editModeLabel = $("editModeLabel");
+    const btnLinkTables = $("btnLinkTables");
+    const linkHint = $("linkHint");
+    function updateLinkHint(){
+      if(!linkHint) return;
+      if(!linkMode){ linkHint.textContent = ""; return; }
+      if(!linkSourceId){ linkHint.textContent = "Arrastra desde una mesa hacia otra."; return; }
+      const t = (window.__db && window.__db.tables) ? (window.__db.tables||[]).find(x=>x.id===linkSourceId) : null;
+      linkHint.textContent = t ? `Origen: ${t.name || t.id}. Solta sobre la mesa destino.` : "Origen seleccionado";
+    }
+    function setLinkMode(on){
+      linkMode = !!on;
+      if(!linkMode) {
+        linkSourceId = null;
+        clearLinkDrag();
+      }
+      if(btnLinkTables) btnLinkTables.textContent = linkMode ? "Cancelar conectar" : "Conectar mesas";
+      updateLinkHint();
+      renderTables(window.__db || null);
+    }
+    if(editTools) editTools.style.display = "none";
+    function setEditMode(on){
+      editMode = !!on;
+      if(editModeLabel) editModeLabel.textContent = editMode ? "Activo" : "Inactivo";
+      if($("fixToggle")) $("fixToggle").disabled = !editMode;
+      if($("snapToggle")) $("snapToggle").disabled = !editMode;
+      if($("tableW")) $("tableW").disabled = !editMode;
+      if($("tableH")) $("tableH").disabled = !editMode;
+      if($("tableShape")) $("tableShape").disabled = !editMode;
+      if(btnLinkTables) btnLinkTables.disabled = !editMode;
+      if(!editMode) setLinkMode(false);
+      renderTables(window.__db || null);
+    }
+    const requirePrintToggle = $("requirePrintToggle");
+    if(localStorage.getItem(LS_REQUIRE_PRINT) === null){
+      localStorage.setItem(LS_REQUIRE_PRINT, "1");
+    }
+    if(requirePrintToggle){
+      requirePrintToggle.checked = localStorage.getItem(LS_REQUIRE_PRINT) === "1";
+      requirePrintToggle.addEventListener("change", ()=>{
+        localStorage.setItem(LS_REQUIRE_PRINT, requirePrintToggle.checked ? "1" : "0");
+      });
+    }
+    if(btnEditTools){
+      btnEditTools.addEventListener("click", ()=>{
+        editToolsOpen = !editToolsOpen;
+        if(editTools) editTools.style.display = editToolsOpen ? "" : "none";
+        if(salonTools && editToolsOpen) salonTools.open = true;
+        btnEditTools.textContent = editToolsOpen ? "Cerrar edicion" : "Editar salon";
+        setEditMode(editToolsOpen);
+      });
+    }
+    if(btnResetTables){
+      btnResetTables.addEventListener("click", ()=>{
+        if(!confirm("Reiniciar posiciones y tamanos de mesas?")) return;
+        sendAction("tables:resetLayout", {});
+        toast("Mesas reiniciadas");
+      });
+    }
+    if(btnLinkTables){
+      btnLinkTables.addEventListener("click", ()=>{
+        if(!editMode) return toast("Activa 'Modo edicion'");
+        setLinkMode(!linkMode);
+      });
+    }
+    setEditMode(editToolsOpen);
+
+    $("btnApplyTableCount").addEventListener("click", ()=>{
+      const n = Number($("tablesNewCount").value || 0);
+      if(!n) return toast("Pon un numero");
+      sendAction("tables:setCount", { count: n });
+      toast("Cantidad aplicada");
+    });
+
+    $("fixToggle").addEventListener("change", ()=>{
+      if(!editMode) return toast("Activa 'Modo edicion'");
+      if(!selectedTableId) return toast("Selecciona una mesa");
+      sendAction("tables:setLayout", { tableId: selectedTableId, locked: $("fixToggle").checked });
+      toast($("fixToggle").checked ? "Mesa fijada" : "Mesa libre");
+    });
+
+    const tableW = $("tableW");
+    const tableH = $("tableH");
+    const tableShape = $("tableShape");
+    function syncTableEditInputs(t){
+      if(!tableW || !tableH || !tableShape) return;
+      if(!t){
+        tableW.value = "";
+        tableH.value = "";
+        tableShape.value = "square";
+        return;
+      }
+      const w = Number.isFinite(Number(t.w)) ? Number(t.w) : 96;
+      const h = Number.isFinite(Number(t.h)) ? Number(t.h) : 72;
+      tableW.value = String(Math.round(w));
+      tableH.value = String(Math.round(h));
+      tableShape.value = (String(t.shape||"square")==="round") ? "round" : "square";
+    }
+    function applyTableSize(){
+      if(!editMode) return toast("Activa 'Modo edicion'");
+      const t = getSelectedTable(window.__db);
+      if(!t) return toast("Selecciona una mesa");
+      const w = Number((tableW && tableW.value || "").replace(",", "."));
+      const h = Number((tableH && tableH.value || "").replace(",", "."));
+      const patch = { tableId: t.id };
+      if(Number.isFinite(w) && w > 0) patch.w = w;
+      if(Number.isFinite(h) && h > 0) patch.h = h;
+      if(patch.w === undefined && patch.h === undefined) return;
+      sendAction("tables:setLayout", patch);
+      toast("Tamano actualizado");
+      renderTables(window.__db || null);
+    }
+    if(tableW) tableW.addEventListener("change", applyTableSize);
+    if(tableH) tableH.addEventListener("change", applyTableSize);
+    if(tableShape){
+      tableShape.addEventListener("change", ()=>{
+        if(!editMode) return toast("Activa 'Modo edicion'");
+        const t = getSelectedTable(window.__db);
+        if(!t) return toast("Selecciona una mesa");
+        sendAction("tables:setLayout", { tableId: t.id, shape: tableShape.value });
+        toast("Forma actualizada");
+        renderTables(window.__db || null);
+      });
+    }
+
+    const snapToggle = $("snapToggle");
+    if(snapToggle){
+      snapToggle.checked = !!snapGrid;
+      snapToggle.addEventListener("change", ()=>{
+        snapGrid = snapToggle.checked;
+        localStorage.setItem(LS_SNAP, snapGrid ? "1" : "0");
+        toast(snapGrid ? "Iman activo" : "Iman desactivado");
+      });
+    }
+
+    $("btnClear").addEventListener("click", ()=>{
+      selectedTableId = "";
+      localStorage.removeItem(LS_TABLE);
+      renderCurrent(window.__db || null);
+      // ayudar a que sea obvio que sali?
+      const fw = $("floorWrap");
+      if(fw) fw.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    $("btnDetails").addEventListener("click", ()=>{
+      detailsOpen = !detailsOpen;
+      renderTableDetails(window.__db || null);
+    });
+    $("btnRename").addEventListener("click", ()=>{
+      const table = getSelectedTable(window.__db);
+      if(!table) return toast("Selecciona una mesa");
+      const name = ($("dRename").value || "").trim();
+      if(!name) return toast("Pon un nombre");
+      sendAction("tables:rename", { tableId: table.id, name });
+      toast("Nombre actualizado");
+    });
+
+    loadCustomerReqs();
+    setInterval(loadCustomerReqs, 20000);
+
+    let tableFilter = "all";
+    let tableScale = 1.1;
+    function clampTableScale(v){
+      return Math.max(0.6, Math.min(1.8, Number(v || 1)));
+    }
+    function setTableScale(next, save){
+      tableScale = clampTableScale(next);
+      if(tableScaleInput) tableScaleInput.value = String(tableScale);
+      if(save) localStorage.setItem(LS_TABLE_SCALE, String(tableScale));
+      renderTables(window.__db || null);
+    }
+    const tableSearch = $("tableSearch");
+    const tableScaleInput = $("tableScale");
+    const tableFilters = $("tableFilters");
+    const floorSelect = $("floorSelect");
+    const floorManageSelect = $("floorManageSelect");
+    const floorNewName = $("floorNewName");
+    const btnAddFloor = $("btnAddFloor");
+    const btnRemoveFloor = $("btnRemoveFloor");
+    const tableFloorSel = $("tableFloor");
+    const btnApplyTableFloor = $("btnApplyTableFloor");
+    const salonLayoutEl = document.querySelector(".salonLayout");
+    const salonFloorEl = document.querySelector(".salonFloor");
+    const salonActionsEl = document.querySelector(".salonActions");
+    const salonOrderEl = document.querySelector(".salonOrder");
+    function setFocusRing(target){
+      if(salonLayoutEl) salonLayoutEl.classList.remove("focusOutline");
+      if(salonFloorEl) salonFloorEl.classList.remove("focusOutline");
+      if(salonActionsEl) salonActionsEl.classList.remove("focusOutline");
+      if(salonOrderEl) salonOrderEl.classList.remove("focusOutline");
+      if(target === "layout" && salonLayoutEl) salonLayoutEl.classList.add("focusOutline");
+      if(target === "floor" && salonFloorEl) salonFloorEl.classList.add("focusOutline");
+      if(target === "actions" && salonActionsEl) salonActionsEl.classList.add("focusOutline");
+      if(target === "order" && salonOrderEl) salonOrderEl.classList.add("focusOutline");
+    }
+    if(tableFilters){
+      tableFilters.querySelectorAll(".chip").forEach(chip=>{
+        chip.addEventListener("click", ()=>{
+          tableFilters.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+          chip.classList.add("active");
+          tableFilter = chip.getAttribute("data-filter") || "all";
+          renderTables(window.__db || null);
+        });
+      });
+    }
+    const DEFAULT_FLOORS = ["Planta A", "Planta B"];
+const DEFAULT_FLOOR = "Planta A";
+function normalizeFloorName(name){
+  const n = String(name || "").trim();
+  if(!n) return "";
+  const low = n.toLowerCase();
+  if(low === "planta baja") return "Planta A";
+  if(low === "planta alta") return "Planta B";
+  return n;
+}
+function parseFloorList(raw){
+  const items = String(raw||"").split(",").map(s=>normalizeFloorName(s)).filter(Boolean);
+  const clean = [];
+  items.forEach(n=>{ if(!clean.includes(n)) clean.push(n); });
+  return clean.slice(0, 8);
+}
+function loadFloors(){
+  const raw = localStorage.getItem(LS_FLOOR_LIST);
+  const list = raw ? parseFloorList(raw) : [];
+  return list.length ? list : DEFAULT_FLOORS.slice();
+}
+function saveFloors(list){
+  const items = (list || []).map(s=>normalizeFloorName(s)).filter(Boolean);
+  const clean = [];
+  items.forEach(n=>{ if(!clean.includes(n)) clean.push(n); });
+  if(!clean.includes(DEFAULT_FLOOR)) clean.unshift(DEFAULT_FLOOR);
+  const out = clean.slice(0, 8);
+  localStorage.setItem(LS_FLOOR_LIST, out.join(", "));
+  return out;
+}
+let floorList = saveFloors(loadFloors());
+let activeFloor = DEFAULT_FLOOR;
+if(!floorList.includes(activeFloor)) activeFloor = floorList[0];
+function normalizeFloor(name){
+  const n = normalizeFloorName(name);
+  return floorList.includes(n) ? n : floorList[0];
+}
+function getTableFloor(t){
+  const z = normalizeFloorName((t && t.zone) || "");
+  return floorList.includes(z) ? z : floorList[0];
+}
+    function setActiveFloor(name){
+      activeFloor = normalizeFloor(name);
+      localStorage.setItem(LS_FLOOR_ACTIVE, activeFloor);
+      if(floorSelect) floorSelect.value = activeFloor;
+      if(floorManageSelect) floorManageSelect.value = activeFloor;
+      const db = window.__db || null;
+      if(db && selectedTableId){
+        const t = (db.tables||[]).find(x=>x.id===selectedTableId);
+        if(t && getTableFloor(t) !== activeFloor){
+          selectedTableId = "";
+          localStorage.removeItem(LS_TABLE);
+        }
+      }
+      renderCurrent(db);
+      renderTables(db);
+    }
+    function renderFloorUI(){
+      if(floorSelect){
+        floorSelect.innerHTML = floorList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+      }
+      if(floorManageSelect){
+        floorManageSelect.innerHTML = floorList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+      }
+      if(tableFloorSel){
+        tableFloorSel.innerHTML = floorList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+      }
+      setActiveFloor(activeFloor);
+    }
+    renderFloorUI();
+    if(floorSelect){
+      floorSelect.addEventListener("change", ()=>setActiveFloor(floorSelect.value || floorList[0]));
+    }
+    if(floorManageSelect){
+      floorManageSelect.addEventListener("change", ()=>setActiveFloor(floorManageSelect.value || floorList[0]));
+    }
+    if(btnAddFloor){
+  btnAddFloor.addEventListener("click", ()=>{
+    const name = normalizeFloorName((floorNewName && floorNewName.value) || "");
+    if(!name) return toast("Pon un nombre de planta");
+    if(floorList.includes(name)) return toast("Esa planta ya existe");
+    floorList = saveFloors(floorList.concat([name]));
+    if(floorNewName) floorNewName.value = "";
+    renderFloorUI();
+    setActiveFloor(name);
+    toast("Planta agregada");
+  });
+}
+if(btnRemoveFloor){
+  btnRemoveFloor.addEventListener("click", ()=>{
+    toast("No se puede eliminar la Planta A");
+  });
+}
+if(btnApplyTableFloor){
+      btnApplyTableFloor.addEventListener("click", ()=>{
+        const db = window.__db || null;
+        const t = getSelectedTable(db);
+        if(!t) return toast("Selecciona una mesa");
+        const floor = tableFloorSel ? tableFloorSel.value : floorList[0];
+        sendAction("tables:setLayout", { tableId: t.id, zone: floor });
+        toast("Planta actualizada");
+        renderTables(db);
+      });
+    }
+    if(tableSearch){
+      tableSearch.addEventListener("input", ()=>renderTables(window.__db || null));
+    }
+    const savedTableScale = Number(localStorage.getItem(LS_TABLE_SCALE));
+    if(Number.isFinite(savedTableScale)){
+      tableScale = clampTableScale(savedTableScale);
+      if(tableScaleInput) tableScaleInput.value = String(tableScale);
+    }
+    if(tableScaleInput){
+      tableScaleInput.addEventListener("input", ()=>{
+        setTableScale(tableScaleInput.value || 1, true);
+      });
+    }
+
+    $("q").addEventListener("input", ()=>renderMenu(window.__db || null));
+    $("discountType").addEventListener("change", ()=>{
+      const t = $("discountType").value;
+      $("discountValue").disabled = (t === "none");
+      if(t === "none") $("discountValue").value = "";
+    });
+    $("discountScope").addEventListener("change", ()=>{
+      const itemSel = $("discountItem");
+      if(itemSel) itemSel.disabled = ($("discountScope").value !== "line");
+    });
+
+    function itemKitchenStatus(it, fallback){
+      const s = String((it && it.kitchenStatus) || "").trim();
+      if(s) return s;
+      return String(fallback || "borrador");
+    }
+
+    function getTicketItemFlags(t){
+      const items = (t && Array.isArray(t.items)) ? t.items : [];
+      const flags = {
+        hasItems: items.length > 0,
+        hasNew: false,
+        hasReceived: false,
+        hasPrep: false,
+        hasReady: false,
+        hasDelivered: false,
+        allDelivered: false,
+        allReadyOrDelivered: false,
+        hasPending: false,
+        hasReadyOrDelivered: false,
+      };
+      if(!flags.hasItems) return flags;
+      for(const it of items){
+        const s = itemKitchenStatus(it, t ? t.kitchenStatus : "");
+        if(s === "borrador") flags.hasNew = true;
+        else if(s === "recibido") flags.hasReceived = true;
+        else if(s === "en_preparacion") flags.hasPrep = true;
+        else if(s === "listo") flags.hasReady = true;
+        else if(s === "entregado") flags.hasDelivered = true;
+      }
+      flags.allDelivered = items.every(it => itemKitchenStatus(it, t ? t.kitchenStatus : "") === "entregado");
+      flags.allReadyOrDelivered = items.every(it => {
+        const s = itemKitchenStatus(it, t ? t.kitchenStatus : "");
+        return s === "listo" || s === "entregado";
+      });
+      flags.hasPending = flags.hasNew || flags.hasReceived || flags.hasPrep;
+      flags.hasReadyOrDelivered = flags.hasReady || flags.hasDelivered;
+      return flags;
+    }
+
+    function ticketStatusText(t){
+      if(!t) return "?";
+      const flags = getTicketItemFlags(t);
+      if(!flags.hasItems) return "Estado cocina: Borrador (a?n no enviado)";
+      if(flags.allDelivered) return "Estado cocina: Entregado";
+      if(flags.allReadyOrDelivered) return "Estado cocina: Listo para entregar";
+      if(flags.hasPending && flags.hasReadyOrDelivered) return "Estado cocina: Parcial (listo + pendientes)";
+      if(flags.hasPrep) return "Estado cocina: En preparaci?n";
+      if(flags.hasReceived) return "Estado cocina: Recibido en cocina";
+      if(flags.hasReady) return "Estado cocina: Listo";
+      if(flags.hasNew) return "Estado cocina: Borrador (pendiente de enviar)";
+      return "Estado cocina: " + (t.kitchenStatus || "-");
+    }
+
+    function getSelectedTable(db){
+      if(!db || !selectedTableId) return null;
+      return (db.tables||[]).find(t=>t.id===selectedTableId) || null;
+    }
+
+    function getSelectedTicket(db){
+      const table = getSelectedTable(db);
+      if(!table || !table.ticketId) return null;
+      return (db.tickets||[]).find(t=>t.id===table.ticketId && t.status==="abierta") || null;
+    }
+
+    function renderTableDetails(db){
+      const box = $("tableDetails");
+      if(!box) return;
+      if(!detailsOpen){
+        box.style.display = "none";
+        return;
+      }
+      const table = getSelectedTable(db);
+      if(!table){
+        box.style.display = "none";
+        return;
+      }
+      const ticket = getSelectedTicket(db);
+      $("dName").textContent = table.name || table.id || "-";
+      $("dStatus").textContent = table.status || "-";
+      $("dRename").value = table.name || "";
+      if(ticket && Array.isArray(ticket.items) && ticket.items.length){
+        const items = ticket.items.map(it=>{
+          const qty = Number(it.qty||0);
+          return String(qty) + " x " + String(it.name || it.productId);
+        }).join(" | ");
+        $("dItems").textContent = items;
+      } else {
+        $("dItems").textContent = "Sin consumo.";
+      }
+      box.style.display = "";
+      if(salonTools) salonTools.open = true;
+    }
+
+    function addProductToTable(tableId, productId){
+      const db = window.__db;
+      const table = (db && db.tables) ? db.tables.find(t=>t.id===tableId) : null;
+      if(!table){
+        return toast("Selecciona una mesa primero");
+      }
+      if(!table.ticketId){
+        if(editMode){
+          toast("Mesa libre: pulsa 'Abrir comanda' para empezar");
+        } else {
+          toast("Esta mesa no tiene comanda abierta");
+        }
+        return;
+      }
+      const product = productById(db, productId);
+      if(product && hasModifiers(product)){
+        openModsPick(product, { type: "table", tableId });
+        return;
+      }
+      sendAction("ticket:addItemEx", { ticketId: table.ticketId, productId, qty: 1, selections: {} });
+    }
+
+    function groupProducts(products){
+      const groups = new Map();
+      products.forEach(p=>{
+        const k = p.categoryTitle || p.categoryId || "Otros";
+        if(!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(p);
+      });
+      return Array.from(groups.entries());
+    }
+
+    function statusClass(t, ticket){
+      if(!t || !t.status) return "free";
+      if(t.status === "libre") return "free";
+      if(t.status === "lista") return "ready";
+      if(t.status === "sumando") return "sumando";
+      if(t.status === "borrador") return "draft";
+      return "busy";
+    }
+    function shapeClass(t){
+      return (t && String(t.shape||"square")==="round") ? "round" : "";
+    }
+    function layoutOrigin(floorW, floorH){
+      return { ox: Math.round((floorW || 0) / 2), oy: Math.round((floorH || 0) / 2) };
+    }
+    function defaultRelPos(i){
+      const col = i % 10;
+      const row = Math.floor(i / 10);
+      return { x: (col - 4.5) * 110, y: (row - 2) * 90 };
+    }
+
+    function buildLinkSvg(tables, origin, floorW, floorH){
+      const pos = new Map();
+      tables.forEach((t, i)=>{
+        const def = defaultRelPos(i);
+        const relX = Number.isFinite(Number(t.x)) ? Number(t.x) : def.x;
+        const relY = Number.isFinite(Number(t.y)) ? Number(t.y) : def.y;
+        const posX = origin.ox + relX;
+        const posY = origin.oy + relY;
+        const w = (Number.isFinite(Number(t.w)) ? Number(t.w) : 96) * tableScale;
+        const h = (Number.isFinite(Number(t.h)) ? Number(t.h) : 72) * tableScale;
+        pos.set(t.id, { x: posX + (w / 2), y: posY + (h / 2) });
+      });
+      const pairs = new Set();
+      const lines = [];
+      tables.forEach(t=>{
+        const links = Array.isArray(t.links) ? t.links : [];
+        links.forEach(id=>{
+          const a = pos.get(t.id);
+          const b = pos.get(id);
+          if(!a || !b) return;
+          const key = [t.id, id].sort().join("|");
+          if(pairs.has(key)) return;
+          pairs.add(key);
+          lines.push(`<line class="floorLinkLine" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"></line>`);
+        });
+      });
+      if(!lines.length) return "";
+      return `<svg class="floorLinks" width="${floorW}" height="${floorH}" viewBox="0 0 ${floorW} ${floorH}" preserveAspectRatio="none">${lines.join("")}</svg>`;
+    }
+
+    function confirmLink(fromId, toId, db){
+      const tables = (db && db.tables) ? db.tables : [];
+      const source = tables.find(t=>t && t.id === fromId);
+      const target = tables.find(t=>t && t.id === toId);
+      if(!source || !target) return;
+      if(source.ticketId || target.ticketId){
+        toast("Conecta antes de abrir la comanda");
+        return;
+      }
+      const already = Array.isArray(source.links) && source.links.includes(toId);
+      if(already){
+        toast("Estas mesas ya estan conectadas");
+        return;
+      }
+      const labelA = source.name || source.id;
+      const labelB = target.name || target.id;
+      if(confirm(`Estas seguro de conectar estas mesas?\n${labelA} -> ${labelB}`)){
+        sendAction("tables:link", { fromId: source.id, toId: target.id });
+        toast("Mesas conectadas");
+      }
+    }
+
+    function ensureLinkDragLayer(floor, floorW, floorH){
+      let svg = document.getElementById("floorLinkDrag");
+      if(svg) return svg;
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("id", "floorLinkDrag");
+      svg.setAttribute("class", "floorLinkDrag");
+      svg.setAttribute("width", String(floorW));
+      svg.setAttribute("height", String(floorH));
+      svg.setAttribute("viewBox", `0 0 ${floorW} ${floorH}`);
+      svg.innerHTML = '<line class="floorLinkDragLine" x1="0" y1="0" x2="0" y2="0"></line>';
+      floor.appendChild(svg);
+      return svg;
+    }
+
+    function updateLinkDragLine(floor, x1, y1, x2, y2){
+      const floorW = floor.offsetWidth || 2600;
+      const floorH = floor.offsetHeight || 900;
+      const svg = ensureLinkDragLayer(floor, floorW, floorH);
+      svg.setAttribute("width", String(floorW));
+      svg.setAttribute("height", String(floorH));
+      svg.setAttribute("viewBox", `0 0 ${floorW} ${floorH}`);
+      const line = svg.querySelector("line");
+      if(!line) return;
+      line.setAttribute("x1", String(x1));
+      line.setAttribute("y1", String(y1));
+      line.setAttribute("x2", String(x2));
+      line.setAttribute("y2", String(y2));
+      svg.style.display = "block";
+    }
+
+    function clearLinkDrag(){
+      const svg = document.getElementById("floorLinkDrag");
+      if(svg) svg.style.display = "none";
+      linkDrag = null;
+      linkSourceId = null;
+      updateLinkHint();
+      const floor = $("floor");
+      if(floor) floor.querySelectorAll(".tableNode.linkSource").forEach(el=>el.classList.remove("linkSource"));
+    }
+
+    function startLinkDrag(node, id){
+      const floor = $("floor");
+      if(!floor) return;
+      linkSourceId = id;
+      updateLinkHint();
+      node.classList.add("linkSource");
+      const x1 = (parseFloat(node.style.left) || node.offsetLeft || 0) + (node.offsetWidth / 2);
+      const y1 = (parseFloat(node.style.top) || node.offsetTop || 0) + (node.offsetHeight / 2);
+      linkDrag = { sourceId: id, x1, y1 };
+      updateLinkDragLine(floor, x1, y1, x1, y1);
+
+      function move(ev){
+        if(!linkDrag) return;
+        const rect = floor.getBoundingClientRect();
+        const x2 = ev.clientX - rect.left;
+        const y2 = ev.clientY - rect.top;
+        updateLinkDragLine(floor, linkDrag.x1, linkDrag.y1, x2, y2);
+      }
+      function up(ev){
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+        if(!linkDrag) return;
+        const target = document.elementFromPoint(ev.clientX, ev.clientY);
+        const nodeEl = target && target.closest ? target.closest(".tableNode") : null;
+        const toId = nodeEl ? nodeEl.getAttribute("data-table") : null;
+        const fromId = linkDrag.sourceId;
+        const db = window.__db || null;
+        if(toId && fromId && toId !== fromId){
+          confirmLink(fromId, toId, db);
+        }
+        clearLinkDrag();
+        renderTables(db);
+      }
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    }
+
+    function renderTables(db){
+      const floor = $("floor");
+      if(!db || !floor){ if(floor) floor.innerHTML = ""; return; }
+
+      const tables = db.tables || [];
+      $("tablesCount").textContent = tables.length;
+      $("tablesBusy").textContent  = tables.filter(t=>t.status!=="libre").length;
+      $("tablesReady").textContent = tables.filter(t=>t.status==="lista").length;
+
+      const ticketsById = new Map((db.tickets||[]).map(t=>[t.id,t]));
+
+      const floorW = floor.offsetWidth || 2600;
+      const floorH = floor.offsetHeight || 900;
+      const origin = layoutOrigin(floorW, floorH);
+      const q = String((tableSearch && tableSearch.value) || "").trim().toLowerCase();
+
+      const tablesFiltered = tables.filter((t, i)=>{
+        const name = String(t.name || t.id || "").toLowerCase();
+        if(q && !name.includes(q)) return false;
+        const st = String(t.status || "libre");
+        if(tableFilter !== "all" && st !== tableFilter) return false;
+        if(getTableFloor(t) !== activeFloor) return false;
+        return true;
+      });
+
+      const linkSvg = buildLinkSvg(tablesFiltered, origin, floorW, floorH);
+      floor.innerHTML = linkSvg + tablesFiltered.map((t, i)=>{
+        const selected = (t.id === selectedTableId);
+        const ticket = t.ticketId ? ticketsById.get(t.ticketId) : null;
+        const def = defaultRelPos(i);
+        const relX = Number.isFinite(Number(t.x)) ? Number(t.x) : def.x;
+        const relY = Number.isFinite(Number(t.y)) ? Number(t.y) : def.y;
+        const posX = origin.ox + relX;
+        const posY = origin.oy + relY;
+        const w = (Number.isFinite(Number(t.w)) ? Number(t.w) : 96) * tableScale;
+        const h = (Number.isFinite(Number(t.h)) ? Number(t.h) : 72) * tableScale;
+        const lockClass = t.locked ? "locked" : "";
+        const selClass = selected ? "selected" : "";
+        const linkClass = (linkSourceId === t.id) ? "linkSource" : "";
+        const nameRaw = String(t.name || t.id || "");
+        const nameNum = (nameRaw.match(/\d+/) || [""])[0] || nameRaw.replace(/\D+/g, "");
+        const nameLabel = nameNum || nameRaw;
+        const fixLabel = t.locked ? "Liberar" : "Fijar";
+        const fixBubble = (selected && editMode) ? `<button class="fixBubble" data-fix="${esc(t.id)}">${esc(fixLabel)}</button>` : "";
+        const resizeHandle = (selected && editMode) ? `<div class="resizeHandle" title="Cambiar tama?o"></div>` : "";
+        const flags = ticket ? getTicketItemFlags(ticket) : null;
+        const kitchenSpin = (flags && (flags.hasReceived || flags.hasPrep)) ? `<div class="kitchenSpin" title="Cocina en curso"></div>` : "";
+        const isKitchenReady = !!(flags && flags.hasReady);
+        const isKitchenDelivered = !!(flags && flags.allDelivered);
+        const isTableReady = t.status === "lista";
+        const readyBubble = isKitchenDelivered
+          ? `<div class="readyBubble delivered">ENTREGADO</div>`
+          : (isKitchenReady || isTableReady) ? `<div class="readyBubble ready">LISTA</div>` : "";
+        const itemCount = (ticket && Array.isArray(ticket.items))
+          ? ticket.items.reduce((sum, it)=> sum + Number(it.qty || 0), 0)
+          : 0;
+        const showCount = !!(ticket && flags && flags.hasNew && !flags.hasReceived && !flags.hasPrep && !flags.hasReady && !flags.hasDelivered);
+        const countBadge = showCount ? `<div class="tCount">${esc(itemCount)}</div>` : "";
+
+        return `
+          <div class="tableNode ${statusClass(t, ticket)} ${shapeClass(t)} ${lockClass} ${selClass} ${linkClass}" data-table="${esc(t.id)}"
+               style="left:${esc(posX)}px; top:${esc(posY)}px; width:${esc(w)}px; height:${esc(h)}px;">
+            
+            ${readyBubble}
+            ${countBadge}
+            ${fixBubble}
+            ${resizeHandle}
+            ${kitchenSpin}
+            <div class="tName">${esc(nameLabel)}</div>
+          </div>
+        `;
+      }).join("");
+
+      renderMiniMap(tables, floorW, floorH, tablesFiltered.map(t=>t.id), ticketsById);
+      syncFloorScroll();
+      if(!floorCentered){
+        const fw = $("floorWrap");
+        if(fw){
+          const applied = applySavedFloorPos();
+          if(!applied){
+            fw.scrollLeft = Math.max(0, (fw.scrollWidth - fw.clientWidth) / 2);
+            fw.scrollTop = Math.max(0, (fw.scrollHeight - fw.clientHeight) / 2);
+          }
+        }
+        floorCentered = true;
+      }
+
+      floor.querySelectorAll(".tableNode").forEach(node=>{
+        const id = node.getAttribute("data-table");
+        const t = (db.tables||[]).find(x=>x.id===id);
+        if(!t) return;
+
+        const select = ()=>{
+          selectedTableId = id;
+          floor.querySelectorAll('.tableNode.selected').forEach(el=>el.classList.remove('selected'));
+          node.classList.add('selected');
+          localStorage.setItem(LS_TABLE, selectedTableId);
+          $("selTableLabel").textContent = t.name || t.id || id;
+          $("fixToggle").checked = !!t.locked;
+          if(tableFloorSel) tableFloorSel.value = getTableFloor(t);
+          syncTableEditInputs(t);
+          renderCurrent(window.__db || null);
+          if(editMode && !t.ticketId){
+            toast("Mesa libre: pulsa 'Abrir comanda' para empezar");
+          }
+        };
+
+        node.addEventListener("click", ()=>{
+          if(linkMode) return;
+          select();
+        });
+        node.addEventListener("dragover", (ev)=>{ ev.preventDefault(); });
+        node.addEventListener("drop", (ev)=>{
+          ev.preventDefault();
+          const pid = window.__dragPid || "";
+          if(pid) addProductToTable(id, pid);
+        });
+        node.addEventListener("dragover", (ev)=>{ ev.preventDefault(); });
+        node.addEventListener("drop", (ev)=>{
+          ev.preventDefault();
+          const pid = window.__dragPid || "";
+          if(pid) addProductToTable(id, pid);
+        });
+        node.addEventListener("pointerdown", (ev)=>{
+          if(linkMode){
+            ev.preventDefault();
+            startLinkDrag(node, id);
+            return;
+          }
+          if(ev.ctrlKey) return;
+          ev.preventDefault();
+          node.setPointerCapture(ev.pointerId);
+          select();
+          if(t.locked){
+            toast("Mesa fija");
+            return;
+          }
+          const startX = ev.clientX, startY = ev.clientY;
+          const baseW = floor.offsetWidth || 2600;
+          const baseH = floor.offsetHeight || 900;
+          const origin = layoutOrigin(baseW, baseH);
+          const startAbsX = parseFloat(node.style.left) || 0;
+          const startAbsY = parseFloat(node.style.top) || 0;
+
+          function move(e){
+            const scale = floorZoom || 1;
+            const dx = (e.clientX - startX) / scale;
+            const dy = (e.clientY - startY) / scale;
+            const maxX = baseW - node.offsetWidth;
+            const maxY = baseH - node.offsetHeight;
+            let nx = Math.max(0, Math.min(maxX, startAbsX + dx));
+            let ny = Math.max(0, Math.min(maxY, startAbsY + dy));
+            if(snapGrid){
+              const g = 5;
+              nx = origin.ox + Math.round((nx - origin.ox) / g) * g;
+              ny = origin.oy + Math.round((ny - origin.oy) / g) * g;
+              nx = Math.max(0, Math.min(maxX, nx));
+              ny = Math.max(0, Math.min(maxY, ny));
+            }
+            node.style.left = nx + "px";
+            node.style.top = ny + "px";
+          }
+          function up(){
+            node.removeEventListener("pointermove", move);
+            node.removeEventListener("pointerup", up);
+            const nxAbs = parseFloat(node.style.left) || 0;
+            const nyAbs = parseFloat(node.style.top) || 0;
+            const nx = nxAbs - origin.ox;
+            const ny = nyAbs - origin.oy;
+            sendAction("tables:setLayout", { tableId: id, x: nx, y: ny });
+          }
+        node.addEventListener("pointermove", move);
+        node.addEventListener("pointerup", up);
+      });
+
+        const handle = node.querySelector(".resizeHandle");
+        if(handle){
+          handle.addEventListener("pointerdown", (ev)=>{
+            if(!editMode) return;
+            if(t.locked) return toast("Mesa fija");
+            ev.preventDefault();
+            ev.stopPropagation();
+            handle.setPointerCapture(ev.pointerId);
+            const startX = ev.clientX, startY = ev.clientY;
+            const startW = parseFloat(node.style.width) || node.offsetWidth || 0;
+            const startH = parseFloat(node.style.height) || node.offsetHeight || 0;
+            const minPx = 30 * tableScale;
+            function moveResize(e){
+              const dx = e.clientX - startX;
+              const dy = e.clientY - startY;
+              let nw = Math.max(minPx, startW + dx);
+              let nh = Math.max(minPx, startH + dy);
+              if(String(t.shape||"square")==="round"){
+                const m = Math.max(nw, nh);
+                nw = m;
+                nh = m;
+              }
+              node.style.width = nw + "px";
+              node.style.height = nh + "px";
+            }
+            function upResize(){
+              handle.removeEventListener("pointermove", moveResize);
+              handle.removeEventListener("pointerup", upResize);
+              const nw = parseFloat(node.style.width) || startW;
+              const nh = parseFloat(node.style.height) || startH;
+              const baseW = Math.max(30, nw / tableScale);
+              const baseH = Math.max(30, nh / tableScale);
+              sendAction("tables:setLayout", { tableId: id, w: baseW, h: baseH });
+              syncTableEditInputs(t);
+            }
+            handle.addEventListener("pointermove", moveResize);
+            handle.addEventListener("pointerup", upResize);
+          });
+        }
+    });
+      floor.querySelectorAll(".fixBubble").forEach(btn=>{
+        btn.addEventListener("pointerdown", (ev)=>{ ev.stopPropagation(); });
+        btn.addEventListener("click", (ev)=>{
+          ev.stopPropagation();
+          const id = btn.getAttribute("data-fix");
+          const t = (db.tables||[]).find(x=>x.id===id);
+          if(!t) return;
+          sendAction("tables:setLayout", { tableId: id, locked: !t.locked });
+          toast(!t.locked ? "Mesa fijada" : "Mesa libre");
+        });
+      });
+      const sel = (db.tables||[]).find(t=>t.id===selectedTableId);
+      if(sel){
+        $("selTableLabel").textContent = sel.name || sel.id || selectedTableId;
+        $("fixToggle").checked = !!sel.locked;
+        syncTableEditInputs(sel);
+      } else {
+        $("selTableLabel").textContent = "-";
+        $("fixToggle").checked = false;
+        syncTableEditInputs(null);
+      }
+    }
+
+    function renderMiniMap(tables, floorW, floorH, visibleIds, ticketsById){
+      const mini = $("miniMap");
+      if(!mini) return;
+      const w = mini.clientWidth || 260;
+      const h = mini.clientHeight || 140;
+      const origin = layoutOrigin(floorW, floorH);
+      mini.innerHTML = tables.map((t, i)=>{
+        const ticket = t.ticketId ? (ticketsById ? ticketsById.get(t.ticketId) : null) : null;
+        const def = defaultRelPos(i);
+        const relX = Number.isFinite(Number(t.x)) ? Number(t.x) : def.x;
+        const relY = Number.isFinite(Number(t.y)) ? Number(t.y) : def.y;
+        const posX = origin.ox + relX;
+        const posY = origin.oy + relY;
+        const mx = Math.round((posX / Math.max(1, floorW)) * w);
+        const my = Math.round((posY / Math.max(1, floorH)) * h);
+        const cls = "miniNode " + statusClass(t, ticket) + (visibleIds.includes(t.id) ? "" : " dim");
+        return `<div class="${cls}" data-table="${esc(t.id)}" style="left:${mx}px; top:${my}px;"></div>`;
+      }).join("");
+      mini.querySelectorAll(".miniNode").forEach(node=>{
+        node.addEventListener("click", ()=>{
+          const id = node.getAttribute("data-table");
+          const t = (tables||[]).find(x=>x.id===id);
+          if(!t) return;
+          const origin = layoutOrigin(floorW, floorH);
+          const idx = (tables || []).indexOf(t);
+          const def = defaultRelPos(Math.max(0, idx));
+          const relX = Number.isFinite(Number(t.x)) ? Number(t.x) : def.x;
+          const relY = Number.isFinite(Number(t.y)) ? Number(t.y) : def.y;
+          const posX = origin.ox + relX;
+          const posY = origin.oy + relY;
+          const fw = $("floorWrap");
+          if(!fw) return;
+          fw.scrollLeft = Math.max(0, posX - (fw.clientWidth/2));
+          fw.scrollTop = Math.max(0, posY - (fw.clientHeight/2));
+        });
+      });
+    }
+
+    function renderTicketMeta(db, ticket){
+      const wrap = $("ticketMeta");
+      if(!selectedTableId){
+        wrap.innerHTML = "";
+        return;
+      }
+
+      const table = getSelectedTable(db);
+
+      if(!ticket){
+        wrap.innerHTML = `
+          <div class="mini warnText" style="margin-top:10px;">Esta mesa no esta abierta. Pulsa 'Abrir mesa'.</div>
+        `;
+        return;
+      }
+
+      wrap.innerHTML = `\n        <div style="margin-top:10px;">
+          <div class="small">Notas de mesa</div>
+          <input id="mNotes" class="input" value="${esc(ticket.notes||"")}" placeholder="Ej: sin hielo, al?rgico, pedir cuenta?"/>
+        </div>
+      `;
+
+      const notesEl = document.getElementById("mNotes");
+      if(notesEl){
+        let tmr = null;
+        notesEl.addEventListener("input", ()=>{
+          if(tmr) clearTimeout(tmr);
+          tmr = setTimeout(()=>{
+            sendAction("ticket:setMeta", { ticketId: ticket.id, notes: notesEl.value });
+          }, 350);
+        });
+      }
+    }
+
+    function lineTotal(it){
+      const unit = Number(it.unitPrice||0);
+      const qty = Number(it.qty||0);
+      if(!isFinite(unit) || !isFinite(qty) || qty<=0) return 0;
+      const subtotal = unit * qty;
+      const d = it.discount || null;
+      let discountAmount = 0;
+      if(d && typeof d === "object"){
+        const type = String(d.type||"").toLowerCase();
+        const raw = Number(d.value||0);
+        if(Number.isFinite(raw) && raw > 0){
+          if(type === "percent"){
+            const pct = Math.min(100, Math.max(0, raw));
+            discountAmount = subtotal * (pct / 100);
+          } else if(type === "amount"){
+            discountAmount = raw;
+          }
+        }
+      }
+      discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
+      return Math.max(0, subtotal - discountAmount);
+    }
+
+    function calcTotals(ticket){
+      const items = (ticket && ticket.items) ? ticket.items : [];
+      const subtotal = items.reduce((a,it)=>a + lineTotal(it), 0);
+      const d = ticket && ticket.discount ? ticket.discount : null;
+      let discountAmount = 0;
+      if(d && typeof d === "object"){
+        const type = String(d.type||"").toLowerCase();
+        const raw = Number(d.value||0);
+        if(Number.isFinite(raw) && raw > 0){
+          if(type === "percent"){
+            const pct = Math.min(100, Math.max(0, raw));
+            discountAmount = subtotal * (pct / 100);
+          } else if(type === "amount"){
+            discountAmount = raw;
+          }
+        }
+      }
+      discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
+      const total = Math.max(0, subtotal - discountAmount);
+      return { subtotal, discountAmount, total };
+    }
+
+    function fillDiscountTargets(ticket){
+      const scope = $("discountScope");
+      const itemSel = $("discountItem");
+      if(!scope || !itemSel) return;
+      const items = (ticket && ticket.items) ? ticket.items : [];
+      itemSel.innerHTML = items.map(it=>{
+        const label = `${it.name || it.productId} x${it.qty || 0}`;
+        return `<option value="${esc(it.lineId || it.productId)}">${esc(label)}</option>`;
+      }).join("") || `<option value="">Sin items</option>`;
+      itemSel.disabled = (scope.value !== "line");
+    }
+
+    function cartModifiersKey(modifiers){
+      return (Array.isArray(modifiers) ? modifiers : [])
+        .map(m=>`${m.groupId||""}:${m.optionId||""}:${m.kind||""}:${Number(m.price||0)}`)
+        .sort()
+        .join("|");
+    }
+
+    function cartLineGroupKey(it){
+      const discount = it && it.discount ? `${it.discount.type||""}:${Number(it.discount.value||0)}` : "";
+      return [
+        String(it && it.productId || ""),
+        String(it && it.name || ""),
+        String(Number(it && it.unitPrice || 0)),
+        cartModifiersKey(it && it.modifiers),
+        discount
+      ].join("||");
+    }
+
+    function groupCartLines(ticket){
+      const items = (ticket && Array.isArray(ticket.items)) ? ticket.items : [];
+      const groups = [];
+      const byKey = new Map();
+      items.forEach((it, idx)=>{
+        const key = cartLineGroupKey(it);
+        let group = byKey.get(key);
+        if(!group){
+          group = {
+            key,
+            index: idx,
+            name: it.name || it.productId || "Item",
+            unitPrice: Number(it.unitPrice || 0),
+            modifiers: Array.isArray(it.modifiers) ? it.modifiers : [],
+            discount: it.discount || null,
+            items: [],
+            qty: 0,
+            total: 0,
+            pendingQty: 0,
+            readyQty: 0,
+            deliveredQty: 0,
+          };
+          byKey.set(key, group);
+          groups.push(group);
+        }
+        const qty = Number(it.qty || 0);
+        const status = itemKitchenStatus(it, ticket ? ticket.kitchenStatus : "");
+        group.items.push(it);
+        group.qty += qty;
+        group.total += lineTotal(it);
+        if(status === "listo") group.readyQty += qty;
+        else if(status === "entregado") group.deliveredQty += qty;
+        else group.pendingQty += qty;
+      });
+      return groups.map(group=>{
+        const draftLine = group.items.find(it => itemKitchenStatus(it, ticket ? ticket.kitchenStatus : "") === "borrador") || null;
+        const actionLine = draftLine || group.items[group.items.length - 1] || null;
+        const parts = [];
+        if(group.pendingQty > 0 && (group.readyQty > 0 || group.deliveredQty > 0)){
+          parts.push(`${group.pendingQty} nuevo${group.pendingQty === 1 ? "" : "s"}`);
+        }
+        if(group.readyQty > 0) parts.push(`${group.readyQty} listo${group.readyQty === 1 ? "" : "s"}`);
+        if(group.deliveredQty > 0) parts.push(`${group.deliveredQty} entregado${group.deliveredQty === 1 ? "" : "s"}`);
+        return {
+          ...group,
+          actionLine,
+          rowClass: group.pendingQty > 0 ? " status-pending" : " status-ready",
+          stateNote: parts.join(" • "),
+        };
+      }).sort((a,b)=>a.index - b.index);
+    }
+
+    function cartActionTarget(group){
+      if(!group || !group.actionLine) return null;
+      const line = group.actionLine;
+      return {
+        id: line.lineId || line.productId || "",
+        mode: line.lineId ? "line" : "prod",
+      };
+    }
+
+    function renderCart(ticket){
+      const wrap = $("cart");
+      if(!ticket){
+        wrap.innerHTML = "";
+        return;
+      }
+      const items = ticket.items || [];
+      const totals = calcTotals(ticket);
+      const total = totals.total;
+      $("cartCount").textContent = items.reduce((a,it)=>a+Number(it.qty||0),0);
+      const discountInfo = $("discountInfo");
+      if(discountInfo){
+        if(totals.discountAmount > 0){
+          const pct = ticket && ticket.discount && ticket.discount.type === "percent" ? ` (${ticket.discount.value}%)` : "";
+          discountInfo.textContent = `Descuento${pct}: -${money(totals.discountAmount)}`;
+        } else {
+          discountInfo.textContent = "Sin descuento aplicado";
+        }
+      }
+
+      const flags = getTicketItemFlags(ticket);
+      $("btnCharge").disabled = items.length===0 || !flags.allDelivered;
+      $("btnPrint").disabled = items.length===0;
+
+      if(items.length === 0){
+        wrap.innerHTML = "";
+        return;
+      }
+
+      const groups = groupCartLines(ticket);
+
+      wrap.innerHTML = `
+        <div class="panel">
+          <div class="panelBody">
+            ${groups.map((group, idx)=>{
+              const mods = (group.modifiers||[]).map(m=>{
+                const tag = (String(m.kind||"")==="remove") ? ("Sin " + m.optionName) : m.optionName;
+                const price = Number(m.price||0);
+                return price>0 ? `${tag} (+${money(price)})` : String(tag);
+              }).join(" ? ");
+              return `
+                <div class="cartRow${group.rowClass}">
+                  <div style="flex:1; min-width:0;">
+                    <div class="cartName">${esc(group.name)}</div>
+                    ${mods ? `<div class="small" style="margin-top:2px;">${esc(mods)}</div>` : ``}
+                    ${group.discount ? `<div class="small" style="margin-top:2px; color:#ffdfb0;">Desc. linea: ${esc(group.discount.type)} ${esc(group.discount.value)}</div>` : ``}
+                    <div class="small muted">${money(group.unitPrice)} c/u</div>
+                    ${group.stateNote ? `<div class="small muted" style="margin-top:2px;">${esc(group.stateNote)}</div>` : ``}
+                  </div>
+
+                  <div class="qty">
+                    <button class="btnIcon" data-dec-group="${idx}">-</button>
+                    <div class="qtyNum">${esc(group.qty)}</div>
+                    <button class="btnIcon" data-inc-group="${idx}">+</button>
+                  </div>
+
+                  <div class="cartPrice">${money(group.total)}</div>
+
+                  <button class="btnIcon" title="Descuento" data-disc-group="${idx}">%</button>
+                  <button class="btnIcon" title="Quitar" data-rm-group="${idx}">x</button>
+                </div>
+              `;
+            }).join("")}
+            <div class="hr"></div>
+            <div class="row" style="justify-content:space-between; align-items:center;">
+              <div style="font-weight:800">SUBTOTAL</div>
+              <div style="font-weight:900; font-size:16px;">${money(totals.subtotal)}</div>
+            </div>
+            ${totals.discountAmount > 0 ? `
+              <div class="row" style="justify-content:space-between; align-items:center; margin-top:6px;">
+                <div style="font-weight:800">DESCUENTO</div>
+                <div style="font-weight:900; font-size:16px;">-${money(totals.discountAmount)}</div>
+              </div>
+            ` : ``}
+            <div class="row" style="justify-content:space-between; align-items:center; margin-top:6px;">
+              <div style="font-weight:800">TOTAL</div>
+              <div style="font-weight:900; font-size:18px;">${money(total)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      wrap.querySelectorAll("[data-inc-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-inc-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          if(target.mode==="line") sendAction("ticket:lineQty", { ticketId: ticket.id, lineId: target.id, delta: 1 });
+          else sendAction("ticket:addItem", { ticketId: ticket.id, productId: target.id, delta: 1 });
+        });
+      });
+      wrap.querySelectorAll("[data-dec-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-dec-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          if(target.mode==="line") sendAction("ticket:lineQty", { ticketId: ticket.id, lineId: target.id, delta: -1 });
+          else sendAction("ticket:addItem", { ticketId: ticket.id, productId: target.id, delta: -1 });
+        });
+      });
+      wrap.querySelectorAll("[data-rm-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-rm-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          if(target.mode==="line") sendAction("ticket:removeLine", { ticketId: ticket.id, lineId: target.id });
+          else sendAction("ticket:addItem", { ticketId: ticket.id, productId: target.id, delta: -999 });
+        });
+      });
+      wrap.querySelectorAll("[data-disc-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-disc-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          const line = (ticket.items||[]).find(x => (x.lineId || x.productId) === target.id);
+          if(!line || !line.lineId) return;
+          const raw = prompt("Descuento linea (ej: 10% o 500):", "");
+          if(raw === null) return;
+          const v = String(raw).trim();
+          if(!v){
+            sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId: line.lineId, discount: null });
+            return;
+          }
+          if(v.endsWith("%")){
+            const num = Number(v.slice(0,-1).replace(",", "."));
+            if(!isFinite(num) || num <= 0) return toast("Valor invalido");
+            sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId: line.lineId, discount: { type: "percent", value: num } });
+          } else {
+            const num = Number(v.replace(",", "."));
+            if(!isFinite(num) || num <= 0) return toast("Valor invalido");
+            sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId: line.lineId, discount: { type: "amount", value: num } });
+          }
+        });
+      });
+
+      // cobro
+      $("btnCharge").onclick = ()=>{
+        $("payPaid").dataset.total = String(total);
+        openPayModal(total);
+      };
+    }
+
+    let menuCategory = "all";
+    function categoryTone(name){
+      let h = 0;
+      const s = String(name || "");
+      for(let i=0;i<s.length;i++){ h = ((h<<5) - h) + s.charCodeAt(i); h |= 0; }
+      return Math.abs(h) % 6;
+    }
+    function getCategoryColorMap(db){
+      const map = new Map();
+      const list = (db && db.settings && Array.isArray(db.settings.menuCategories)) ? db.settings.menuCategories : [];
+      list.forEach(c=>{
+        if(!c) return;
+        const color = String(c.color || "").trim();
+        if(!color) return;
+        if(c.id) map.set(String(c.id), color);
+        if(c.title) map.set(String(c.title), color);
+      });
+      return map;
+    }
+    function hexToRgba(hex, alpha){
+      const h = String(hex || "").trim().replace("#", "");
+      if(h.length === 3){
+        const r = parseInt(h[0]+h[0], 16);
+        const g = parseInt(h[1]+h[1], 16);
+        const b = parseInt(h[2]+h[2], 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      if(h.length === 6){
+        const r = parseInt(h.slice(0,2), 16);
+        const g = parseInt(h.slice(2,4), 16);
+        const b = parseInt(h.slice(4,6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      return "";
+    }
+    function categoryStyle(color){
+      const bg = hexToRgba(color, 0.12);
+      const border = hexToRgba(color, 0.45);
+      if(!bg || !border) return "";
+      return `background:${bg}; border-color:${border};`;
+    }
+
+    function renderMenu(db){
+      const wrap = $("menu");
+      if(!db){ wrap.innerHTML = ""; return; }
+      const q = ($("q").value || "").trim().toLowerCase();
+      const productsAll = (db.products||[]).filter(p => p.active !== false);
+      const filtered = q ? productsAll.filter(p => (p.name||"").toLowerCase().includes(q)) : productsAll;
+      const categoriesAll = groupProducts(productsAll).map(([title])=>title);
+      if(menuCategory !== "all" && !categoriesAll.includes(menuCategory)) menuCategory = "all";
+      const activeCat = menuCategory;
+      const items = (activeCat === "all")
+        ? filtered
+        : filtered.filter(p => (p.categoryTitle || p.categoryId || "Otros") === activeCat);
+      const canAdd = !!getSelectedTicket(db);
+      const catColors = getCategoryColorMap(db);
+
+      const catButtons = ["all", ...categoriesAll].map((c,i)=>{
+        const label = (c === "all") ? "Todos" : c;
+        const active = (c === activeCat) ? "active" : "";
+        const color = (c === "all") ? "" : (catColors.get(String(c)) || "");
+        const tone = (c === "all" || color) ? "" : ("menuTone" + categoryTone(c));
+        const style = color ? ` style="${categoryStyle(color)}"` : "";
+        return `<button class="menuCat ${tone} ${active}" data-cat="${esc(c)}"${style}>${esc(label)}</button>`;
+      }).join("");
+
+      const title = (activeCat === "all") ? (q ? "Resultados" : "Todos los rubros") : activeCat;
+      const grid = items.slice(0, 240).map(p=>{
+        const cat = p.categoryTitle || p.categoryId || "Otros";
+        const color = catColors.get(String(cat)) || "";
+        const tone = categoryTone(cat);
+        const dragAttr = canAdd ? "true" : "false";
+        const disabledAttr = canAdd ? "" : "disabled";
+        const tileClass = canAdd ? "" : " disabled";
+        const toneClass = color ? "" : (" menuTone" + tone);
+        const style = color ? ` style="${categoryStyle(color)}"` : "";
+        const img = String(p.imageUrl || "").trim();
+        const thumb = img ? `<div class="menuTileThumb" style="background-image:url('${esc(img)}')"></div>` : "";
+        return `
+          <div class="menuTile${toneClass}${tileClass}" draggable="${dragAttr}" data-dragpid="${esc(p.id)}"${style}>
+            ${thumb}
+            <div class="menuTileName">${esc(p.name)}</div>
+            <div class="menuTileMeta">${esc(cat)} - ${money(p.price)}</div>
+            <div class="menuTileActions">
+              <span class="mini">${esc(p.id)}</span>
+              <button class="menuTileBtn" data-add="${esc(p.id)}" ${disabledAttr}>Agregar</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      wrap.innerHTML = `
+        <div class="menuBoard">
+          <div class="menuSidebar">
+            <div class="menuSideTitle">Rubros</div>
+            ${catButtons}
+          </div>
+          <div class="menuContent">
+            <div class="menuTop">
+              <div class="menuTitle">${esc(title)}</div>
+              <div class="badge2">Productos <strong>${items.length}</strong></div>
+            </div>
+            <div class="menuGrid">
+              ${grid || `<div class="small">Sin resultados.</div>`}
+            </div>
+          </div>
+        </div>
+      `;
+
+      wrap.querySelectorAll("[data-cat]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          menuCategory = btn.getAttribute("data-cat") || "all";
+          renderMenu(window.__db || null);
+        });
+      });
+
+      wrap.querySelectorAll("[data-add]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          if(!canAdd) return;
+          const pid = btn.getAttribute("data-add");
+          addProductToTable(selectedTableId, pid);
+        });
+      });
+
+      // Drag: arrastrar producto a una mesa
+      wrap.querySelectorAll("[data-dragpid]").forEach(row=>{
+        row.addEventListener("dragstart", ()=>{
+          if(!canAdd) return;
+          window.__dragPid = row.getAttribute("data-dragpid");
+        });
+        row.addEventListener("dragend", ()=>{ window.__dragPid = ""; });
+      });
+    }
+
+    // Modal cobro
+    function updatePayDelta(){
+      const total = Number(($("payPaid").dataset.total)||0);
+      const raw = String($("payPaid").value || "").trim();
+      if(!raw){
+        $("payChange").textContent = "-";
+        return;
+      }
+      const paid = Number(raw.replace(",", "."));
+      if(!Number.isFinite(paid)){
+        $("payChange").textContent = "Importe invalido";
+        return;
+      }
+      if(paid < total){
+        $("payChange").textContent = "Falta: " + money(total - paid);
+        return;
+      }
+      $("payChange").textContent = "Vuelto: " + money(paid - total);
+    }
+    function openPayModal(total){
+      $("payPaid").dataset.total = String(total);
+      $("payTotal").value = money(total);
+      $("payPaid").value = "";
+      updatePayDelta();
+      updateFiscalExtra();
+      $("payModal").style.display = "flex";
+      $("payPaid").focus();
+    }
+    function closePayModal(){ $("payModal").style.display = "none"; }
+    $("payClose").addEventListener("click", closePayModal);
+    $("payModal").addEventListener("click", (e)=>{ if(e.target === $("payModal")) closePayModal(); });
+    $("payPaid").addEventListener("input", updatePayDelta);
+
+    function updateFiscalExtra(){
+      const v = $("payFiscal").value;
+      const show = (v && v !== "no_fiscal");
+      $("fiscalExtra").style.display = show ? "block" : "none";
+      if($("rDocType").value === "ConsumidorFinal"){
+        $("rDocNum").value = "";
+        $("rIva").value = "";
+      }
+    }
+    $("payFiscal").addEventListener("change", ()=>{
+      updateFiscalExtra();
+      updatePayDelta();
+    });
+    $("rDocType").addEventListener("change", updateFiscalExtra);
+
+    function renderCurrent(db){
+      if(!db){
+        setFocusRing(null);
+        $("subtitle").textContent = "Selecciona una mesa";
+        $("ticketMeta").innerHTML = "";
+        $("cart").innerHTML = "";
+        return;
+      }
+
+      const table = getSelectedTable(db);
+      const ticket = getSelectedTicket(db);
+      if(!table){
+        setFocusRing("floor");
+      } else {
+        setFocusRing(ticket ? "order" : null);
+      }
+
+      $("subtitle").textContent = table ? table.name : "Selecciona una mesa";
+      $("statusText").textContent = ticket ? ticketStatusText(ticket) : "?";
+
+      // botones
+      $("btnOpen").disabled = !table || !!(table && table.ticketId);
+      const itemCount = (ticket && ticket.items) ? (ticket.items||[]).length : 0;
+      const flags = ticket ? getTicketItemFlags(ticket) : null;
+      const hasNewItems = !!(flags && flags.hasNew);
+      const hasReadyOrDelivered = !!(flags && flags.hasReadyOrDelivered);
+      const canCharge = !!(ticket && itemCount > 0 && flags && flags.allDelivered);
+      $("btnSendKitchen").disabled = !ticket || itemCount === 0;
+      $("btnCharge").disabled = !canCharge;
+      $("btnMoveTable").disabled = !ticket;
+      $("btnCancel").disabled = !ticket;
+      const sendLabel = hasReadyOrDelivered ? "Sumar producto" : "Enviar a cocina";
+      if($("btnSendKitchen")) $("btnSendKitchen").textContent = sendLabel;
+      const openBtn = $("btnOpen");
+      if(openBtn){
+        if(table && !ticket){
+          openBtn.classList.add("focusOutlineBtn");
+        } else {
+          openBtn.classList.remove("focusOutlineBtn");
+        }
+      }
+
+      // Jerarquia: una sola accion principal segun estado
+      const isReady = !!(ticket && flags && flags.allReadyOrDelivered) || !!(table && table.status === "lista");
+      const btns = [$("btnOpen"), $("btnSendKitchen"), $("btnCharge")];
+      btns.forEach(b=>{ if(b) b.classList.remove("primary"); });
+      if(canCharge){
+        $("btnCharge").classList.add("primary");
+      } else if(ticket){
+        $("btnSendKitchen").classList.add("primary");
+      } else {
+        $("btnOpen").classList.add("primary");
+      }
+
+      const focused = (document.activeElement && document.activeElement.id === "mNotes");
+      if(!(focused && ticket && ticket.id === lastTicketId)){
+        renderTicketMeta(db, ticket);
+      }
+      renderTableDetails(db);
+      renderCart(ticket);
+      lastTicketId = ticket ? ticket.id : "";
+
+      $("btnApplyDiscount").onclick = ()=>{
+        if(!ticket) return toast("Selecciona una comanda primero");
+        const type = $("discountType").value;
+        const raw = Number(($("discountValue").value || "0").replace(",", "."));
+        const scope = $("discountScope").value;
+        if(type === "none" || !Number.isFinite(raw) || raw <= 0){
+          if(scope === "line"){
+            const lineId = $("discountItem").value || "";
+            if(lineId) sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId, discount: null });
+          } else {
+            sendAction("ticket:setDiscount", { ticketId: ticket.id, discount: null });
+          }
+          return;
+        }
+        if(scope === "line"){
+          const lineId = $("discountItem").value || "";
+          if(!lineId) return toast("Selecciona un producto");
+          sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId, discount: { type, value: raw } });
+        } else {
+          sendAction("ticket:setDiscount", { ticketId: ticket.id, discount: { type, value: raw } });
+        }
+      };
+      const discountType = $("discountType");
+      const discountValue = $("discountValue");
+      const btnDiscount = $("btnApplyDiscount");
+      if(ticket){
+        const d = ticket.discount || {};
+        discountType.value = d.type ? d.type : "none";
+        discountValue.value = d.value ? String(d.value) : "";
+        discountValue.disabled = (discountType.value === "none");
+        if(btnDiscount) btnDiscount.disabled = false;
+        fillDiscountTargets(ticket);
+        if($("btnPrint")){
+          $("btnPrint").style.display = "";
+          $("btnPrint").href = "/print.html?id=" + encodeURIComponent(ticket.id);
+          $("btnPrint").dataset.tid = ticket.id;
+          $("btnPrint").onclick = ()=>{ localStorage.setItem(LS_LAST_PRINT, ticket.id); };
+        }
+      } else {
+        discountType.value = "none";
+        discountValue.value = "";
+        discountValue.disabled = true;
+        if(btnDiscount) btnDiscount.disabled = true;
+        fillDiscountTargets(null);
+      }
+      renderMenu(db);
+
+            // handlers
+      $("btnOpen").onclick = ()=>{
+        const table = getSelectedTable(window.__db);
+        if(!table) return;
+        sendAction("ticket:ensureForTable", { tableId: table.id });
+        toast("Comanda abierta");
+      };
+
+      $("btnSendKitchen").onclick = ()=>{
+        const ticket = getSelectedTicket(window.__db);
+        if(!ticket) return;
+        const flags = getTicketItemFlags(ticket);
+        if(!flags.hasNew) return toast("No hay productos nuevos para enviar");
+        sendAction("ticket:sendToKitchen", { ticketId: ticket.id });
+        toast(flags.hasReadyOrDelivered ? "Productos sumados a cocina" : "Enviado a cocina");
+      };
+
+      $("btnCharge").onclick = ()=>{
+        const ticket = getSelectedTicket(window.__db);
+        if(!ticket) return;
+        const totals = calcTotals(ticket);
+        $("payPaid").dataset.total = String(totals.total || 0);
+        openPayModal(totals.total || 0);
+      };
+
+      $("btnMoveTable").onclick = ()=>{
+        const ticket = getSelectedTicket(window.__db);
+        if(!ticket) return;
+        let to = prompt("Mover a mesa (id o numero):", "");
+        if(!to) return;
+        to = String(to).trim();
+        if(/^[0-9]+$/.test(to)){
+          const n = Number(to);
+          if(!n) return toast("Mesa invalida");
+          to = "T" + n;
+        }
+        sendAction("ticket:moveTable", { ticketId: ticket.id, toTableId: to });
+        toast("Transferencia enviada");
+      };
+
+      $("btnCancel").onclick = ()=>{
+        const ticket = getSelectedTicket(window.__db);
+        if(!ticket) return;
+        if(!confirm("Anular la comanda?")) return;
+        const reason = prompt("Motivo (opcional):", "") || "";
+        sendAction("ticket:cancel", { ticketId: ticket.id, reason });
+        toast("Comanda anulada");
+      };
+
+      $("payConfirm").onclick = ()=>{
+        const ticket = getSelectedTicket(window.__db);
+        if(!ticket) return closePayModal();
+        const requirePrint = localStorage.getItem(LS_REQUIRE_PRINT) !== "0";
+        const printed = localStorage.getItem(LS_LAST_PRINT) === ticket.id;
+        if(requirePrint && !printed){
+          toast("Primero imprime la comanda");
+          const href = "/print.html?id=" + encodeURIComponent(ticket.id);
+          window.open(href, "_blank");
+          return;
+        }
+        const total = Number(($("payPaid").dataset.total)||0);
+        const paidRaw = String($("payPaid").value || "").trim();
+        const paid = paidRaw ? Number(paidRaw.replace(",", ".")) : total;
+        if(!Number.isFinite(paid)){
+          toast("Importe invalido");
+          $("payPaid").focus();
+          return;
+        }
+        if(paid + 0.00001 < total){
+          toast("El importe es menor al total");
+          $("payPaid").focus();
+          return;
+        }
+        const fiscalType = $("payFiscal").value;
+        if(fiscalType && fiscalType !== "no_fiscal"){
+          const rdt = $("rDocType").value;
+          sendAction("ticket:setMeta", {
+            ticketId: ticket.id,
+            fiscal: {
+              docType: $("fDocType").value,
+              receiverDocType: (rdt === "ConsumidorFinal") ? "" : rdt,
+              receiverDocNumber: (rdt === "ConsumidorFinal") ? "" : ($("rDocNum").value || "").trim(),
+              receiverName: ($("rName").value || "").trim(),
+              receiverIva: ($("rIva").value || "").trim(),
+            }
+          });
+        }
+        sendAction("ticket:close", {
+          ticketId: ticket.id,
+          paymentMethod: $("payMethod").value,
+          fiscalType,
+          paid: isFinite(paid) ? paid : total
+        });
+        closePayModal();
+        toast("Cobro registrado");
+      };
+    }
+    function updateKitchenNotice(db){
+      const box = $("kitchenNotice");
+      if(!box || !db){ if(box) box.style.display = "none"; return; }
+      const ready = (db.tickets||[]).filter(t=>{
+        if(!t || t.status!=="abierta" || !t.tableId) return false;
+        const flags = getTicketItemFlags(t);
+        return !!(flags.hasReady && !flags.allDelivered);
+      });
+      if(!ready.length){ box.style.display = "none"; return; }
+      const names = ready.map(t=>{
+        const table = (db.tables||[]).find(tb=>tb.id===t.tableId);
+        return table ? (table.name || table.id || t.tableId) : t.tableId;
+      });
+      const bubbles = names.map(n=>{
+        const label = String(n || "").trim();
+        const mesaLabel = label.toLowerCase().includes("mesa") ? label : ("Mesa " + label);
+        return `<div class="kitchenNoticeBubble">${esc(mesaLabel)} lista</div>`;
+      }).join("");
+      box.innerHTML = `<div class="kitchenNoticeTitle">Cocina</div><div class="kitchenNoticeBubbles">${bubbles}</div>`;
+      box.style.display = "";
+    }
+
+    onState((db, ok)=>{
+      window.__db = db;
+      $("wsStatus").textContent = ok ? "OK" : "Reconectando.";
+      renderTables(db);
+      renderCurrent(db);
+      renderMenu(db);
+      updateKitchenNotice(db);
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+{
+  "name": "nexa-pos-wifi",
+  "version": "6.0.0",
+  "private": true,
+  "description": "POS Wi‑Fi local (salón/mostrador/delivery) + cocina en tiempo real + menú cliente + backoffice PRO + cierre de día.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "migrate:postgres": "node scripts/migrate_to_postgres.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "pg": "^8.20.0",
+    "qrcode": "^1.5.4",
+    "ws": "^8.18.0"
+  }
+}

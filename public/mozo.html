@@ -1,0 +1,2446 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ?? Mozo</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .menuArea{ display:flex; gap:10px; align-items:flex-start; }
+    .menuMain{ flex:1; min-width:0; }
+    .menuCats{ display:none; flex-direction:column; gap:8px; align-self:flex-start; max-height:70vh; overflow:auto; }
+    .menuCartList{ margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; }
+    .menuCartItem{
+      padding:4px 8px;
+      border:1px solid rgba(255,215,90,.75);
+      border-radius:999px;
+      background:linear-gradient(180deg, rgba(255,215,90,.28), rgba(255,255,255,0.02));
+      font-size:12px;
+      font-weight:800;
+      color:var(--text);
+      white-space:normal;
+      word-break:break-word;
+      max-width:100%;
+    }
+    .menuCartItem.ready{
+      border-color: rgba(80,220,120,.85);
+      background:linear-gradient(180deg, rgba(80,220,120,.28), rgba(255,255,255,0.02));
+    }
+    .menuCartItem.pending{
+      border-color: rgba(255,215,90,.85);
+      background:linear-gradient(180deg, rgba(255,215,90,.28), rgba(255,255,255,0.02));
+    }
+    .tableCard .dot.ready{
+      box-shadow: 0 0 0 rgba(80,220,120,.6);
+      animation: readyPulse 1.6s ease-in-out infinite;
+    }
+    .tableCard .dot.busy{
+      position:relative;
+      animation: busyPulse 1.2s ease-in-out infinite;
+    }
+    .tableCard .dot.busy::after{
+      content:"";
+      position:absolute;
+      inset:-5px;
+      border-radius:999px;
+      border:2px solid rgba(255,140,60,.6);
+      animation: busyRing 1.2s linear infinite;
+    }
+    @keyframes readyPulse{
+      0%{ box-shadow: 0 0 0 0 rgba(80,220,120,.55); }
+      70%{ box-shadow: 0 0 0 8px rgba(80,220,120,0); }
+      100%{ box-shadow: 0 0 0 0 rgba(80,220,120,0); }
+    }
+    @keyframes busyPulse{
+      0%{ transform: scale(1); }
+      50%{ transform: scale(1.12); }
+      100%{ transform: scale(1); }
+    }
+    @keyframes busyRing{
+      0%{ transform: rotate(0deg); opacity:.7; }
+      100%{ transform: rotate(360deg); opacity:.2; }
+    }
+    .menuCartMore{
+      padding:4px 8px;
+      border-radius:999px;
+      background:var(--accentStrong);
+      font-size:12px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .menuCartEmpty{
+      font-size:12px;
+      font-weight:700;
+      color:var(--muted);
+    }
+    .btn.chargeGreen{
+      border-color: rgba(80,220,120,.95);
+      background: linear-gradient(180deg, rgba(80,220,120,.28), rgba(40,90,50,.2));
+      color:#eafff1;
+    }
+    .btn.chargeGreen:hover{
+      background: linear-gradient(180deg, rgba(80,220,120,.36), rgba(40,90,50,.28));
+      border-color: rgba(80,220,120,.98);
+    }
+    .cartRow.status-ready{
+      border-left:4px solid rgba(80,220,120,.9);
+      padding-left:8px;
+      background: linear-gradient(90deg, rgba(80,220,120,.12), rgba(255,255,255,0));
+    }
+    .cartRow.status-pending{
+      border-left:4px solid rgba(255,215,90,.9);
+      padding-left:8px;
+      background: linear-gradient(90deg, rgba(255,215,90,.12), rgba(255,255,255,0));
+    }
+    .orderScreen{
+      position:fixed;
+      inset:0;
+      z-index:30;
+      background:var(--bg);
+      display:none;
+      overflow:auto;
+    }
+    .orderScreenHeader{
+      position:sticky;
+      top:0;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      background:var(--bg);
+      border-bottom:1px solid var(--line);
+    }
+    .orderScreenTitle{
+      font-weight:900;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-size:12px;
+    }
+    #orderScreenBody{ padding:10px 12px 16px; }
+    body[data-order-screen="1"] .orderScreen{ display:block; }
+    body[data-order-screen="1"] .mobileTabs{ display:none; }
+    body[data-order-screen="1"] #mobileOrder{ display:block; }
+    .catIcon{
+      width:46px; height:46px; border-radius:14px; border:1px solid var(--line);
+      background:rgba(255,255,255,0.04); color:var(--text); font-weight:900;
+      display:flex; align-items:center; justify-content:center; cursor:pointer;
+      transition: transform .1s ease, border-color .1s ease;
+    }
+    .catIcon:active{ transform:scale(0.98); }
+    .catIcon.active{ border-color: var(--accent); }
+    .catIcon.disabled{ opacity:.45; pointer-events:none; }
+    .mobileTabs{ display:none; }
+    .mobileTabs .tabBtn{
+      flex:1; padding:12px 10px; border:0; border-top:1px solid var(--line);
+      background:rgba(10,10,10,0.98); color:var(--text); font-weight:900;
+    }
+    .mobileTabs .tabBtn.active{ color:var(--accent); }
+    .mobilePanel{ display:block; }
+    @media (max-width: 900px){
+      body{ overflow-x:hidden; }
+      .top{ display:none; }
+      .wrap{ padding-left:12px; padding-right:12px; }
+      .split{ display:block; }
+      .card{ margin-top:12px; }
+      .mobileStatusRow{
+        position:sticky; top:0; z-index:5; background:var(--bg);
+        padding-bottom:8px;
+      }
+      .mobileStatusRow{
+        display:grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap:6px;
+        align-items:end;
+      }
+      .mobileStatusRow > div:first-child{ grid-column: 1 / -1; }
+      .row{ flex-wrap:wrap; }
+      #mobileTables,
+      #mobileMenu,
+      #mobileOrder{ width:100%; max-width:100%; }
+      #mobileTables .row > *,
+      #mobileMenu .row > *,
+      #mobileOrder .row > *{ min-width:0; }
+      #mobileTables .row,
+      #mobileMenu .row,
+      #mobileOrder .row{ gap:6px; }
+      #mobileTables .row.compactGrid,
+      #mobileMenu .row.compactGrid,
+      #mobileOrder .row.compactGrid{
+        display:grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items:stretch;
+      }
+      #mobileTables .row.compactGrid.threeCols,
+      #mobileOrder .row.compactGrid.threeCols{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      #mobileTables .row.compactGrid .badge2.full,
+      #mobileOrder .row.compactGrid .badge2.full{
+        grid-column: 1 / -1;
+      }
+      .badge2{ margin-top:6px; }
+      .btn{
+        padding:6px 8px;
+        font-size:11px;
+        min-height:34px;
+        line-height:1.15;
+        white-space:normal;
+      }
+      .input{ padding:6px 8px; font-size:12px; min-height:34px; }
+      .small{ font-size:12px; }
+      .mini{ font-size:11px; }
+      .badge2{ font-size:11px; padding:6px 8px; line-height:1.15; }
+      .menuArea{ gap:8px; }
+      .menuCats{ display:flex; position:sticky; top:12px; max-height:60vh; }
+      .menuGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tableGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap:8px; }
+      .tableCard{ padding:10px; }
+      .tableCard .title{ font-size:13px; }
+      .menuTile{ padding:8px; }
+      .menuTileName{ font-size:12px; }
+      .menuTileMeta{ font-size:11px; }
+      .menuTileActions .mini{ font-size:10px; }
+      .mobileTabs{
+        display:flex; position:fixed; left:0; right:0; bottom:0; z-index:20;
+      }
+      .mobilePanel{ display:none; }
+      body:not([data-mobile-tab]) #mobileTables{ display:block; }
+      body[data-mobile-tab="tables"] #mobileTables{ display:block; }
+      body[data-mobile-tab="menu"] #mobileMenu{ display:block; }
+      body[data-order-inline="1"] #mobileOrder{ display:block; }
+      .tableGrid .inlineOrder{ grid-column: 1 / -1; margin-top:8px; }
+      main.wrap{ padding-bottom:64px; }
+    }
+    @media (max-width: 520px){
+      .tableGrid{ grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      .catIcon{ width:40px; height:40px; border-radius:12px; font-size:12px; }
+      .menuGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Mozo ?? ventas (sal??n ?? mostrador ?? delivery)</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill mozoHide" href="/cocina.html">Cocina</a>
+          <a class="pill mozoHide" href="/salon_pc.html">Salon</a>
+          <a class="pill mozoHide" href="/mozo_prints.html">Mozo &#128424;</a>
+          
+        </div>
+        <div class="navGroup mozoHide">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          
+          
+        </div>
+        <span id="adminLinks" style="display:none">
+          <div class="navGroup">
+            <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+            
+          
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+          
+        </span>
+        <div class="navGroup navProfile navPerfil mozoHide">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card kitchenNotice" id="kitchenNotice" style="display:none;"></section>
+    <div class="split">
+      <section class="card col">
+        <div id="mobileTables" class="mobilePanel">
+          <div class="row mobileStatusRow" style="align-items:flex-end;">
+  <div style="flex:1">
+    <div class="small">Tu nombre (para registrar acciones)</div>
+    <input id="mozoName" class="input" placeholder="Ej: Juan" autocomplete="name"/>
+  </div>
+  <div class="badge2">Estado <strong id="wsStatus">??</strong></div>
+  <div class="badge2">Caja <strong id="cashTurnStatus">-</strong></div>
+  <div class="badge2">Solicitudes <strong id="reqCount">0</strong></div>
+</div>
+<div id="reqBox" class="muted mini" style="display:none; margin-top:10px;"></div>
+
+<div class="hr"></div>
+<div class="row compactGrid" style="align-items:center;">
+  <button id="btnCheckIn" class="btn primary" type="button" style="flex:1">Marcar presentismo</button>
+  <button id="btnCheckOut" class="btn" type="button" style="flex:1">Fichar salida</button>
+  <div class="badge2 full">Turno <strong id="attStatus">-</strong></div>
+</div>
+<div id="shiftGate" class="mini warnText" style="margin-top:10px; display:none;">Para usar funciones de mozo, marca presentismo.</div>
+
+        <div class="hr"></div>
+
+        <div class="chips" aria-label="Modo de venta">
+          <div class="chip" data-mode="salon">Sal??n (mesas)</div>
+          <div class="chip" data-mode="mostrador">Mostrador</div>
+          <div class="chip" data-mode="delivery">Delivery</div>
+        </div>
+
+        <div id="salonBlock" style="margin-top:12px;">
+          <div class="row">
+            <div class="badge2">Mesas <strong id="tablesCount">-</strong></div>
+            <div class="badge2">Ocupadas <strong id="tablesBusy">-</strong></div>
+            <div class="badge2">Listas <strong id="tablesReady">-</strong></div>
+          </div>
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <div class="badge2">Planta</div>
+            <select id="floorSelect" class="input" style="min-width:160px;"></select>
+            <button id="btnFloorTools" class="btn" type="button">Gestion plantas</button>
+          </div>
+          <div id="floorTools" style="display:none; margin-top:10px;">
+            <div class="row" style="align-items:center; gap:8px;">
+              <div class="badge2">Plantas</div>
+              <select id="floorManageSelect" class="input" style="min-width:180px;"></select>
+              <input id="floorNewName" class="input" placeholder="Nueva planta" style="flex:1; min-width:160px"/>
+              <button id="btnAddFloor" class="btn" type="button">Agregar</button>
+              <button id="btnRemoveFloor" class="btn danger" type="button">Eliminar</button>
+            </div>
+            <div class="row" style="margin-top:10px; align-items:center; gap:8px;">
+              <div class="badge2">Mesa <strong id="selTableLabel">-</strong></div>
+              <select id="tableFloor" class="input" style="min-width:180px;"></select>
+              <button id="btnApplyTableFloor" class="btn" type="button">Aplicar planta</button>
+            </div>
+          </div>
+          <div class='tableGrid' id="tables" style="margin-top:10px;"></div>
+          <div class="mini" style="margin-top:10px;">Toque una mesa para abrir/continuar la comanda.</div>
+        </div>
+
+        <div id="nonsalonBlock" style="margin-top:12px; display:none;">
+          <div class="row compactGrid">
+            <button id="btnNewTicket" class="btn primary" type="button" style="flex:1">Nuevo ticket</button>
+            <button id="btnMyTickets" class="btn" type="button" style="flex:1">Ver tickets abiertos</button>
+          </div>
+          <div id="ticketsList" style="margin-top:10px; display:none;"></div>
+        </div>
+
+        </div>
+
+        <div id="mobileMenu" class="mobilePanel">
+        <div class="row" style="align-items:center;">
+          <div style="flex:1">
+            <div class="small">Buscar producto</div>
+            <input id="q" class="input" placeholder="Buscar??" autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="row compactGrid" id="menuActionRow" style="align-items:center; margin-top:8px;">
+          <button id="btnMenuCancel" class="btn danger" type="button" style="flex:1">Anular</button>
+          <button id="btnMenuDetails" class="btn" type="button" style="flex:1">Siguiente</button>
+        </div>
+
+        <div class="row" style="align-items:center; margin-top:8px;">
+          <div class="badge2">Mesa <strong id="menuTableLabel">-</strong></div>
+          <div class="badge2">Carrito <strong id="cartCount">0</strong></div>
+          <div class="badge2">Total <strong id="menuCartTotal">-</strong></div>
+        </div>
+        <div id="menuCartList" class="menuCartList" aria-live="polite"></div>
+
+        <div class="menuArea" style="margin-top:12px;">
+          <div class="menuMain">
+            <div id="menu"></div>
+          </div>
+          <div id="catIcons" class="menuCats"></div>
+        </div>
+        </div>
+      </section>
+
+      <div id="mobileOrderHome" style="display:none;"></div>
+      <section class="card col mobilePanel" id="mobileOrder">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div>
+            <div style="font-weight:800; letter-spacing:.18em; text-transform:uppercase;">Comanda</div>
+            <div class="small" id="ticketSubtitle">Selecciona una mesa o crea un ticket</div>
+          </div>
+          <a id="btnPrint" class="btn" href="#" style="display:none;">Imprimir</a>
+        </div>
+
+        <div class="hr"></div>
+
+        <div id="ticketMeta"></div>
+        <div id="cart" style="margin-top:10px;"></div>
+        <div class="row" style="justify-content:space-between; align-items:center; margin-top:10px;">
+          <div class="small muted">Total</div>
+          <div id="cartTotal" style="font-weight:900;">-</div>
+        </div>
+        <div class="row" style="gap:8px; align-items:center; margin-top:10px;">
+          <select id="discountType" class="input" style="flex:1; min-width:130px;">
+            <option value="none">Sin descuento</option>
+            <option value="percent">Descuento %</option>
+            <option value="amount">Descuento $</option>
+          </select>
+          <input id="discountValue" class="input" inputmode="decimal" placeholder="0" style="flex:1; min-width:120px;"/>
+          <button id="btnApplyDiscount" class="btn" type="button">Aplicar</button>
+        </div>
+        <div class="row" style="gap:8px; align-items:center; margin-top:8px;">
+          <select id="discountScope" class="input" style="flex:1; min-width:140px;">
+            <option value="ticket">Aplicar a cuenta</option>
+            <option value="line">Aplicar a producto</option>
+          </select>
+          <select id="discountItem" class="input" style="flex:2; min-width:200px;"></select>
+        </div>
+        <div class="mini muted" id="discountInfo" style="margin-top:6px;">-</div>
+
+        <div class="hr"></div>
+
+        <div class="row" id="orderActionsRow" style="flex-direction:column; align-items:stretch;">
+          <div class="row" style="gap:8px;">
+            <button id="btnOpen2" class="btn" type="button" style="flex:1">Abrir mesa</button>
+            <button id="btnSendKitchen2" class="btn primary" type="button" style="flex:1">Enviar a cocina</button>
+          </div>
+          <button id="btnCharge2" class="btn chargeGreen" type="button" style="width:100%;">Cobrar</button>
+        </div>
+
+        <div class="row" style="align-items:center; margin-top:8px;">
+          <label class="badge2" style="gap:8px; cursor:pointer;">
+            <span>Cobro requiere imprimir</span>
+            <input id="requirePrintToggle" type="checkbox" style="accent-color:#fff; transform: translateY(1px);"/>
+          </label>
+        </div>
+
+        <div class="row compactGrid" style="margin-top:10px;">
+          <button id="btnMoveTable" class="btn" type="button" style="flex:1">Mover / transferir mesa</button>
+          <button id="btnCancel" class="btn danger" type="button" style="flex:1">Anular</button>
+        </div>
+
+        <div class="mini" style="margin-top:10px;" id="ticketStatus">-</div>
+      </section>
+    </div>
+  </main>
+  <!-- mobileTabs eliminado por solicitud -->
+
+  <div id="orderScreen" class="orderScreen">
+    <div class="orderScreenHeader">
+      <button id="orderScreenBack" class="btn" type="button">Volver</button>
+      <div class="orderScreenTitle" id="orderScreenTitle">Comanda</div>
+    </div>
+    <div id="orderScreenBody"></div>
+  </div>
+
+  <!-- Modal Cobro -->
+  <div class="modalOverlay" id="payModal">
+    <div class="modal printCard">
+      <div class="modalHeader">
+        <h3>Cobro</h3>
+        <button class="btn" type="button" id="payClose">Cerrar</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div style="flex:1">
+          <div class="small">M??todo de pago</div>
+          <select id="payMethod" class="input">
+            <option value="efectivo">Efectivo</option>
+            <option value="mercadopago">Mercado Pago</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta">Tarjeta</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <div class="small">Comprobante</div>
+          <select id="payFiscal" class="input">
+            <option value="no_fiscal">Modo interno</option>
+            <option value="manual">Manual (PDF)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1">
+          <div class="small">Total</div>
+          <input id="payTotal" class="input" disabled/>
+        </div>
+        <div style="flex:1">
+          <div class="small">Paga con</div>
+          <input id="payPaid" class="input" inputmode="decimal" placeholder="Ej: 15000"/>
+        </div>
+      </div>
+
+      
+      <div id="fiscalExtra" style="display:none; margin-top:10px;">
+        <div class="row">
+          <div style="flex:1">
+            <div class="small">Tipo comprobante</div>
+            <select id="fDocType" class="input">
+              <option value="FACTURA_C">Factura C</option>
+              <option value="FACTURA_B">Factura B</option>
+              <option value="FACTURA_A">Factura A</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <div class="small">Doc receptor</div>
+            <select id="rDocType" class="input">
+              <option value="DNI">DNI</option>
+              <option value="CUIT">CUIT</option>
+              <option value="ConsumidorFinal">Consumidor final</option>
+            </select>
+          </div>
+        </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div style="flex:1">
+              <div class="small">N? documento</div>
+              <input id="rDocNum" class="input" placeholder="Ej: 40123456"/>
+            </div>
+            <div style="flex:1">
+              <div class="small">Nombre (opcional)</div>
+              <input id="rName" class="input" placeholder="Cliente / Raz?n social"/>
+            </div>
+            <div style="flex:1">
+              <div class="small">IVA receptor (opcional)</div>
+              <input id="rIva" class="input" placeholder="Responsable Inscripto / Consumidor Final"/>
+            </div>
+          </div>
+
+          <div class="mini" style="margin-top:8px;">
+            Si eliges ?Consumidor final?, se omite identificaci?n. El comprobante queda listo para imprimir en Fiscal.
+          </div>
+      </div>
+
+
+      <div class="mini" id="payChange" style="margin-top:8px;">-</div>
+
+      <div class="modalFooter">
+        <button id="payConfirm" class="btn primary" type="button">Confirmar cobro</button>
+      </div>
+
+      <div class="mini" style="margin-top:10px;">
+        Nota: este modo genera un PDF manual con los datos del receptor y el comprobante. Pod?s imprimirlo desde Fiscal.
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Modal Modificadores -->
+  <div class="modalOverlay" id="modsPickModal" style="display:none;">
+    <div class="modal" style="width:min(860px, 100%);">
+      <div class="modalHeader">
+        <h3 id="modsPickTitle">Personalizar</h3>
+        <button class="btn" type="button" id="modsPickClose">Cerrar</button>
+      </div>
+      <div class="hr"></div>
+
+      <div id="modsPickBody"></div>
+
+      <div class="modalFooter">
+        <button class="btn" type="button" id="modsPickCancel">Cancelar</button>
+        <button class="btn primary" type="button" id="modsPickAdd">A??adir</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, onMessage, sendAction, money, esc, toast } = window.RestoApp;
+
+    const LS_NAME = "resto_v8_mozo_name";
+    const LS_MODE = "resto_v8_mode";
+    const LS_TABLE = "resto_v8_table";
+    const LS_TICKET = "resto_v8_ticket";
+const LOGIN_NAME_KEY = "nexa_pc_name";
+    const LS_REQUIRE_PRINT = "resto_v8_require_print";
+    const LS_LAST_PRINT = "resto_v8_last_print";
+    const LS_FLOOR_LIST = "nexa_pc_floor_list";
+    const LS_FLOOR_ACTIVE = "nexa_pc_floor_active";
+    const LS_MOBILE_TAB = "nexa_mobile_tab";
+
+    const $ = (id)=>document.getElementById(id);
+    const orderPanelEl = $("mobileOrder");
+    const orderHomeEl = $("mobileOrderHome");
+    function setMobileTab(tab){
+      const allowed = ["tables", "menu"];
+      const next = allowed.includes(tab) ? tab : "tables";
+      document.body.setAttribute("data-mobile-tab", next);
+      localStorage.setItem(LS_MOBILE_TAB, next);
+      document.querySelectorAll("#mobileTabs [data-tab]").forEach(btn=>{
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === next);
+      });
+    }
+    function isMobileUI(){
+      return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
+    }
+    function updateInlineOrderState(){
+      if(orderScreenOpen){
+        document.body.removeAttribute("data-order-inline");
+        return;
+      }
+      const show = isMobileUI() && mode === "salon" && isCheckedIn && !!selectedTableId;
+      const placed = placeOrderPanel(show);
+      if(placed){
+        document.body.setAttribute("data-order-inline", "1");
+      } else {
+        document.body.removeAttribute("data-order-inline");
+      }
+    }
+    function focusOrderActions(){
+      if(!isMobileUI()) return;
+      requestAnimationFrame(()=>{
+        let target = null;
+        if(orderScreenOpen){
+          target = $("orderActionsRow");
+        } else {
+          const tab = document.body.getAttribute("data-mobile-tab") || "tables";
+          if(tab === "menu"){
+            target = $("menuActionRow");
+          } else if(tab === "tables" && document.body.getAttribute("data-order-inline") === "1"){
+            target = $("orderActionsRow");
+          }
+        }
+        if(target && typeof target.scrollIntoView === "function"){
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+    }
+    function placeOrderPanel(inline){
+      if(!orderPanelEl || !orderHomeEl || !orderHomeEl.parentElement) return false;
+      if(inline){
+        const rawId = String(selectedTableId || "");
+        const safeId = (window.CSS && typeof CSS.escape === "function") ? CSS.escape(rawId) : rawId.replace(/"/g, '\\"');
+        const target = document.querySelector(`.tableCard[data-table="${safeId}"]`);
+        if(target && target.parentElement){
+          orderPanelEl.classList.add("inlineOrder");
+          target.insertAdjacentElement("afterend", orderPanelEl);
+          return true;
+        }
+      }
+      orderPanelEl.classList.remove("inlineOrder");
+      if(orderPanelEl.parentElement !== orderHomeEl.parentElement || orderPanelEl.previousElementSibling !== orderHomeEl){
+        orderHomeEl.parentElement.insertBefore(orderPanelEl, orderHomeEl.nextSibling);
+      }
+      return false;
+    }
+    function updateOrderScreenTitle(){
+      const titleEl = $("orderScreenTitle");
+      if(!titleEl) return;
+      const db = window.__db || null;
+      const tid = getCurrentTicketId(db);
+      const ticket = (db && tid) ? (db.tickets||[]).find(t=>t.id === tid) : null;
+      titleEl.textContent = ticket ? ("Comanda ?? " + ticketLabel(ticket)) : "Comanda";
+    }
+    function openOrderScreen(){
+      const db = window.__db || null;
+      const tid = getCurrentTicketId(db);
+      const ticket = (db && tid) ? (db.tickets||[]).find(t=>t.id === tid) : null;
+      if(!ticket) return toast("Selecciona una comanda primero");
+      orderScreenOpen = true;
+      document.body.setAttribute("data-order-screen", "1");
+      document.body.removeAttribute("data-order-inline");
+      updateOrderScreenTitle();
+      const body = $("orderScreenBody");
+      if(body && orderPanelEl) body.appendChild(orderPanelEl);
+    }
+    function closeOrderScreen(goMenu){
+      if(!orderScreenOpen) return;
+      orderScreenOpen = false;
+      document.body.removeAttribute("data-order-screen");
+      updateInlineOrderState();
+      if(goMenu && isMobileUI()) setMobileTab("menu");
+    }
+    function ymdLocal(d = new Date()){
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function getDayCloseCutoffMinutes(db){
+      const hour = Number(db && db.settings && db.settings.cash && db.settings.cash.dayCloseCutoffHour);
+      const safeHour = Number.isFinite(hour) ? Math.max(0, Math.min(23.99, hour)) : 2;
+      return Math.round(safeHour * 60);
+    }
+    function getBusinessDateKey(db, ts = Date.now()){
+      const cutoffMinutes = getDayCloseCutoffMinutes(db);
+      if (cutoffMinutes <= 0) return ymdLocal(new Date(ts));
+      const d = new Date(ts);
+      const minutes = d.getHours() * 60 + d.getMinutes();
+      if (minutes >= cutoffMinutes) return ymdLocal(d);
+      d.setDate(d.getDate() - 1);
+      return ymdLocal(d);
+    }
+    let lastCashCheckAt = 0;
+    let lastCashCheckOpen = null;
+    async function verifyCashOpen(){
+      const now = Date.now();
+      if(now - lastCashCheckAt < 60000 && lastCashCheckOpen !== null) return lastCashCheckOpen;
+      lastCashCheckAt = now;
+      try{
+        const r = await fetch("/api/cash/status", { cache: "no-store" });
+        const j = await r.json();
+        const cs = j && j.cashStatus ? j.cashStatus : null;
+        lastCashCheckOpen = !!(cs && (cs.open || cs.openAny) && !cs.closed);
+        return lastCashCheckOpen;
+      }catch{
+        return null;
+      }
+    }
+
+    const loginName = (localStorage.getItem(LOGIN_NAME_KEY) || "").trim();
+    function getMozoName(){
+      const input = ($("mozoName").value || "").trim();
+      return (loginName || input);
+    }
+    function getMozoNameOrDefault(){
+      return getMozoName() || "Mozo";
+    }
+    let isCheckedIn = false;
+    function requirePresentismo(){
+      if(isCheckedIn) return true;
+      toast("Marca presentismo primero");
+      return false;
+    }
+    function applyPresentismoGate(){
+      const blocked = !isCheckedIn;
+      const gate = $("shiftGate");
+      if(gate) gate.style.display = blocked ? "" : "none";
+      const btnIn = $("btnCheckIn");
+      const btnOut = $("btnCheckOut");
+      if(btnIn) btnIn.style.display = blocked ? "" : "none";
+      if(btnOut) btnOut.style.display = blocked ? "none" : "";
+      const ids = ["btnOpen","btnOpen2","btnSendKitchen","btnSendKitchen2","btnCharge","btnCharge2","btnMarkReceived","btnClearSelection","btnMoveTable","btnCancel","btnNewTicket","btnMyTickets","btnApplyDiscount","btnFloorTools","btnAddFloor","btnRemoveFloor","btnApplyTableFloor","btnMenuCancel","btnMenuDetails"];
+      ids.forEach(id=>{ const el=$(id); if(el) el.disabled = blocked; });
+      const q = $("q"); if(q) q.disabled = blocked;
+      const nameInput = $("mozoName"); if(nameInput && loginName) nameInput.disabled = true;
+      document.querySelectorAll(".chip").forEach(ch => ch.classList.toggle("disabled", blocked));
+      document.querySelectorAll(".catIcon").forEach(ch => ch.classList.toggle("disabled", blocked));
+    }
+
+    async function setupRoleUI(){
+      try{
+        const me = await fetch('/api/auth/me', {cache:'no-store'}).then(r=>r.json());
+        const isAdmin = (me && me.role === 'admin');
+        const el = document.getElementById('adminLinks');
+        if(el) el.style.display = isAdmin ? '' : 'none';
+        const navMozoLink = document.getElementById('navMozoLink');
+        if(navMozoLink) navMozoLink.style.display = isAdmin ? 'none' : '';
+        const hide = document.querySelectorAll('.mozoHide');
+        hide.forEach(node=>{ node.style.display = isAdmin ? '' : 'none'; });
+        if(!isAdmin && mode !== "salon"){
+          setMode("salon");
+        }
+        if(!isAdmin){
+          document.querySelectorAll(".chip").forEach(ch=>{
+            ch.style.display = (ch.dataset.mode === "salon") ? "" : "none";
+          });
+        }
+      }catch(e){
+        // fallback: siempre mostrar sal??n para mozo
+        if(mode !== "salon") setMode("salon");
+      }
+    }
+
+    const customerReqs = [];
+    function renderCustomerReqs(){
+      const box = document.getElementById('reqBox');
+      const count = document.getElementById('reqCount');
+      if(count) count.textContent = String(customerReqs.filter(r=>r && r.status!=='done').length);
+      if(!box) return;
+      const list = customerReqs.filter(r=>r && r.status!=='done').slice(0,8);
+      if(!list.length){ box.style.display='none'; box.innerHTML=''; return; }
+      box.style.display='';
+      box.innerHTML = '<b>Solicitudes recientes:</b><br>' + list
+        .map(r => {
+          const when = new Date(r.at||Date.now()).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+          const where = (r.table ? (' ?? ' + r.table) : '');
+          return '?? ' + when + ' ?? Cuenta' + where;
+        }).join('<br>');
+    }
+
+    async function loadCustomerReqs(){
+      try{
+        const list = await fetch('/api/customer/requests', {cache:'no-store'}).then(r=>r.json());
+        customerReqs.splice(0, customerReqs.length, ...(Array.isArray(list)?list:[]));
+        renderCustomerReqs();
+      }catch(e){}
+    }
+
+
+    let mode = localStorage.getItem(LS_MODE) || "salon";
+    let selectedTableId = localStorage.getItem(LS_TABLE) || "";
+    let selectedTicketId = localStorage.getItem(LS_TICKET) || "";
+    let orderScreenOpen = false;
+    const draftGuard = {};
+    const DRAFT_GUARD_MS = 3500;
+
+    function markTicketTouched(ticketId){
+      if(!ticketId) return;
+      draftGuard[String(ticketId)] = Date.now();
+    }
+
+    function isTicketRecentlyTouched(ticketId){
+      if(!ticketId) return false;
+      const ts = draftGuard[String(ticketId)] || 0;
+      return (Date.now() - ts) < DRAFT_GUARD_MS;
+    }
+
+    const floorSelect = $("floorSelect");
+    const floorManageSelect = $("floorManageSelect");
+    const floorNewName = $("floorNewName");
+    const tableFloorSel = $("tableFloor");
+    const btnAddFloor = $("btnAddFloor");
+    const btnRemoveFloor = $("btnRemoveFloor");
+    const btnApplyTableFloor = $("btnApplyTableFloor");
+    const floorTools = $("floorTools");
+    const btnFloorTools = $("btnFloorTools");
+    const requirePrintToggle = $("requirePrintToggle");
+
+    if(requirePrintToggle){
+      const saved = localStorage.getItem(LS_REQUIRE_PRINT);
+      requirePrintToggle.checked = (saved !== "0");
+      requirePrintToggle.addEventListener("change", ()=>{
+        localStorage.setItem(LS_REQUIRE_PRINT, requirePrintToggle.checked ? "1" : "0");
+      });
+    }
+    if(btnFloorTools && floorTools){
+      btnFloorTools.addEventListener("click", ()=>{
+        floorTools.style.display = (floorTools.style.display === "none" ? "" : "none");
+      });
+    }
+
+    function parseFloorList(raw){
+      if(!raw) return [];
+      return String(raw).split(",").map(s=>String(s||"").trim()).filter(Boolean);
+    }
+    function loadFloors(){
+      const raw = localStorage.getItem(LS_FLOOR_LIST);
+      const list = raw ? parseFloorList(raw) : [];
+      return list.length ? list : ["Planta baja", "Planta alta"];
+    }
+    function saveFloors(list){
+      const clean = list.map(s=>String(s||"").trim()).filter(Boolean).slice(0, 8);
+      localStorage.setItem(LS_FLOOR_LIST, clean.join(", "));
+      return clean;
+    }
+    let floorList = loadFloors();
+    let activeFloor = localStorage.getItem(LS_FLOOR_ACTIVE) || floorList[0];
+    let activeCategory = "";
+    function normalizeFloor(name){
+      const n = String(name||"").trim();
+      return floorList.includes(n) ? n : floorList[0];
+    }
+    function getTableFloor(t){
+      const z = String((t && t.zone) || "").trim();
+      return floorList.includes(z) ? z : floorList[0];
+    }
+    function getSelectedTable(db){
+      if(!db || !selectedTableId) return null;
+      return (db.tables||[]).find(t=>t.id===selectedTableId) || null;
+    }
+    function setActiveFloor(name){
+      activeFloor = normalizeFloor(name);
+      localStorage.setItem(LS_FLOOR_ACTIVE, activeFloor);
+      if(floorSelect) floorSelect.value = activeFloor;
+      if(floorManageSelect) floorManageSelect.value = activeFloor;
+      const db = window.__db || null;
+      if(db && selectedTableId){
+        const t = (db.tables||[]).find(x=>x.id===selectedTableId);
+        if(t && getTableFloor(t) !== activeFloor){
+          selectedTableId = "";
+          localStorage.removeItem(LS_TABLE);
+        }
+      }
+      renderCurrent(db);
+      applyPresentismoGate();
+      renderTables(db);
+    }
+    function renderFloorUI(){
+      if(floorSelect){
+        floorSelect.innerHTML = floorList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+      }
+      if(floorManageSelect){
+        floorManageSelect.innerHTML = floorList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+      }
+      if(tableFloorSel){
+        tableFloorSel.innerHTML = floorList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+      }
+      setActiveFloor(activeFloor);
+    }
+    renderFloorUI();
+    if(floorSelect){
+      floorSelect.addEventListener("change", ()=>setActiveFloor(floorSelect.value || floorList[0]));
+    }
+    if(floorManageSelect){
+      floorManageSelect.addEventListener("change", ()=>setActiveFloor(floorManageSelect.value || floorList[0]));
+    }
+    if(btnAddFloor){
+      btnAddFloor.addEventListener("click", ()=>{
+        const name = String((floorNewName && floorNewName.value) || "").trim();
+        if(!name) return toast("Pon un nombre de planta");
+        if(floorList.includes(name)) return toast("Esa planta ya existe");
+        floorList = saveFloors(floorList.concat([name]));
+        if(floorNewName) floorNewName.value = "";
+        renderFloorUI();
+        setActiveFloor(name);
+        toast("Planta agregada");
+      });
+    }
+    if(btnRemoveFloor){
+      btnRemoveFloor.addEventListener("click", ()=>{
+        if(floorList.length <= 1) return toast("Debe quedar al menos una planta");
+        const target = activeFloor;
+        if(!confirm(`Eliminar planta "${target}"?`)) return;
+        floorList = saveFloors(floorList.filter(n=>n !== target));
+        const next = floorList[0];
+        const db = window.__db || null;
+        if(db){
+          (db.tables||[]).forEach(t=>{
+            if(getTableFloor(t) === target){
+              sendAction("tables:setLayout", { tableId: t.id, zone: next });
+            }
+          });
+        }
+        setActiveFloor(next);
+        renderFloorUI();
+        toast("Planta eliminada");
+      });
+    }
+    if(btnApplyTableFloor){
+      btnApplyTableFloor.addEventListener("click", ()=>{
+        const db = window.__db || null;
+        const t = getSelectedTable(db);
+        if(!t) return toast("Selecciona una mesa");
+        const floor = tableFloorSel ? tableFloorSel.value : floorList[0];
+        sendAction("tables:setLayout", { tableId: t.id, zone: floor });
+        toast("Planta actualizada");
+        renderTables(db);
+      });
+    }
+    let ensuredName = "";
+
+    // --- Motor de modificadores (modal de selecci??n) ---
+    let modsCtx = null; // { product, context:{type:'ticket'|'table', ticketId?, tableId?}, selections:{} }
+
+    function productById(db, pid){
+      return (db && db.products) ? db.products.find(p=>p.id===pid && p.active!==false) : null;
+    }
+    function hasModifiers(p){
+      return !!(p && Array.isArray(p.modifiers) && p.modifiers.length);
+    }
+
+    function initDefaultSelections(product){
+      const sel = {};
+      const groups = Array.isArray(product.modifiers) ? product.modifiers : [];
+      for(const g of groups){
+        const gid = String(g.id||"");
+        const opts = Array.isArray(g.options) ? g.options : [];
+        const defs = opts.filter(o=>o && o.default).map(o=>String(o.id));
+        if(defs.length) sel[gid] = defs;
+      }
+      return sel;
+    }
+
+    function openModsPick(product, context){
+      modsCtx = { product, context, selections: initDefaultSelections(product) };
+      $("modsPickTitle").textContent = "Personalizar ?? " + (product.name || "Producto");
+      renderModsPick();
+      $("modsPickModal").style.display = "flex";
+    }
+    function closeModsPick(){
+      $("modsPickModal").style.display = "none";
+      modsCtx = null;
+    }
+    $("modsPickClose").addEventListener("click", closeModsPick);
+    $("modsPickCancel").addEventListener("click", closeModsPick);
+    $("modsPickModal").addEventListener("click", (e)=>{ if(e.target === $("modsPickModal")) closeModsPick(); });
+
+    function moneyLite(n){
+      const v = Number(n||0);
+      if(!isFinite(v) || v===0) return "";
+      return (v>0 ? ("+"+money(v)) : money(v));
+    }
+
+    function lineTotal(it){
+      const unit = Number(it.unitPrice||0);
+      const qty = Number(it.qty||0);
+      if(!isFinite(unit) || !isFinite(qty) || qty<=0) return 0;
+      const subtotal = unit * qty;
+      const d = it.discount || null;
+      let discountAmount = 0;
+      if(d && typeof d === "object"){
+        const type = String(d.type||"").toLowerCase();
+        const raw = Number(d.value||0);
+        if(Number.isFinite(raw) && raw > 0){
+          if(type === "percent"){
+            const pct = Math.min(100, Math.max(0, raw));
+            discountAmount = subtotal * (pct / 100);
+          } else if(type === "amount"){
+            discountAmount = raw;
+          }
+        }
+      }
+      discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
+      return Math.max(0, subtotal - discountAmount);
+    }
+
+    function calcTotals(ticket){
+      const items = (ticket && ticket.items) ? ticket.items : [];
+      const subtotal = items.reduce((a,it)=>a + lineTotal(it), 0);
+      const d = ticket && ticket.discount ? ticket.discount : null;
+      let discountAmount = 0;
+      if(d && typeof d === "object"){
+        const type = String(d.type||"").toLowerCase();
+        const raw = Number(d.value||0);
+        if(Number.isFinite(raw) && raw > 0){
+          if(type === "percent"){
+            const pct = Math.min(100, Math.max(0, raw));
+            discountAmount = subtotal * (pct / 100);
+          } else if(type === "amount"){
+            discountAmount = raw;
+          }
+        }
+      }
+      discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
+      const total = Math.max(0, subtotal - discountAmount);
+      return { subtotal, discountAmount, total };
+    }
+
+    function fillDiscountTargets(ticket){
+      const scope = $("discountScope");
+      const itemSel = $("discountItem");
+      if(!scope || !itemSel) return;
+      const items = (ticket && ticket.items) ? ticket.items : [];
+      itemSel.innerHTML = items.map(it=>{
+        const label = `${it.name || it.productId} x${it.qty || 0}`;
+        return `<option value="${esc(it.lineId || it.productId)}">${esc(label)}</option>`;
+      }).join("") || `<option value="">Sin items</option>`;
+      itemSel.disabled = (scope.value !== "line");
+    }
+
+    function renderModsPick(){
+      if(!modsCtx) return;
+      const product = modsCtx.product;
+      const sel = modsCtx.selections;
+      const groups = Array.isArray(product.modifiers) ? product.modifiers : [];
+      const body = $("modsPickBody");
+
+      const html = groups.map(g=>{
+        const gid = String(g.id||"");
+        const modeG = String(g.mode||"single");
+        const required = !!g.required || Number(g.min||0) > 0;
+        const min = Number(g.min||0);
+        const max = Number(g.max||0) || (modeG==="single" ? 1 : 999);
+        const chosen = Array.isArray(sel[gid]) ? sel[gid].map(String) : [];
+        const title = `${esc(g.name||gid)} <span class="small">(${modeG==="single" ? "elige 1" : "multi"}${required ? ", requerido" : ""}${modeG!=="single" ? (", max "+max) : ""})</span>`;
+        const opts = (Array.isArray(g.options) ? g.options : []).map(o=>{
+          const oid = String(o.id||"");
+          const active = chosen.includes(oid);
+          const price = Number(o.price||0);
+          const label = `${esc(o.name||oid)}${price ? ` <span class="small">(${esc(moneyLite(price))})</span>` : ""}`;
+          return `<div class="chip ${active?"active":""}" data-mod-opt="1" data-g="${esc(gid)}" data-o="${esc(oid)}">${label}</div>`;
+        }).join("");
+
+        const note = required && chosen.length===0 ? `<div class="mini" style="margin-top:6px; color:#ffb3b3;">Falta seleccionar</div>` : ``;
+        return `<div style="margin-top:12px;">
+          <div style="font-weight:900;">${title}</div>
+          <div class="chips" style="margin-top:8px; flex-wrap:wrap;">${opts || '<div class="small">Sin opciones</div>'}</div>
+          ${note}
+        </div>`;
+      }).join("");
+
+      body.innerHTML = html || `<div class="small">Este producto no tiene modificadores.</div>`;
+
+      body.querySelectorAll("[data-mod-opt]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          if(!modsCtx) return;
+          const gid = el.getAttribute("data-g");
+          const oid = el.getAttribute("data-o");
+          const g = groups.find(x=>String(x.id)===String(gid));
+          if(!g) return;
+          const modeG = String(g.mode||"single");
+          const max = Number(g.max||0) || (modeG==="single" ? 1 : 999);
+          let chosen = Array.isArray(modsCtx.selections[gid]) ? modsCtx.selections[gid].map(String) : [];
+
+          if(modeG === "single"){
+            chosen = [oid];
+          } else {
+            const on = chosen.includes(oid);
+            if(on) chosen = chosen.filter(x=>x!==oid);
+            else {
+              if(chosen.length >= max) return toast(`M??ximo ${max} en ${g.name||gid}`);
+              chosen = [...chosen, oid];
+            }
+          }
+          modsCtx.selections[gid] = chosen;
+          renderModsPick();
+        });
+      });
+    }
+
+    function validateModsSelections(product, selections){
+      const groups = Array.isArray(product.modifiers) ? product.modifiers : [];
+      for(const g of groups){
+        const gid = String(g.id||"");
+        const modeG = String(g.mode||"single");
+        const required = !!g.required || Number(g.min||0) > 0;
+        const min = Number(g.min||0) || (required ? 1 : 0);
+        const max = Number(g.max||0) || (modeG==="single" ? 1 : 999);
+        const chosen = Array.isArray(selections[gid]) ? selections[gid].map(String) : [];
+        if(required && chosen.length < min) return `Falta seleccionar en: ${g.name||gid}`;
+        if(chosen.length > max) return `Demasiadas opciones en: ${g.name||gid}`;
+      }
+      return "";
+    }
+
+    function addProductToTicket(ticketId, productId){
+      if(!requirePresentismo()) return;
+      const db = window.__db;
+      const p = productById(db, productId);
+      if(!p) return toast("Producto no encontrado");
+      if(hasModifiers(p)){
+        return openModsPick(p, { type:"ticket", ticketId });
+      }
+      sendAction("ticket:addItemEx", { ticketId, productId, qty: 1, selections: {} });
+    }
+
+    function addProductToTable(tableId, productId){
+      if(!requirePresentismo()) return;
+      const db = window.__db;
+      const p = productById(db, productId);
+      if(!p) return toast("Producto no encontrado");
+      const table = (db && db.tables||[]).find(t=>t.id===tableId);
+      const hasTicket = table && table.ticketId;
+      if(!hasTicket) return toast("Abre la mesa primero");
+      if(hasModifiers(p)){
+        return openModsPick(p, { type:"table", tableId });
+      }
+      markTicketTouched(table.ticketId);
+      sendAction("ticket:addToTableEx", { tableId, productId, delta: 1, selections: {} });
+    }
+
+    $("modsPickAdd").addEventListener("click", ()=>{
+      if(!modsCtx) return closeModsPick();
+      const { product, context, selections } = modsCtx;
+      const err = validateModsSelections(product, selections);
+      if(err) return toast(err);
+      if(context.type === "ticket"){
+        sendAction("ticket:addItemEx", { ticketId: context.ticketId, productId: product.id, qty: 1, selections });
+        toast("A??adido");
+      } else {
+        const db = window.__db;
+        const table = (db && db.tables||[]).find(t=>t.id===context.tableId);
+        if(table && table.ticketId) markTicketTouched(table.ticketId);
+        sendAction("ticket:addToTableEx", { tableId: context.tableId, productId: product.id, delta: 1, selections });
+        toast("A??adido a mesa");
+      }
+      closeModsPick();
+    });
+
+
+    function setMode(m){
+      mode = m;
+      localStorage.setItem(LS_MODE, mode);
+      document.querySelectorAll(".chip").forEach(ch => ch.classList.toggle("active", ch.dataset.mode === mode));
+      $("salonBlock").style.display = (mode === "salon") ? "" : "none";
+      $("nonsalonBlock").style.display = (mode === "salon") ? "none" : "";
+      // Limpieza visual
+      $("ticketsList").style.display = "none";
+      renderCurrent(window.__db || null, true);
+      updateInlineOrderState();
+    }
+
+    function setName(n){
+      localStorage.setItem(LS_NAME, n || "");
+      ensuredName = "";
+      // reconecta para que el servidor registre el nombre
+      connect("mozo", n || "Mozo");
+    }
+
+    $("mozoName").value = loginName || (localStorage.getItem(LS_NAME) || "");
+    setName($("mozoName").value.trim());
+applyPresentismoGate();
+    $("mozoName").addEventListener("input", ()=>setName($("mozoName").value.trim()));
+
+    document.querySelectorAll(".chip").forEach(ch => ch.addEventListener("click", ()=>setMode(ch.dataset.mode)));
+    setMode(mode);
+
+    const mobileTabs = document.getElementById("mobileTabs");
+    if(mobileTabs){
+      mobileTabs.querySelectorAll("[data-tab]").forEach(btn=>{
+        btn.addEventListener("click", ()=>setMobileTab(btn.getAttribute("data-tab")));
+      });
+      const savedTab = localStorage.getItem(LS_MOBILE_TAB) || "tables";
+      setMobileTab(savedTab);
+    }
+    window.addEventListener("resize", ()=>updateInlineOrderState());
+
+    // UI seg??n rol + solicitudes de clientes
+    setupRoleUI();
+    loadCustomerReqs();
+
+    if(typeof onMessage === "function"){
+      onMessage((msg)=>{
+        if(msg && msg.type === "customer:request" && msg.request){
+          customerReqs.unshift(msg.request);
+          if(customerReqs.length > 200) customerReqs.length = 200;
+          renderCustomerReqs();
+          toast("Cliente pidi?? la cuenta" + (msg.request.table ? (" ?? " + msg.request.table) : ""));
+        }
+      });
+    }
+
+
+    function clearSelection(goTables){
+      if(orderScreenOpen) closeOrderScreen(false);
+      // Si la mesa qued???? en borrador (sin ????tems ni notas), la liberamos.
+      const db = window.__db;
+      if(db && mode === "salon" && selectedTableId){
+        const table = (db.tables||[]).find(t=>t.id===selectedTableId);
+        const ticket = table && table.ticketId ? (db.tickets||[]).find(x=>x.id===table.ticketId) : null;
+        const empty = ticket && ticket.status === "abierta" && ticket.kitchenStatus === "borrador" && (ticket.items||[]).length===0 && String(ticket.notes||"").trim()==="";
+        if(empty && !isTicketRecentlyTouched(ticket.id)) sendAction("ticket:abandonDraft", { ticketId: ticket.id });
+      }
+
+      selectedTableId = "";
+      selectedTicketId = "";
+      localStorage.removeItem(LS_TABLE);
+      localStorage.removeItem(LS_TICKET);
+      updateInlineOrderState();
+      renderCurrent(window.__db || null, true);
+      if(goTables && isMobileUI()) setMobileTab("tables");
+      toast("Vista cerrada");
+      const el = document.getElementById("tables");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    const btnClearSelection = $("btnClearSelection");
+    if(btnClearSelection) btnClearSelection.addEventListener("click", ()=>clearSelection(false));
+    const btnMenuCancel = $("btnMenuCancel");
+    if(btnMenuCancel) btnMenuCancel.addEventListener("click", ()=>clearSelection(true));
+    const orderScreenBack = $("orderScreenBack");
+    if(orderScreenBack) orderScreenBack.addEventListener("click", ()=>closeOrderScreen(true));
+
+    $("btnNewTicket").addEventListener("click", ()=>{
+if(!requirePresentismo()) return;
+      const name = getMozoName();
+      if(!name) return toast("Pon tu nombre primero");
+      sendAction("ticket:create", { channel: mode });
+      toast("Creando ticket??");
+    });
+
+    $("btnMyTickets").addEventListener("click", ()=>{
+if(!requirePresentismo()) return;
+      const list = $("ticketsList");
+      list.style.display = (list.style.display === "none" ? "" : "none");
+    });
+
+    // Presentismo
+    $("btnCheckIn").addEventListener("click", ()=>{
+      const name = getMozoName();
+      if(!name) return toast("Pon tu nombre primero");
+      if(!sendAction("attendance:checkIn", { name })) return toast("Sin conexi??n??");
+      toast("Entrada registrada");
+    });
+
+    $("btnCheckOut").addEventListener("click", ()=>{
+      const name = getMozoName();
+      if(!name) return toast("Pon tu nombre primero");
+      if(!sendAction("attendance:checkOut", { name })) return toast("Sin conexi??n??");
+      toast("Salida registrada");
+    });
+    // Edicion de mesas deshabilitada en panel de mozo
+
+
+    $("q").addEventListener("input", ()=>renderMenu(window.__db || null));
+
+    $("discountType").addEventListener("change", ()=>{
+      const t = $("discountType").value;
+      $("discountValue").disabled = (t === "none");
+      if(t === "none") $("discountValue").value = "";
+    });
+    $("discountScope").addEventListener("change", ()=>{
+      const itemSel = $("discountItem");
+      if(itemSel) itemSel.disabled = ($("discountScope").value !== "line");
+    });
+
+    // Modal cobro
+    function updatePayDelta(){
+      const total = Number(($("payPaid").dataset.total)||0);
+      const raw = String($("payPaid").value || "").trim();
+      if(!raw){
+        $("payChange").textContent = "-";
+        return;
+      }
+      const paid = Number(raw.replace(",", "."));
+      if(!Number.isFinite(paid)){
+        $("payChange").textContent = "Importe invalido";
+        return;
+      }
+      if(paid < total){
+        $("payChange").textContent = "Falta: " + money(total - paid);
+        return;
+      }
+      $("payChange").textContent = "Vuelto: " + money(paid - total);
+    }
+    function openPayModal(total){
+      $("payPaid").dataset.total = String(total);
+      $("payTotal").value = money(total);
+      $("payPaid").value = "";
+      updatePayDelta();
+      updateFiscalExtra();
+      $("payModal").style.display = "flex";
+      $("payPaid").focus();
+    }
+    function closePayModal(){ $("payModal").style.display = "none"; }
+    $("payClose").addEventListener("click", closePayModal);
+    $("payModal").addEventListener("click", (e)=>{ if(e.target === $("payModal")) closePayModal(); });
+    $("payPaid").addEventListener("input", updatePayDelta);
+
+    function updateFiscalExtra(){
+      const v = $("payFiscal").value;
+      const show = (v && v !== "no_fiscal");
+      $("fiscalExtra").style.display = show ? "block" : "none";
+      if($("rDocType").value === "ConsumidorFinal"){
+        $("rDocNum").value = "";
+        $("rIva").value = "";
+      }
+    }
+    $("payFiscal").addEventListener("change", ()=>{
+      updateFiscalExtra();
+      updatePayDelta();
+    });
+    $("rDocType").addEventListener("change", updateFiscalExtra);
+
+
+    function ticketLabel(t){
+      if(!t) return "";
+      if(t.channel === "salon") return t.tableId ? ("Mesa " + t.tableId.replace("T","")) : "Sal??n";
+      if(t.channel === "mostrador") return "Mostrador";
+      return "Delivery";
+    }
+
+    function itemKitchenStatus(it, fallback){
+      const s = String((it && it.kitchenStatus) || "").trim();
+      if(s) return s;
+      return String(fallback || "borrador");
+    }
+
+    function getTicketItemFlags(t){
+      const items = (t && Array.isArray(t.items)) ? t.items : [];
+      const flags = {
+        hasItems: items.length > 0,
+        hasNew: false,
+        hasReceived: false,
+        hasPrep: false,
+        hasReady: false,
+        hasDelivered: false,
+        allDelivered: false,
+        allReadyOrDelivered: false,
+        hasPending: false,
+        hasReadyOrDelivered: false,
+      };
+      if(!flags.hasItems) return flags;
+      for(const it of items){
+        const s = itemKitchenStatus(it, t ? t.kitchenStatus : "");
+        if(s === "borrador") flags.hasNew = true;
+        else if(s === "recibido") flags.hasReceived = true;
+        else if(s === "en_preparacion") flags.hasPrep = true;
+        else if(s === "listo") flags.hasReady = true;
+        else if(s === "entregado") flags.hasDelivered = true;
+      }
+      flags.allDelivered = items.every(it => itemKitchenStatus(it, t ? t.kitchenStatus : "") === "entregado");
+      flags.allReadyOrDelivered = items.every(it => {
+        const s = itemKitchenStatus(it, t ? t.kitchenStatus : "");
+        return s === "listo" || s === "entregado";
+      });
+      flags.hasPending = flags.hasNew || flags.hasReceived || flags.hasPrep;
+      flags.hasReadyOrDelivered = flags.hasReady || flags.hasDelivered;
+      return flags;
+    }
+
+    function ticketStatusText(t){
+      if(!t) return "-";
+      const flags = getTicketItemFlags(t);
+      if(!flags.hasItems) return "Estado cocina: Borrador (a??n no enviado)";
+      if(flags.allDelivered) return "Estado cocina: Entregado";
+      if(flags.allReadyOrDelivered) return "Estado cocina: Listo para entregar";
+      if(flags.hasPending && flags.hasReadyOrDelivered) return "Estado cocina: Parcial (listo + pendientes)";
+      if(flags.hasPrep) return "Estado cocina: Recibido en cocina";
+      if(flags.hasReceived) return "Estado cocina: Recibido en cocina";
+      if(flags.hasReady) return "Estado cocina: Listo";
+      if(flags.hasNew) return "Estado cocina: Borrador (pendiente de enviar)";
+      return "Estado cocina: " + (t.kitchenStatus || "-");
+    }
+
+    function renderTables(db){
+      const wrap = $("tables");
+      if(!db) { wrap.innerHTML = ""; return; }
+      if(!isCheckedIn){
+        $("tablesCount").textContent = "0";
+        $("tablesBusy").textContent = "0";
+        $("tablesReady").textContent = "0";
+        wrap.innerHTML = `<div class="small">Marca presentismo para ver las mesas.</div>`;
+        return;
+      }
+
+      const tablesAll = db.tables || [];
+      const tables = (mode === "salon") ? tablesAll.filter(t=>getTableFloor(t) === activeFloor) : tablesAll;
+      $("tablesCount").textContent = tables.length;
+      $("tablesBusy").textContent = tables.filter(t=>t.status==="ocupada" || t.status==="lista" || t.status==="borrador" || t.status==="sumando").length;
+      $("tablesReady").textContent = tables.filter(t=>t.status==="lista").length;
+
+      const selLabel = $("selTableLabel");
+      if(selLabel){
+        const selTable = (db.tables||[]).find(t=>t.id===selectedTableId);
+        selLabel.textContent = selTable ? (selTable.name || selTable.id) : "-";
+        if(selTable && tableFloorSel) tableFloorSel.value = getTableFloor(selTable);
+      }
+
+      const ticketsById = new Map((db.tickets||[]).map(t=>[t.id,t]));
+      const statusLabel = {
+        libre: "Libre",
+        borrador: "En carga",
+        ocupada: "Ocupada",
+        lista: "Lista",
+        sumando: "Sumando",
+      };
+
+      wrap.innerHTML = tables.map(t=>{
+        const selected = (t.id === selectedTableId);
+        const dot = t.status === "libre" ? "free" : (t.status === "lista" ? "ready" : (t.status === "borrador" ? "draft" : (t.status === "sumando" ? "sumando" : "busy")));
+
+        const ticket = t.ticketId ? ticketsById.get(t.ticketId) : null;
+        const hasItems = ticket && (ticket.items||[]).length > 0;
+        const flags = ticket ? getTicketItemFlags(ticket) : null;
+        const itemsN = hasItems ? (ticket.items||[]).reduce((a,it)=>a+Number(it.qty||0),0) : 0;
+        const total = hasItems ? (ticket.items||[]).reduce((a,it)=>a+Number(it.qty||0)*Number(it.unitPrice||0),0) : 0;
+        const readyCount = hasItems
+          ? (ticket.items||[]).reduce((a,it)=>{
+              const s = itemKitchenStatus(it, ticket.kitchenStatus);
+              return a + ((s === "listo") ? Number(it.qty||0) : 0);
+            }, 0)
+          : 0;
+        const deliverMsg = (readyCount > 0 && !(flags && flags.allDelivered)) ? `Llevar ${readyCount} a la mesa` : "";
+        let st = String(t.status || "libre");
+        if(st === "libre" && ticket && ticket.status === "abierta" && ticket.kitchenStatus === "borrador"){
+          st = "borrador";
+        }
+        const detailParts = [];
+        if(hasItems) detailParts.push(money(total));
+        if(deliverMsg) detailParts.push(deliverMsg);
+        const detail = hasItems
+          ? detailParts.join(" ?? ")
+          : (ticket ? "Sin productos" : "");
+        const meta = `${statusLabel[st] || "Estado"}${detail ? " - " + detail : ""}`;
+        const rec = t.received ? "Recibida ?" : "";
+        const title = `<div class="title">${esc(t.name)}</div>`;
+        return `
+          <div class="tableCard state-${esc(st)} ${selected ? "selected":""}" data-table="${esc(t.id)}">
+            <div class="topRow">
+              ${title}
+              <div class="dot ${dot}"></div>
+            </div>
+            <div class="meta">
+              <span>${esc(meta)}</span>
+              <span>${esc(rec)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+      wrap.querySelectorAll(".tableCard").forEach(el=>{
+        const id = el.getAttribute("data-table");
+        // modo normal: seleccionar mesa + drag&drop de productos
+        el.addEventListener("dragover", (e)=>{
+          if(window.__dragPid){ e.preventDefault(); }
+        });
+        el.addEventListener("dragenter", ()=>{ if(window.__dragPid) el.classList.add("dropHover"); });
+        el.addEventListener("dragleave", ()=> el.classList.remove("dropHover"));
+        el.addEventListener("drop", (e)=>{
+          e.preventDefault();
+          el.classList.remove("dropHover");
+          const pid = window.__dragPid;
+          if(!pid) return;
+          addProductToTable(id, pid);
+          toast(`A??adido a ${el.querySelector('.title') ? el.querySelector('.title').textContent : id}`);
+        });
+
+        // modo normal: seleccionar mesa
+        el.addEventListener("click", ()=>{
+          // Si ven??amos de una mesa en borrador vac??a, la liberamos al cambiar.
+          const prev = selectedTableId;
+          const db = window.__db;
+          if(db && mode === "salon" && prev && prev !== id){
+            const tPrev = (db.tables||[]).find(t=>t.id===prev);
+            const tkPrev = tPrev && tPrev.ticketId ? (db.tickets||[]).find(x=>x.id===tPrev.ticketId) : null;
+              const empty = tkPrev && tkPrev.status === "abierta" && tkPrev.kitchenStatus === "borrador" && (tkPrev.items||[]).length===0 && String(tkPrev.notes||"").trim()==="";
+              if(empty && !isTicketRecentlyTouched(tkPrev.id)) sendAction("ticket:abandonDraft", { ticketId: tkPrev.id });
+            }
+            selectedTableId = id;
+            localStorage.setItem(LS_TABLE, selectedTableId);
+            localStorage.removeItem(LS_TICKET);
+            selectedTicketId = "";
+            if(tableFloorSel){
+              const selTable = (db.tables||[]).find(t=>t.id===selectedTableId);
+              if(selTable) tableFloorSel.value = getTableFloor(selTable);
+            }
+            renderCurrent(db, true);
+            renderTables(db);
+        });
+      });
+      updateInlineOrderState();
+    }
+
+    function groupProducts(products){
+      const groups = new Map();
+      products.forEach(p=>{
+        const k = p.categoryTitle || p.categoryId || "Otros";
+        if(!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(p);
+      });
+      return Array.from(groups.entries());
+    }
+    function getCategoryColorMap(db){
+      const map = new Map();
+      const list = (db && db.settings && Array.isArray(db.settings.menuCategories)) ? db.settings.menuCategories : [];
+      list.forEach(c=>{
+        if(!c) return;
+        const color = String(c.color || "").trim();
+        if(!color) return;
+        if(c.id) map.set(String(c.id), color);
+        if(c.title) map.set(String(c.title), color);
+      });
+      return map;
+    }
+    function hexToRgba(hex, alpha){
+      const h = String(hex || "").trim().replace("#", "");
+      if(h.length === 3){
+        const r = parseInt(h[0]+h[0], 16);
+        const g = parseInt(h[1]+h[1], 16);
+        const b = parseInt(h[2]+h[2], 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      if(h.length === 6){
+        const r = parseInt(h.slice(0,2), 16);
+        const g = parseInt(h.slice(2,4), 16);
+        const b = parseInt(h.slice(4,6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      return "";
+    }
+    function categoryStyle(color){
+      const bg = hexToRgba(color, 0.12);
+      const border = hexToRgba(color, 0.45);
+      if(!bg || !border) return "";
+      return `background:${bg}; border-color:${border};`;
+    }
+    function categoryIconLabel(title){
+      const parts = String(title || "").trim().split(/\s+/).filter(Boolean);
+      if(!parts.length) return "?";
+      if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    function renderCategoryIcons(groups, catColors){
+      const wrap = $("catIcons");
+      if(!wrap) return;
+      const allActive = !activeCategory;
+      const items = [{ title: "Todo", key: "" }]
+        .concat(groups.map(([title])=>({ title, key: String(title) })));
+      wrap.innerHTML = items.map(item=>{
+        const color = catColors.get(String(item.title)) || "";
+        const style = color ? ` style="${categoryStyle(color)}"` : "";
+        const label = item.key ? categoryIconLabel(item.title) : "TO";
+        const active = item.key === activeCategory;
+        return `<button class="catIcon ${active ? "active" : ""}" data-cat="${esc(item.key)}"${style} title="${esc(item.title)}">${esc(label)}</button>`;
+      }).join("");
+      wrap.querySelectorAll("[data-cat]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          activeCategory = btn.getAttribute("data-cat") || "";
+          renderMenu(window.__db || null);
+        });
+      });
+      if(allActive) wrap.querySelectorAll("[data-cat=\"\"]").forEach(btn=>btn.classList.add("active"));
+      applyPresentismoGate();
+    }
+
+    function renderMenu(db){
+      const wrap = $("menu");
+      if(!db) { wrap.innerHTML = ""; return; }
+      if(!isCheckedIn){
+        wrap.innerHTML = `<div class="small">Marca presentismo para ver el menu.</div>`;
+        const cats = $("catIcons");
+        if(cats) cats.innerHTML = "";
+        return;
+      }
+      const q = ($("q").value || "").trim().toLowerCase();
+      const products = (db.products||[]).filter(p => p.active !== false);
+      const catColors = getCategoryColorMap(db);
+      const allGroups = groupProducts(products);
+      renderCategoryIcons(allGroups, catColors);
+      const filtered = products.filter(p=>{
+        const nameMatch = !q || String(p.name||"").toLowerCase().includes(q);
+        const catKey = String(p.categoryTitle || p.categoryId || "Otros");
+        const catMatch = !activeCategory || catKey === activeCategory;
+        return nameMatch && catMatch;
+      });
+      const title = activeCategory ? activeCategory : (q ? "Resultados" : "Todos los rubros");
+      const canAdd = (mode === "salon") ? !!selectedTableId : !!getCurrentTicketId(db);
+
+      const grid = filtered.slice(0, 240).map(p=>{
+        const cat = p.categoryTitle || p.categoryId || "Otros";
+        const color = catColors.get(String(cat)) || "";
+        const dragAttr = canAdd ? "true" : "false";
+        const disabledAttr = canAdd ? "" : "disabled";
+        const tileClass = canAdd ? "" : " disabled";
+        const style = color ? ` style="${categoryStyle(color)}"` : "";
+        const img = String(p.imageUrl || "").trim();
+        const thumb = img ? `<div class="menuTileThumb" style="background-image:url('${esc(img)}')"></div>` : "";
+        return `
+          <div class="menuTile${tileClass}" draggable="${dragAttr}" data-dragpid="${esc(p.id)}"${style}>
+            ${thumb}
+            <div class="menuTileName">${esc(p.name)}</div>
+            <div class="menuTileMeta">${esc(cat)} - ${money(p.price)}</div>
+            <div class="menuTileActions">
+              <span class="mini">${esc(p.id)}</span>
+              <button class="menuTileBtn" data-add="${esc(p.id)}" ${disabledAttr}>Agregar</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      wrap.innerHTML = `
+        <div class="menuTop">
+          <div class="menuTitle">${esc(title)}</div>
+          <div class="badge2">Productos <strong>${filtered.length}</strong></div>
+        </div>
+        <div class="menuGrid">
+          ${grid || `<div class="small">Sin resultados.</div>`}
+        </div>
+      `;
+
+      wrap.querySelectorAll("[data-add]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const pid = btn.getAttribute("data-add");
+          if(mode === "salon"){
+            if(!selectedTableId) return toast("Selecciona una mesa primero");
+            addProductToTable(selectedTableId, pid);
+          } else {
+            const tid = getCurrentTicketId(db);
+            if(!tid) return toast("Crea/selecciona un ticket primero");
+            addProductToTicket(tid, pid);
+          }
+        });
+      });
+
+      // Drag: arrastrar producto a una mesa
+      wrap.querySelectorAll("[data-dragpid]").forEach(row=>{
+        row.addEventListener("dragstart", ()=>{
+          if(!canAdd) return;
+          window.__dragPid = row.getAttribute("data-dragpid");
+        });
+        row.addEventListener("dragend", ()=>{
+          window.__dragPid = "";
+        });
+      });
+    }
+
+    function getCurrentTicketId(db){
+      if(!db) return "";
+      if(mode === "salon"){
+        const table = (db.tables||[]).find(t=>t.id === selectedTableId);
+        return table && table.ticketId ? table.ticketId : "";
+      }
+      // no sal??n
+      if(selectedTicketId){
+        const t = (db.tickets||[]).find(x=>x.id===selectedTicketId && x.status==="abierta");
+        if(t) return selectedTicketId;
+      }
+      // intenta coger el ??ltimo ticket abierto del canal
+      const name = getMozoName();
+      const t = (db.tickets||[]).find(x => x.status==="abierta" && x.channel===mode && x.createdBy === name);
+      if(t){
+        selectedTicketId = t.id;
+        localStorage.setItem(LS_TICKET, selectedTicketId);
+        return selectedTicketId;
+      }
+      return "";
+    }
+
+    function renderTicketsList(db){
+      const list = $("ticketsList");
+      if(!db){ list.innerHTML=""; return; }
+      const name = getMozoName();
+      const open = (db.tickets||[]).filter(t=>t.status==="abierta" && t.channel!== "salon");
+      if(open.length === 0){
+        list.innerHTML = `<div class="small">No hay tickets abiertos.</div>`;
+        return;
+      }
+      list.innerHTML = open.map(t=>{
+        const sel = t.id === selectedTicketId;
+        const flags = getTicketItemFlags(t);
+        const title = ticketLabel(t) + " ?? " + money((t.items||[]).reduce((a,it)=>a+it.qty*it.unitPrice,0));
+        const sub = (t.customerName ? ("Cliente: " + t.customerName) : ("Creado por: " + (t.createdBy||"")));
+        const dotClass = flags.allDelivered ? "ready" : (flags.allReadyOrDelivered ? "ready" : (flags.hasPending ? "busy" : "free"));
+        return `
+          <div class="tableCard ${sel?"selected":""}" data-ticket="${esc(t.id)}">
+            <div class="topRow">
+              <div class="title">${esc(title)}</div>
+              <div class="dot ${dotClass}"></div>
+            </div>
+            <div class="meta"><span>${esc(sub)}</span><span>${esc(ticketStatusText(t))}</span></div>
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll(".tableCard").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          selectedTicketId = el.getAttribute("data-ticket");
+          localStorage.setItem(LS_TICKET, selectedTicketId);
+          renderCurrent(db, true);
+        });
+      });
+    }
+
+    function renderTicketMeta(db, ticket){
+      const wrap = $("ticketMeta");
+      if(!ticket){ wrap.innerHTML = ""; return; }
+
+      let meta = "";
+      if(ticket.channel === "delivery"){
+        meta = `
+          <div class="row">
+            <div style="flex:1">
+              <div class="small">Cliente</div>
+              <input id="mName" class="input" value="${esc(ticket.customerName||"")}" placeholder="Nombre"/>
+            </div>
+            <div style="flex:1">
+              <div class="small">Tel??fono</div>
+              <input id="mPhone" class="input" value="${esc(ticket.customerPhone||"")}" placeholder="Ej: 11 1234 5678"/>
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="small">Direcci??n</div>
+            <input id="mAddr" class="input" value="${esc(ticket.customerAddress||"")}" placeholder="Calle, n??mero, piso??"/>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="small">Notas (opcional)</div>
+            <input id="mNotes" class="input" value="${esc(ticket.notes||"")}" placeholder="Ej: timbre roto, llamar al llegar??"/>
+          </div>
+        `;
+      } else if(ticket.channel === "mostrador"){
+        meta = `
+          <div class="row">
+            <div style="flex:1">
+              <div class="small">Nombre (opcional)</div>
+              <input id="mName" class="input" value="${esc(ticket.customerName||"")}" placeholder="Cliente"/>
+            </div>
+            <div style="flex:1">
+              <div class="small">Notas (opcional)</div>
+              <input id="mNotes" class="input" value="${esc(ticket.notes||"")}" placeholder="Aclaraciones"/>
+            </div>
+          </div>
+        `;
+      } else {
+        meta = `
+          <div class="row">
+            <div class="badge2">Mesa <strong>${esc(ticket.tableId||"-")}</strong></div>
+            <div class="badge2">Recibida <strong>${((db.tables||[]).find(t=>t.id===ticket.tableId)||{}).received ? "S??" : "No"}</strong></div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="small">Notas de mesa</div>
+            <input id="mNotes" class="input" value="${esc(ticket.notes||"")}" placeholder="Ej: sin hielo, alergico"/>
+          </div>
+        `;
+      }
+
+      wrap.innerHTML = meta;
+
+      // listeners meta
+      const nameEl = document.getElementById("mName");
+      const phoneEl = document.getElementById("mPhone");
+      const addrEl = document.getElementById("mAddr");
+      const notesEl = document.getElementById("mNotes");
+      const tid = ticket.id;
+
+      function pushMeta(){
+        sendAction("ticket:setMeta", {
+          ticketId: tid,
+          customerName: nameEl ? nameEl.value : undefined,
+          customerPhone: phoneEl ? phoneEl.value : undefined,
+          customerAddress: addrEl ? addrEl.value : undefined,
+          notes: notesEl ? notesEl.value : undefined,
+        });
+      }
+      [nameEl, phoneEl, addrEl, notesEl].filter(Boolean).forEach(el=>el.addEventListener("input", ()=>pushMeta()));
+    }
+
+    function isItemDelivered(it){
+      const s = itemKitchenStatus(it);
+      return s === "entregado";
+    }
+
+    function buildMenuCartPreview(items){
+      if(!items || !items.length) return `<span class="menuCartEmpty">Sin productos</span>`;
+      const parts = items.slice(0, 8).map(it=>{
+        const qtyNum = Number(it.qty || 0);
+        const qty = Number.isFinite(qtyNum) ? String(Math.round(qtyNum * 100) / 100).replace(/\.0+$/,"") : String(it.qty || "");
+        const name = esc(it.name || "Item");
+        const delivered = isItemDelivered(it);
+        const stateClass = delivered ? " ready" : " pending";
+        return `<span class="menuCartItem${stateClass}">${esc(qty)}x ${name}</span>`;
+      });
+      const extra = items.length - parts.length;
+      if(extra > 0) parts.push(`<span class="menuCartMore">+${extra} mas</span>`);
+      return parts.join("");
+    }
+
+    function cartModifiersKey(modifiers){
+      return (Array.isArray(modifiers) ? modifiers : [])
+        .map(m=>`${m.groupId||""}:${m.optionId||""}:${m.kind||""}:${Number(m.price||0)}`)
+        .sort()
+        .join("|");
+    }
+
+    function cartLineGroupKey(it){
+      const discount = it && it.discount ? `${it.discount.type||""}:${Number(it.discount.value||0)}` : "";
+      return [
+        String(it && it.productId || ""),
+        String(it && it.name || ""),
+        String(Number(it && it.unitPrice || 0)),
+        cartModifiersKey(it && it.modifiers),
+        discount
+      ].join("||");
+    }
+
+    function groupCartLines(ticket){
+      const items = (ticket && Array.isArray(ticket.items)) ? ticket.items : [];
+      const groups = [];
+      const byKey = new Map();
+      items.forEach((it, idx)=>{
+        const key = cartLineGroupKey(it);
+        let group = byKey.get(key);
+        if(!group){
+          group = {
+            key,
+            index: idx,
+            name: it.name || it.productId || "Item",
+            unitPrice: Number(it.unitPrice || 0),
+            modifiers: Array.isArray(it.modifiers) ? it.modifiers : [],
+            discount: it.discount || null,
+            items: [],
+            qty: 0,
+            total: 0,
+            pendingQty: 0,
+            readyQty: 0,
+            deliveredQty: 0,
+          };
+          byKey.set(key, group);
+          groups.push(group);
+        }
+        const qty = Number(it.qty || 0);
+        const status = itemKitchenStatus(it, ticket ? ticket.kitchenStatus : "");
+        group.items.push(it);
+        group.qty += qty;
+        group.total += lineTotal(it);
+        if(status === "listo") group.readyQty += qty;
+        else if(status === "entregado") group.deliveredQty += qty;
+        else group.pendingQty += qty;
+      });
+      return groups.map(group=>{
+        const draftLine = group.items.find(it => itemKitchenStatus(it, ticket ? ticket.kitchenStatus : "") === "borrador") || null;
+        const actionLine = draftLine || group.items[group.items.length - 1] || null;
+        const parts = [];
+        if(group.pendingQty > 0 && (group.readyQty > 0 || group.deliveredQty > 0)){
+          parts.push(`${group.pendingQty} nuevo${group.pendingQty === 1 ? "" : "s"}`);
+        }
+        if(group.readyQty > 0) parts.push(`${group.readyQty} listo${group.readyQty === 1 ? "" : "s"}`);
+        if(group.deliveredQty > 0) parts.push(`${group.deliveredQty} entregado${group.deliveredQty === 1 ? "" : "s"}`);
+        return {
+          ...group,
+          actionLine,
+          rowClass: group.pendingQty > 0 ? " status-pending" : " status-ready",
+          stateNote: parts.join(" • "),
+        };
+      }).sort((a,b)=>a.index - b.index);
+    }
+
+    function cartActionTarget(group){
+      if(!group || !group.actionLine) return null;
+      const line = group.actionLine;
+      return {
+        id: line.lineId || line.productId || "",
+        mode: line.lineId ? "line" : "prod",
+      };
+    }
+
+    function renderCart(ticket){
+      const wrap = $("cart");
+      const badge = $("cartCount");
+      const menuList = $("menuCartList");
+      if(!ticket){
+        wrap.innerHTML = `<div class="small">Sin ticket seleccionado.</div>`;
+        badge.textContent = "0";
+        const totalEl = $("cartTotal");
+        if(totalEl) totalEl.textContent = "-";
+        const menuTotalEl = $("menuCartTotal");
+        if(menuTotalEl) menuTotalEl.textContent = "-";
+        if(menuList) menuList.innerHTML = `<span class="menuCartEmpty">Sin productos</span>`;
+        const discountInfo = $("discountInfo");
+        if(discountInfo) discountInfo.textContent = "-";
+        const btnCharge = $("btnCharge");
+        if(btnCharge) btnCharge.disabled = true;
+        const btnPrint = $("btnPrint");
+        if(btnPrint) btnPrint.disabled = true;
+        return;
+      }
+
+      const items = ticket.items || [];
+      const count = items.reduce((a,it)=>a+Number(it.qty||0),0);
+      badge.textContent = String(count||0);
+
+      const totals = calcTotals(ticket);
+      const total = totals.total;
+
+      const totalEl = $("cartTotal");
+      if(totalEl) totalEl.textContent = money(total);
+      const menuTotalEl = $("menuCartTotal");
+      if(menuTotalEl) menuTotalEl.textContent = money(total);
+      if(menuList) menuList.innerHTML = buildMenuCartPreview(items);
+      const discountInfo = $("discountInfo");
+      if(discountInfo){
+        if(totals.discountAmount > 0){
+          const pct = ticket && ticket.discount && ticket.discount.type === "percent" ? ` (${ticket.discount.value}%)` : "";
+          discountInfo.textContent = `Descuento${pct}: -${money(totals.discountAmount)}`;
+        } else {
+          discountInfo.textContent = "Sin descuento aplicado";
+        }
+      }
+      const btnCharge = $("btnCharge");
+      if(btnCharge) btnCharge.disabled = items.length===0;
+      const btnPrint = $("btnPrint");
+      if(btnPrint) btnPrint.disabled = items.length===0;
+
+      if(items.length===0){
+        wrap.innerHTML = `<div class="small">Carrito vac??o.</div>`;
+        return;
+      }
+
+      const groups = groupCartLines(ticket);
+
+      wrap.innerHTML = groups.map((group, idx)=>{
+        const mods = (group.modifiers||[]).map(m=>{
+          const tag = (String(m.kind||"")==="remove") ? ("Sin " + m.optionName) : m.optionName;
+          const price = Number(m.price||0);
+          return price>0 ? `${tag} (+${money(price)})` : String(tag);
+        }).join(" ?? ");
+
+        return `
+          <div class="cartRow${group.rowClass}">
+            <div style="flex:1; min-width:0;">
+              <div class="cartName">${esc(group.name)}</div>
+              ${mods ? `<div class="small" style="margin-top:2px;">${esc(mods)}</div>` : ``}
+              ${group.discount ? `<div class="small" style="margin-top:2px; color:#ffdfb0;">Desc. l??nea: ${esc(group.discount.type)} ${esc(group.discount.value)}</div>` : ``}
+              <div class="small muted">${money(group.unitPrice)} c/u</div>
+              ${group.stateNote ? `<div class="small muted" style="margin-top:2px;">${esc(group.stateNote)}</div>` : ``}
+            </div>
+
+            <div class="qty">
+              <button class="btnIcon" data-dec-group="${idx}">-</button>
+              <div class="qtyNum">${esc(group.qty)}</div>
+              <button class="btnIcon" data-inc-group="${idx}">+</button>
+            </div>
+
+            <div class="cartPrice">${money(group.total)}</div>
+
+            <button class="btnIcon" title="Descuento" data-disc-group="${idx}">%</button>
+            <button class="btnIcon" title="Quitar" data-rm-group="${idx}">??</button>
+          </div>
+        `;
+      }).join("");
+
+      wrap.querySelectorAll("[data-inc-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-inc-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          if(target.mode==="line") sendAction("ticket:lineQty", { ticketId: ticket.id, lineId: target.id, delta: 1 });
+          else sendAction("ticket:addItem", { ticketId: ticket.id, productId: target.id, delta: 1 });
+        });
+      });
+      wrap.querySelectorAll("[data-dec-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-dec-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          if(target.mode==="line") sendAction("ticket:lineQty", { ticketId: ticket.id, lineId: target.id, delta: -1 });
+          else sendAction("ticket:addItem", { ticketId: ticket.id, productId: target.id, delta: -1 });
+        });
+      });
+      wrap.querySelectorAll("[data-rm-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-rm-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          if(target.mode==="line") sendAction("ticket:removeLine", { ticketId: ticket.id, lineId: target.id });
+          else sendAction("ticket:addItem", { ticketId: ticket.id, productId: target.id, delta: -999 });
+        });
+      });
+      wrap.querySelectorAll("[data-disc-group]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const group = groups[Number(b.getAttribute("data-disc-group"))];
+          const target = cartActionTarget(group);
+          if(!target) return;
+          const line = (ticket.items||[]).find(x => (x.lineId || x.productId) === target.id);
+          if(!line || !line.lineId) return;
+          const raw = prompt("Descuento l??nea (ej: 10% o 500):", "");
+          if(raw === null) return;
+          const v = String(raw).trim();
+          if(!v){
+            sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId: line.lineId, discount: null });
+            return;
+          }
+          if(v.endsWith("%")){
+            const num = Number(v.slice(0,-1).replace(",", "."));
+            if(!isFinite(num) || num <= 0) return toast("Valor inv??lido");
+            sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId: line.lineId, discount: { type: "percent", value: num } });
+          } else {
+            const num = Number(v.replace(",", "."));
+            if(!isFinite(num) || num <= 0) return toast("Valor inv??lido");
+            sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId: line.lineId, discount: { type: "amount", value: num } });
+          }
+        });
+      });
+    }
+
+    function renderCurrent(db, force){
+      if(!db) return;
+      const tid = getCurrentTicketId(db);
+      const ticket = (db.tickets||[]).find(t=>t.id === tid);
+      const table = (mode === "salon") ? getSelectedTable(db) : null;
+      const menuTableLabel = $("menuTableLabel");
+      if(menuTableLabel){
+        if(table){
+          menuTableLabel.textContent = table.name || table.id || "-";
+        } else if(ticket){
+          menuTableLabel.textContent = ticketLabel(ticket);
+        } else {
+          menuTableLabel.textContent = "-";
+        }
+      }
+
+      // texto superior
+      if(ticket){
+        $("ticketSubtitle").textContent = ticketLabel(ticket) + " ?? " + (ticket.createdBy ? ("por " + ticket.createdBy) : "");
+      } else {
+        $("ticketSubtitle").textContent = (mode === "salon") ? "Selecciona una mesa" : "Crea un ticket";
+      }
+      updateOrderScreenTitle();
+
+      // botones
+      const canOpen = !!(table && !ticket);
+      const canEdit = !!(ticket && ticket.channel==="salon" && table);
+      const openLabel = canEdit ? "Editar mesa" : "Abrir mesa";
+      const openDisabled = !(canOpen || canEdit);
+      const flags = ticket ? getTicketItemFlags(ticket) : null;
+      const hasItems = !!(flags && flags.hasItems);
+      const hasNewItems = !!(flags && flags.hasNew);
+      const hasReadyOrDelivered = !!(flags && flags.hasReadyOrDelivered);
+      const allDelivered = !!(flags && flags.allDelivered);
+      const allReadyOrDelivered = !!(flags && flags.allReadyOrDelivered);
+      const sendDisabled = !ticket || !hasItems;
+      const receivedDisabled = !(ticket && ticket.channel==="salon" && ticket.tableId);
+      const clearDisabled = !(ticket && ticket.channel==="salon");
+      const moveDisabled = !(ticket && ticket.channel==="salon" && ticket.tableId);
+      const cancelDisabled = !ticket;
+      const canMenuOpen = !!(table && !ticket);
+      const detailsDisabled = !(ticket || canMenuOpen);
+      const isReady = allDelivered || !!(table && table.status === "lista");
+      const canCharge = !!(ticket && hasItems && (allDelivered || allReadyOrDelivered || (table && table.status === "lista") || ticket.kitchenStatus === "listo"));
+      const setDisabled = (id, v)=>{ const el=$(id); if(el) el.disabled = v; };
+      const setVisible = (id, v)=>{ const el=$(id); if(el) el.style.display = v ? "" : "none"; };
+      setDisabled("btnOpen", openDisabled);
+      setDisabled("btnOpen2", openDisabled);
+      setDisabled("btnSendKitchen", sendDisabled);
+      setDisabled("btnSendKitchen2", sendDisabled);
+      setDisabled("btnMenuDetails", detailsDisabled);
+      setDisabled("btnCharge", !canCharge);
+      setDisabled("btnCharge2", !canCharge);
+      const showCharge = canCharge || !!(table && table.status === "lista");
+      setVisible("btnCharge", showCharge);
+      setVisible("btnCharge2", showCharge);
+      setVisible("btnOpen2", canOpen || canEdit);
+      setVisible("btnSendKitchen2", !!ticket);
+      setVisible("btnMoveTable", !!(ticket && hasItems));
+      setDisabled("btnMarkReceived", receivedDisabled);
+      setDisabled("btnClearSelection", clearDisabled);
+      setDisabled("btnMoveTable", moveDisabled);
+      setDisabled("btnCancel", cancelDisabled);
+      const btnOpenLabel = $("btnOpen");
+      if(btnOpenLabel) btnOpenLabel.textContent = openLabel;
+      const btnOpenLabel2 = $("btnOpen2");
+      if(btnOpenLabel2) btnOpenLabel2.textContent = canEdit ? "Ver menu" : openLabel;
+      const btnMenuDetails = $("btnMenuDetails");
+      if(btnMenuDetails) btnMenuDetails.textContent = canMenuOpen ? "Abrir mesa" : "Ver comanda";
+      const sendLabel = hasReadyOrDelivered ? "Sumar producto" : "Enviar a cocina";
+      const btnSendKitchen = $("btnSendKitchen");
+      if(btnSendKitchen) btnSendKitchen.textContent = sendLabel;
+      const btnSendKitchen2 = $("btnSendKitchen2");
+      if(btnSendKitchen2) btnSendKitchen2.textContent = sendLabel;
+
+      $("ticketStatus").textContent = ticket ? ticketStatusText(ticket) : "-";
+
+      renderTicketMeta(db, ticket);
+      renderCart(ticket);
+
+      const btnPrint = $("btnPrint");
+      if(btnPrint){
+        if(ticket){
+          btnPrint.style.display = "";
+          btnPrint.href = "/print.html?id=" + encodeURIComponent(ticket.id);
+          btnPrint.dataset.tid = ticket.id;
+          btnPrint.onclick = ()=>{ localStorage.setItem(LS_LAST_PRINT, ticket.id); };
+        } else {
+          btnPrint.style.display = "none";
+          btnPrint.onclick = null;
+        }
+      }
+
+      // tickets list
+      if(mode !== "salon") renderTicketsList(db);
+
+      // handlers
+      const onClick = (id, fn)=>{ const el=$(id); if(el) el.onclick = fn; };
+      onClick("btnOpen", ()=>{
+        if(!table) return toast("Selecciona una mesa");
+        if(canEdit){
+          if(isMobileUI()) setMobileTab("menu");
+          focusOrderActions();
+          return;
+        }
+        sendAction("ticket:ensureForTable", { tableId: table.id });
+        toast("Comanda abierta");
+        if(isMobileUI()) setMobileTab("menu");
+        focusOrderActions();
+      });
+      onClick("btnOpen2", ()=>{
+        if(!table) return toast("Selecciona una mesa");
+        if(canEdit){
+          if(isMobileUI()) setMobileTab("menu");
+          focusOrderActions();
+          return;
+        }
+        sendAction("ticket:ensureForTable", { tableId: table.id });
+        toast("Comanda abierta");
+        if(isMobileUI()) setMobileTab("menu");
+        focusOrderActions();
+      });
+      const afterSend = ()=>{
+        if(orderScreenOpen) closeOrderScreen(false);
+        if(isMobileUI()) setMobileTab("tables");
+      };
+      onClick("btnSendKitchen", ()=>{
+        if(!ticket) return;
+        if(!hasNewItems) return toast("No hay productos nuevos para enviar");
+        sendAction("ticket:sendToKitchen", { ticketId: ticket.id });
+        toast(hasReadyOrDelivered ? "Productos sumados a cocina" : "Enviado a cocina");
+        afterSend();
+      });
+      onClick("btnSendKitchen2", ()=>{
+        if(!ticket) return;
+        if(!hasNewItems) return toast("No hay productos nuevos para enviar");
+        sendAction("ticket:sendToKitchen", { ticketId: ticket.id });
+        toast(hasReadyOrDelivered ? "Productos sumados a cocina" : "Enviado a cocina");
+        afterSend();
+      });
+      onClick("btnMenuDetails", ()=>{
+        if(canMenuOpen){
+          if(!table) return toast("Selecciona una mesa");
+          sendAction("ticket:ensureForTable", { tableId: table.id });
+          toast("Comanda abierta");
+          return;
+        }
+        if(!ticket) return toast("Selecciona una comanda primero");
+        openOrderScreen();
+      });
+      onClick("btnCharge", ()=>{
+        if(!ticket) return;
+        const totals = calcTotals(ticket);
+        openPayModal(totals.total);
+      });
+      onClick("btnCharge2", ()=>{
+        if(!ticket) return;
+        const totals = calcTotals(ticket);
+        openPayModal(totals.total);
+      });
+      $("btnApplyDiscount").onclick = ()=>{
+        if(!ticket) return toast("Selecciona una comanda primero");
+        const type = $("discountType").value;
+        const raw = Number(($("discountValue").value || "0").replace(",", "."));
+        const scope = $("discountScope").value;
+        if(type === "none" || !Number.isFinite(raw) || raw <= 0){
+          if(scope === "line"){
+            const lineId = $("discountItem").value || "";
+            if(lineId) sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId, discount: null });
+          } else {
+            sendAction("ticket:setDiscount", { ticketId: ticket.id, discount: null });
+          }
+          return;
+        }
+        if(scope === "line"){
+          const lineId = $("discountItem").value || "";
+          if(!lineId) return toast("Selecciona un producto");
+          sendAction("ticket:setLineDiscount", { ticketId: ticket.id, lineId, discount: { type, value: raw } });
+        } else {
+          sendAction("ticket:setDiscount", { ticketId: ticket.id, discount: { type, value: raw } });
+        }
+      };
+
+      const btnMarkReceived = $("btnMarkReceived");
+      if(btnMarkReceived) btnMarkReceived.onclick = ()=>{
+        if(!ticket || !ticket.tableId) return;
+        const table = (db.tables||[]).find(t=>t.id===ticket.tableId);
+        const next = !(table && table.received);
+        sendAction("table:setReceived", { tableId: ticket.tableId, received: next });
+        toast(next ? "Mesa marcada como recibida" : "Mesa desmarcada");
+      };
+
+      $("btnMoveTable").onclick = ()=>{
+        if(!ticket || !ticket.tableId) return;
+        const raw = prompt("Transferir a mesa (n??mero o ID, ej: 5 o T5):", "");
+        if(!raw) return;
+        let to = String(raw).trim().toUpperCase();
+        if(!to) return;
+        if(!to.startsWith("T")) {
+          const n = to.replace(/\D/g, "");
+          if(!n) return toast("Mesa inv??lida");
+          to = "T" + n;
+        }
+        sendAction("ticket:moveTable", { ticketId: ticket.id, toTableId: to });
+        toast("Transferencia enviada");
+      };
+
+      $("btnCancel").onclick = ()=>{
+        if(!ticket) return;
+        if(!confirm("Anular la comanda?")) return;
+        const reason = prompt("Motivo (opcional):", "") || "";
+        sendAction("ticket:cancel", { ticketId: ticket.id, reason });
+        toast("Comanda anulada");
+      };
+
+
+      $("payConfirm").onclick = ()=>{
+        if(!ticket) return closePayModal();
+        const requirePrint = localStorage.getItem(LS_REQUIRE_PRINT) !== "0";
+        const printed = localStorage.getItem(LS_LAST_PRINT) === ticket.id;
+        if(requirePrint && !printed){
+          if(isMobileUI()){
+            sendAction("notify:printRequired", { ticketId: ticket.id, tableId: ticket.tableId });
+            toast("Aviso enviado para imprimir en PC");
+            return;
+          }
+          toast("Primero imprime la comanda");
+          const href = "/print.html?id=" + encodeURIComponent(ticket.id);
+          window.open(href, "_blank");
+          return;
+        }
+        const total = Number(($("payPaid").dataset.total)||0);
+        const paidRaw = String($("payPaid").value || "").trim();
+        const paid = paidRaw ? Number(paidRaw.replace(",", ".")) : total;
+        if(!Number.isFinite(paid)){
+          toast("Importe invalido");
+          $("payPaid").focus();
+          return;
+        }
+        if(paid + 0.00001 < total){
+          toast("El importe es menor al total");
+          $("payPaid").focus();
+          return;
+        }
+        const fiscalType = $("payFiscal").value;
+
+        // Si es fiscal, guardamos datos del receptor / doc antes de cerrar
+        if(fiscalType && fiscalType !== "no_fiscal"){
+          const rdt = $("rDocType").value;
+          sendAction("ticket:setMeta", {
+            ticketId: ticket.id,
+              fiscal: {
+                docType: $("fDocType").value,
+                receiverDocType: (rdt === "ConsumidorFinal") ? "" : rdt,
+                receiverDocNumber: (rdt === "ConsumidorFinal") ? "" : ($("rDocNum").value || "").trim(),
+                receiverName: ($("rName").value || "").trim(),
+                receiverIva: ($("rIva").value || "").trim(),
+              }
+            });
+        }
+
+        sendAction("ticket:close", {
+          ticketId: ticket.id,
+          paymentMethod: $("payMethod").value,
+          fiscalType,
+          paid: isFinite(paid) ? paid : total
+        });
+        closePayModal();
+        toast("Cobro registrado");
+      };
+
+      const discountType = $("discountType");
+      const discountValue = $("discountValue");
+      const btnDiscount = $("btnApplyDiscount");
+      if(ticket){
+        const d = ticket.discount || {};
+        discountType.value = d.type ? d.type : "none";
+        discountValue.value = d.value ? String(d.value) : "";
+        discountValue.disabled = (discountType.value === "none");
+        if(btnDiscount) btnDiscount.disabled = false;
+        fillDiscountTargets(ticket);
+      } else {
+        discountType.value = "none";
+        discountValue.value = "";
+        discountValue.disabled = true;
+        if(btnDiscount) btnDiscount.disabled = true;
+        fillDiscountTargets(null);
+      }
+    }
+
+    function updateKitchenNotice(db){
+      const box = $("kitchenNotice");
+      if(!box || !db){ if(box) box.style.display = "none"; return; }
+      const ready = (db.tickets||[]).filter(t=>{
+        if(!t || t.status!=="abierta" || !t.tableId) return false;
+        const flags = getTicketItemFlags(t);
+        return !!(flags.hasReady && !flags.allDelivered);
+      });
+      if(!ready.length){ box.style.display = "none"; return; }
+      const names = ready.map(t=>{
+        const table = (db.tables||[]).find(tb=>tb.id===t.tableId);
+        return table ? (table.name || table.id || t.tableId) : t.tableId;
+      });
+      const bubbles = names.map(n=>{
+        const label = String(n || "").trim();
+        const mesaLabel = label.toLowerCase().includes("mesa") ? label : ("Mesa " + label);
+        return `<div class="kitchenNoticeBubble">${esc(mesaLabel)} lista</div>`;
+      }).join("");
+      box.innerHTML = `<div class="kitchenNoticeTitle">Cocina</div><div class="kitchenNoticeBubbles">${bubbles}</div>`;
+      box.style.display = "";
+    }
+
+    onState((db, connected)=>{
+      window.__db = db;
+      $("wsStatus").textContent = connected ? "OK" : "Reconectando??";
+      const cashEl = $("cashTurnStatus");
+      if(cashEl){
+        if(!db || !db.cash){
+          cashEl.textContent = "-";
+        } else {
+        const turns = Array.isArray(db.cash.turns) ? db.cash.turns : [];
+        const sessions = Array.isArray(db.cash.sessions) ? db.cash.sessions : [];
+        const dateKey = getBusinessDateKey(db);
+        const openTurn = turns.find(t=>t && t.dateKey === dateKey && !t.closedAt && !t.locked);
+        const openAny = turns.find(t=>t && !t.closedAt && !t.locked);
+        const openSession = sessions.find(s=>s && s.dateKey === dateKey && !s.closedAt);
+        const openSessionAny = sessions.find(s=>s && !s.closedAt);
+        const hasOpenSessionId = !!db.cash.openSessionId;
+        const activeTurn = openTurn || openAny;
+        const activeSession = openSession || openSessionAny || hasOpenSessionId;
+        cashEl.textContent = activeTurn ? `${activeTurn.shift}` : (activeSession ? "Caja" : "Sin turno");
+        const hasCashData = turns.length > 0 || sessions.length > 0 || hasOpenSessionId;
+        if(!activeTurn && !activeSession && hasCashData && connected){
+          verifyCashOpen().then((isOpen)=>{
+            if(isOpen){
+              cashEl.textContent = "Caja";
+              return;
+            }
+            if(!window.__noTurnWarnAt || (Date.now() - window.__noTurnWarnAt) > 300000){
+              window.__noTurnWarnAt = Date.now();
+              toast("Atencion: no hay turno de caja abierto");
+            }
+          });
+        }
+        }
+      }
+
+      // asegurar empleado para presentismo
+      const myName = getMozoName();
+      if(connected && myName && ensuredName !== myName){
+        if(sendAction("people:ensureEmployee", { name: myName })) ensuredName = myName;
+      }
+
+      // estado de turno
+      const emp = (db && db.people && db.people.employees) ? (db.people.employees||[]).find(e => (e.name||"").toLowerCase() === myName.toLowerCase()) : null;
+      const last = emp ? (db.attendance||[]).find(a => a.employeeId === emp.id) : null;
+      $("attStatus").textContent = last ? (last.type === "in" ? "Dentro" : "Fuera") : "-";
+isCheckedIn = !!(last && last.type === "in");
+applyPresentismoGate();
+
+      renderTables(db);
+      renderMenu(db);
+      renderCurrent(db);
+      applyPresentismoGate();
+      updateKitchenNotice(db);
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

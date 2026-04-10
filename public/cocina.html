@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Cocina</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Cocina ? comandas en tiempo real</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <span id="adminLinks">
+          <div class="navGroup">
+            <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+            
+          
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+          
+        </span>
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="row" style="align-items:flex-end;">
+      <div style="flex:1">
+        <div class="small">Nombre (opcional)</div>
+        <input id="name" class="input" placeholder="Cocina" />
+      </div>
+      <div class="badge2">Estado <strong id="wsStatus">?</strong></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row" style="align-items:flex-end; gap:12px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:240px;">
+        <div class="small">Filtro</div>
+        <div class="chips" style="margin-top:6px;">
+          <div class="chip active" data-filter="pendientes">Pendientes</div>
+          <div class="chip" data-filter="listos">Listos</div>
+          <div class="chip" data-filter="todo">Todo</div>
+        </div>
+      </div>
+      <div style="min-width:220px;">
+        <div class="small">Sector</div>
+        <select id="sectorSel" class="input"></select>
+      </div>
+    </div>
+
+    <div class="kitchenLists" style="margin-top:12px;">
+      <div class="kitchenListGroup" id="groupPending">
+        <div class="small" style="letter-spacing:.22em; text-transform:uppercase; font-weight:800;">Pendientes</div>
+        <div id="listPending" style="margin-top:8px;"></div>
+      </div>
+      <div class="kitchenListGroup" id="groupReady">
+        <div class="small" style="letter-spacing:.22em; text-transform:uppercase; font-weight:800;">Listos</div>
+        <div id="listReady" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+    const $ = (id)=>document.getElementById(id);
+
+    async function setupRoleUI(){
+      try{
+        const me = await fetch('/api/auth/me', {cache:'no-store'}).then(r=>r.json());
+        const el = document.getElementById('adminLinks');
+        if(el) el.style.display = (me && me.role==='admin') ? '' : 'none';
+      }catch(e){}
+    }
+
+    const LS_NAME = "resto_v8_cocina_name";
+    const LS_FILTER = "resto_v8_cocina_filter";
+    const LS_SECTOR = "resto_v8_cocina_sector";
+
+    let filter = localStorage.getItem(LS_FILTER) || "pendientes";
+    let sector = localStorage.getItem(LS_SECTOR) || "__all";
+
+    function sectorName(db, id){
+      const secs = (((db.settings||{}).kitchen||{}).sectors || [{id:"general",name:"General",enabled:true}]);
+      const s = secs.find(x=>String(x.id)===String(id));
+      return s ? (s.name || s.id) : String(id);
+    }
+
+    function fillSectorSel(db){
+      const secs = (((db.settings||{}).kitchen||{}).sectors || [{id:"general",name:"General",enabled:true}]).filter(s=>s && s.enabled!==false);
+      const sel = $("sectorSel");
+      sel.innerHTML = `<option value="__all">Todos</option>` + secs.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
+      sel.value = sector;
+      sel.onchange = ()=>{
+        sector = sel.value || "__all";
+        localStorage.setItem(LS_SECTOR, sector);
+        render(window.__db || db);
+      };
+    }
+
+    function setFilter(f){
+      filter = f;
+      localStorage.setItem(LS_FILTER, filter);
+      document.querySelectorAll(".chip").forEach(ch=>ch.classList.toggle("active", ch.dataset.filter === filter));
+      render(window.__db || null);
+    }
+
+    document.querySelectorAll(".chip").forEach(ch=>ch.addEventListener("click", ()=>setFilter(ch.dataset.filter)));
+
+    $("name").value = localStorage.getItem(LS_NAME) || "Cocina";
+    function setName(n){
+      localStorage.setItem(LS_NAME, n || "");
+      connect("cocina", n || "Cocina");
+    }
+    setName($("name").value.trim());
+    $("name").addEventListener("input", ()=>setName($("name").value.trim()));
+
+    function ticketLabel(t){
+      if(t.channel === "salon") return (t.tableId ? ("Mesa " + t.tableId.replace("T","")) : "Sal?n");
+      if(t.channel === "mostrador") return "Mostrador";
+      return "Delivery";
+    }
+
+    function statusBadge(s){
+      const map = { recibido:"Recibido", listo:"Listo", entregado:"Entregado", borrador:"Borrador" };
+      return map[s] || s;
+    }
+
+    function itemStatus(it, fallback){
+      const s = String((it && it.kitchenStatus) || "").trim();
+      if(s) return s;
+      return String(fallback || "borrador");
+    }
+
+    function render(db){
+      const pendingWrap = $("listPending");
+      const readyWrap = $("listReady");
+      const groupPending = $("groupPending");
+      const groupReady = $("groupReady");
+      if(!db){
+        if(pendingWrap) pendingWrap.innerHTML = "";
+        if(readyWrap) readyWrap.innerHTML = "";
+        return;
+      }
+
+      fillSectorSel(db);
+
+      const open = (db.tickets||[]).filter(t => t.status === "abierta");
+      const listAll = open
+        .sort((a,b)=>Number(a.createdAt||0) - Number(b.createdAt||0));
+      const pendingCards = [];
+      const readyCards = [];
+
+      for(const t of listAll){
+        const itemsAll = (t.items||[]);
+        const itemsSel = (sector==="__all") ? itemsAll : itemsAll.filter(it => String(it.sectorId||"general") === String(sector));
+        if(itemsSel.length===0) continue;
+
+        const pendingItems = itemsSel.filter(it => ["recibido","en_preparacion"].includes(itemStatus(it, t.kitchenStatus)));
+        const readyItems = itemsSel.filter(it => itemStatus(it, t.kitchenStatus) === "listo");
+        if(pendingItems.length===0 && readyItems.length===0) continue;
+
+        const renderItems = (list)=>list.map(it=>{
+          const mods = (it.modifiers||[]).map(m=>{
+            const price = Number(m.price||0);
+            const tag = (String(m.kind||"")==="remove") ? `Sin ${m.optionName}` : m.optionName;
+            return price>0 ? `${tag} (+${money(price)})` : String(tag);
+          }).join(" ? ");
+          return `<div class="mini"><strong>${esc(it.qty)}?</strong> ${esc(it.name)}${mods?`<div class="small" style="margin-left:22px">${esc(mods)}</div>`:""}</div>`;
+        }).join("");
+
+        // sectores presentes en este ticket (para imprimir por sector)
+        const secsIn = [...new Set(itemsAll.map(it=>String(it.sectorId||"general")))].filter(sid=>sid !== "general");
+        const printBtns = secsIn.map(sid=>`<a class="btn" href="/print.html?id=${encodeURIComponent(t.id)}&kitchen=1&sector=${encodeURIComponent(sid)}" target="_blank" style="flex:1; text-align:center;">Imprimir ${esc(sectorName(db,sid))}</a>`).join("");
+        const shouldPrintInPending = pendingItems.length > 0 || readyItems.length === 0;
+
+        if(pendingItems.length){
+          const pendingLabel = "recibido";
+          const card = `
+            <div class="card kitchenCard" style="margin-top:12px;">
+              <div class="row" style="align-items:center; justify-content:space-between;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div class="dot busy"></div>
+                  <div>
+                    <div style="font-weight:900">${esc(ticketLabel(t))}</div>
+                    <div class="small"><span class="kitchenStatus">${esc(statusBadge(pendingLabel))}</span> - Por ${esc(t.createdBy || "")}</div>
+                  </div>
+                </div>
+                <div class="badge2">Items <strong>${pendingItems.reduce((a,it)=>a+it.qty,0)}</strong></div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div>${renderItems(pendingItems)}</div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn primary" data-st="${esc(t.id)}" data-v="listo" data-scope="pending" style="flex:1">Listo</button>
+              </div>
+              ${printBtns && shouldPrintInPending ? `<div class="row" style="margin-top:10px;">${printBtns}</div>` : ``}
+            </div>
+          `;
+          pendingCards.push(card);
+        }
+
+        if(readyItems.length){
+          const card = `
+            <div class="card kitchenCard ready" style="margin-top:12px;">
+              <div class="row" style="align-items:center; justify-content:space-between;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div class="dot ready"></div>
+                  <div>
+                    <div style="font-weight:900">${esc(ticketLabel(t))}</div>
+                    <div class="small"><span class="kitchenStatus ready">${esc(statusBadge("listo"))}</span> - Por ${esc(t.createdBy || "")}</div>
+                  </div>
+                </div>
+                <div class="badge2">Items <strong>${readyItems.reduce((a,it)=>a+it.qty,0)}</strong></div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div>${renderItems(readyItems)}</div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn" data-st="${esc(t.id)}" data-v="en_preparacion" data-scope="ready" style="flex:1">Volver a preparacion</button>
+                <button class="btn primary" data-st="${esc(t.id)}" data-v="entregado" data-scope="ready" style="flex:1">Entregado</button>
+              </div>
+              ${printBtns && !shouldPrintInPending ? `<div class="row" style="margin-top:10px;">${printBtns}</div>` : ``}
+            </div>
+          `;
+          readyCards.push(card);
+        }
+      }
+
+      const showPending = filter !== "listos";
+      const showReady = filter !== "pendientes";
+      if(groupPending) groupPending.style.display = showPending ? "" : "none";
+      if(groupReady) groupReady.style.display = showReady ? "" : "none";
+      if(pendingWrap) pendingWrap.innerHTML = pendingCards.join("") || `<div class="small">No hay pedidos pendientes.</div>`;
+      if(readyWrap) readyWrap.innerHTML = readyCards.join("") || `<div class="small">No hay pedidos listos.</div>`;
+
+      document.querySelectorAll("#listPending [data-st], #listReady [data-st]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const tid = btn.getAttribute("data-st");
+          const v = btn.getAttribute("data-v");
+          const scope = btn.getAttribute("data-scope") || "";
+          sendAction("ticket:setKitchenStatus", { ticketId: tid, status: v, scope });
+          if(v === "listo" || v === "entregado"){
+            setFilter("todo");
+          }
+          toast("Actualizado");
+        });
+      });
+    }
+
+    onState((db, connected)=>{
+      window.__db = db;
+      $("wsStatus").textContent = connected ? "OK" : "Reconectando?";
+      render(db);
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

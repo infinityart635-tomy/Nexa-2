@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ?? Impresiones Mozo</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .printRow{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);}
+    .printMeta{display:flex; flex-direction:column; gap:2px;}
+    .printList{margin-top:8px;}
+    .printActions{display:flex; gap:8px; flex-wrap:wrap;}
+    .empty{padding:18px 0; color:var(--muted);}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Impresiones enviadas por mozo</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center; gap:10px;">
+        <div>
+          <div class="h2">Cola de impresi?n</div>
+          <div class="mini muted">Recibidos desde el celular del mozo.</div>
+        </div>
+        <div class="printActions">
+          <div class="badge2">Estado <strong id="wsStatus">???</strong></div>
+          <button id="btnRefresh" class="btn" type="button">Actualizar</button>
+          <button id="btnClearDone" class="btn" type="button">Limpiar impresos</button>
+        </div>
+      </div>
+      <div class="hr" style="margin-top:12px;"></div>
+      <div id="printList" class="printList"></div>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const DONE_KEY = "nexa_print_done_ids";
+    const $ = (id)=>document.getElementById(id);
+
+    function getDoneSet(){
+      try{
+        const raw = localStorage.getItem(DONE_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(arr) ? arr : []);
+      }catch{ return new Set(); }
+    }
+    function saveDoneSet(set){
+      try{ localStorage.setItem(DONE_KEY, JSON.stringify(Array.from(set))); }catch{}
+    }
+    function formatWhen(ts){
+      try{ return new Date(ts||Date.now()).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); }catch{ return ""; }
+    }
+
+    function render(){
+      const listEl = $("printList");
+      if(!listEl || !window.RestoApp) return;
+      const done = getDoneSet();
+      const all = window.RestoApp.getNotifications()
+        .filter(n => n && n.data && n.data.action === "print:required")
+        .sort((a,b)=>Number(b.at||0)-Number(a.at||0));
+      const pending = all.filter(n => !done.has(n.id));
+      if(!pending.length){
+        listEl.innerHTML = `<div class="empty">No hay impresiones pendientes.</div>`;
+        return;
+      }
+      listEl.innerHTML = pending.map(n=>{
+        const tid = (n.data && n.data.ticketId) ? String(n.data.ticketId) : "";
+        const text = n.text || "Imprimir comanda";
+        const time = formatWhen(n.at);
+        return `
+          <div class="printRow">
+            <div class="printMeta">
+              <div style="font-weight:800;">${window.RestoApp.esc(text)}</div>
+              <div class="mini muted">${window.RestoApp.esc(time)} ?? ${window.RestoApp.esc(n.by||"")}</div>
+            </div>
+            <div class="printActions">
+              <button class="btn primary" data-print="${window.RestoApp.esc(tid)}" data-id="${window.RestoApp.esc(n.id)}">Imprimir</button>
+              <button class="btn" data-done="${window.RestoApp.esc(n.id)}">Marcar listo</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      listEl.querySelectorAll("[data-print]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const tid = btn.getAttribute("data-print") || "";
+          const id = btn.getAttribute("data-id") || "";
+          if(tid) window.open("/print.html?id=" + encodeURIComponent(tid), "_blank");
+          if(id){
+            const done = getDoneSet();
+            done.add(id);
+            saveDoneSet(done);
+            render();
+          }
+        });
+      });
+      listEl.querySelectorAll("[data-done]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-done") || "";
+          if(!id) return;
+          const done = getDoneSet();
+          done.add(id);
+          saveDoneSet(done);
+          render();
+        });
+      });
+    }
+
+    $("btnRefresh")?.addEventListener("click", render);
+    $("btnClearDone")?.addEventListener("click", ()=>{
+      localStorage.removeItem(DONE_KEY);
+      render();
+    });
+
+    if(window.RestoApp && window.RestoApp.connect){
+      window.RestoApp.connect("mozo", "PC");
+      window.RestoApp.onState((db, connected)=>{
+        const ws = $("wsStatus");
+        if(ws) ws.textContent = connected ? "OK" : "Reconectando???";
+      });
+    }
+
+    window.addEventListener("resto:notify", render);
+    render();
+  </script>
+</body>
+</html>
+
+

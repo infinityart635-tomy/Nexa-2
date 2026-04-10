@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Cuenta</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .top{display:none;}
+    .accessShell{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding:20px 0;
+    }
+    .authCard{
+      width:min(100%, 520px);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:8px;
+      background:
+        linear-gradient(180deg, rgba(24,26,32,.98), rgba(12,14,18,.98)),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      box-shadow:
+        0 28px 60px rgba(0,0,0,.45),
+        inset 0 1px 0 rgba(255,255,255,.04);
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .authCard::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto;
+      height:3px;
+      background:linear-gradient(90deg, rgba(120,240,190,.92), rgba(120,220,255,.72));
+    }
+    .authHeader{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .brandBlock{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      min-width:0;
+    }
+    .brandDot{
+      width:40px;
+      height:40px;
+      border-radius:8px;
+      border:1px solid rgba(120,240,190,.24);
+      background:linear-gradient(180deg, rgba(120,240,190,.18), rgba(120,240,190,.06));
+      display:grid;
+      place-items:center;
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.18em;
+      color:#ecfff6;
+      flex:0 0 auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .authEyebrow{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);}
+    .authTitle{margin:2px 0 0; font-size:28px; line-height:1.02; font-weight:900;}
+    .authSub{margin-top:4px; max-width:30ch; color:var(--muted); line-height:1.35;}
+    .statusBar{
+      margin:0;
+      padding:8px 10px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      line-height:1;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .tabRow{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:6px;
+      padding:4px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:rgba(255,255,255,.03);
+    }
+    .tabBtn{
+      border:1px solid transparent;
+      border-radius:8px;
+      padding:9px 10px;
+      background:transparent;
+      color:var(--text);
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      cursor:pointer;
+      min-width:0;
+    }
+    .tabBtn.active{
+      border-color:rgba(120,240,190,.22);
+      background:linear-gradient(180deg, rgba(120,240,190,.16), rgba(120,240,190,.08));
+      color:#eafff5;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .msgBox{
+      margin-top:10px;
+      padding:10px 11px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:rgba(255,255,255,.02);
+      line-height:1.45;
+      color:var(--muted);
+    }
+    .msgBox{display:none;}
+    .msgBox.show{display:block;}
+    .msgBox.error{border-color:rgba(255,110,110,.34); background:rgba(120,28,28,.18); color:#ffd7d7;}
+    .msgBox.success{border-color:rgba(120,240,190,.34); background:rgba(18,86,52,.18); color:#d9ffe9;}
+    .panel{
+      display:none;
+      margin-top:12px;
+      padding:14px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    }
+    .panel.active{display:block;}
+    .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+    @media (max-width: 720px){
+      .formGrid{grid-template-columns:minmax(0,1fr);}
+    }
+    .field{display:flex; flex-direction:column; gap:7px;}
+    .field.full{grid-column:1 / -1;}
+    .authCard .small{
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(241,241,244,.64);
+    }
+    .authCard .input{
+      border-radius:8px;
+      padding:12px 13px;
+      background:rgba(0,0,0,.22);
+      border-color:rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .authCard .input:focus{
+      border-color:rgba(120,240,190,.45);
+      box-shadow: 0 0 0 3px rgba(120,240,190,.10), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .fieldHint{display:none;}
+    .readonlyBox{min-height:44px; display:flex; align-items:center; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.02); line-height:1.35;}
+    .formActions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .authCard .btn{
+      border-radius:8px;
+      padding:10px 14px;
+      font-size:11px;
+    }
+    .authCard .btn.primary{
+      min-width:140px;
+      border-color:rgba(120,240,190,.42);
+      background:linear-gradient(180deg, rgba(120,240,190,.18), rgba(120,240,190,.08));
+      color:#ecfff6;
+    }
+    .btn.flat{border-color:rgba(255,255,255,.12); background:rgba(255,255,255,.02);}
+    .sectionNote{display:none;}
+    .miniBox{display:none;}
+    @media (max-height: 820px){
+      .authCard{padding:14px;}
+      .panel{padding:12px;}
+      .authTitle{font-size:24px;}
+      .brandDot{width:36px; height:36px;}
+    }
+    @media (max-width: 560px){
+      .authCard{padding:14px 12px;}
+      .authHeader{gap:10px;}
+      .brandBlock{gap:10px;}
+      .authTitle{font-size:24px;}
+      .tabRow{grid-template-columns:1fr;}
+      .statusBar{width:100%; text-align:center;}
+      .formActions .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap accessShell">
+    <section class="authCard">
+      <div class="authHeader">
+        <div class="brandBlock">
+          <div class="brandDot">N</div>
+          <div>
+            <div class="authEyebrow">NEXA</div>
+            <h1 class="authTitle" id="viewTitle">Ingresar</h1>
+            <div class="authSub" id="viewSub">Usuario o mail y contrasena.</div>
+          </div>
+        </div>
+        <div class="statusBar" id="statusBar">Cargando...</div>
+      </div>
+      <div class="tabRow" role="tablist" aria-label="Cuenta">
+        <button class="tabBtn active" type="button" data-tab="login">Ingresar</button>
+        <button class="tabBtn" type="button" data-tab="register">Crear cuenta</button>
+        <button class="tabBtn" type="button" data-tab="recover">Recuperar</button>
+      </div>
+      <div class="msgBox" id="msgBox"></div>
+
+      <section class="panel active" data-panel="login">
+        <div class="formGrid">
+          <div class="field full">
+            <label class="small" for="loginIdentifier">Usuario o mail</label>
+            <input id="loginIdentifier" class="input" autocomplete="username" placeholder="Usuario o mail"/>
+          </div>
+          <div class="field full">
+            <label class="small" for="loginPassword">Contrasena</label>
+            <input id="loginPassword" class="input" type="password" autocomplete="current-password" placeholder="Contrasena"/>
+          </div>
+        </div>
+        <div class="formActions">
+          <button id="btnLogin" class="btn primary" type="button">Entrar</button>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="register">
+        <div class="formGrid">
+          <div class="field">
+            <label class="small" for="registerName">Nombre</label>
+            <input id="registerName" class="input" autocomplete="name" placeholder="Tu nombre"/>
+          </div>
+          <div class="field">
+            <label class="small" for="registerUsername">Usuario</label>
+            <input id="registerUsername" class="input" autocomplete="username" placeholder="Usuario"/>
+          </div>
+          <div class="field full">
+            <label class="small" for="registerEmail">Mail</label>
+            <input id="registerEmail" class="input" type="email" autocomplete="email" placeholder="mail@ejemplo.com"/>
+          </div>
+          <div class="field">
+            <label class="small" for="registerPassword">Contrasena</label>
+            <input id="registerPassword" class="input" type="password" autocomplete="new-password" placeholder="Minimo 4 caracteres"/>
+          </div>
+          <div class="field">
+            <label class="small" for="registerPassword2">Repetir contrasena</label>
+            <input id="registerPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
+          </div>
+          <div class="field full">
+            <label class="small" for="registerQuestion">Pregunta de seguridad</label>
+            <input id="registerQuestion" class="input" placeholder="Ej: Nombre de mi primera mascota"/>
+          </div>
+          <div class="field full">
+            <label class="small" for="registerAnswer">Respuesta</label>
+            <input id="registerAnswer" class="input" autocomplete="off" placeholder="Respuesta de seguridad"/>
+          </div>
+        </div>
+        <div class="formActions">
+          <button id="btnRegister" class="btn primary" type="button">Crear cuenta</button>
+          <button id="btnToLogin" class="btn flat" type="button">Volver a ingresar</button>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="recover">
+        <div class="formGrid">
+          <div class="field full">
+            <label class="small" for="recoverIdentifier">Usuario o mail</label>
+            <input id="recoverIdentifier" class="input" autocomplete="username" placeholder="Usuario o mail"/>
+          </div>
+          <div class="field full">
+            <label class="small">Pregunta de seguridad</label>
+            <div id="recoverQuestionBox" class="readonlyBox">Escribe tu usuario o mail y toca Ver pregunta.</div>
+          </div>
+          <div class="field full">
+            <label class="small" for="recoverAnswer">Respuesta</label>
+            <input id="recoverAnswer" class="input" autocomplete="off" placeholder="Respuesta de seguridad"/>
+          </div>
+          <div class="field">
+            <label class="small" for="recoverPassword">Nueva contrasena</label>
+            <input id="recoverPassword" class="input" type="password" autocomplete="new-password" placeholder="Minimo 4 caracteres"/>
+          </div>
+          <div class="field">
+            <label class="small" for="recoverPassword2">Repetir contrasena</label>
+            <input id="recoverPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
+          </div>
+        </div>
+        <div class="formActions">
+          <button id="btnLoadQuestion" class="btn flat" type="button">Ver pregunta</button>
+          <button id="btnRecover" class="btn primary" type="button">Restablecer acceso</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    const params = new URLSearchParams(location.search);
+    const next = params.get("next") || sessionStorage.getItem("nexa_next") || "";
+    const state = {
+      tab: "login",
+      recoveryQuestion: ""
+    };
+
+    if (next) sessionStorage.setItem("nexa_next", next);
+
+    function profileUrl() {
+      const savedNext = next || sessionStorage.getItem("nexa_next") || "";
+      return savedNext ? `/profile.html?next=${encodeURIComponent(savedNext)}` : "/profile.html";
+    }
+
+    function showMessage(text, kind) {
+      const el = $("msgBox");
+      el.textContent = text || "";
+      el.className = "msgBox" + (text ? " show" : "") + (kind ? ` ${kind}` : "");
+    }
+
+    function setTab(tab) {
+      state.tab = tab;
+      $$('[data-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tab));
+      $$('[data-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === tab));
+      showMessage("", "");
+      if (tab === "login") {
+        $("viewTitle").textContent = "Ingresar";
+        $("viewSub").textContent = "Usuario o mail y contrasena.";
+      } else if (tab === "register") {
+        $("viewTitle").textContent = "Crear cuenta";
+        $("viewSub").textContent = "Nombre, usuario, mail y seguridad.";
+      } else {
+        $("viewTitle").textContent = "Recuperar acceso";
+        $("viewSub").textContent = "Usuario o mail, respuesta y nueva contrasena.";
+      }
+    }
+
+    function errorText(error) {
+      if (error === "missing_name") return "Escribe tu nombre.";
+      if (error === "missing_username") return "Escribe un usuario.";
+      if (error === "missing_email") return "Escribe un mail.";
+      if (error === "missing_identifier") return "Escribe tu usuario o mail.";
+      if (error === "missing_password") return "Escribe una contrasena.";
+      if (error === "weak_password") return "Usa una contrasena de al menos 4 caracteres.";
+      if (error === "missing_security_question") return "Escribe una pregunta de seguridad.";
+      if (error === "missing_security_answer") return "Completa la respuesta de seguridad.";
+      if (error === "username_taken") return "Ese usuario ya esta en uso.";
+      if (error === "email_taken") return "Ese mail ya esta en uso.";
+      if (error === "invalid_credentials") return "Usuario, mail o contrasena incorrectos.";
+      if (error === "account_not_found") return "No existe una cuenta con ese usuario o mail.";
+      if (error === "invalid_security_answer") return "La respuesta de seguridad no coincide.";
+      if (error === "recovery_not_configured") return "La recuperacion no esta configurada para esta cuenta.";
+      return error ? `Error: ${error}` : "No se pudo completar la accion.";
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, Object.assign({ cache: "no-store" }, options || {}));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const error = new Error(data && data.error ? data.error : "request_failed");
+        error.payload = data;
+        throw error;
+      }
+      return data;
+    }
+
+    async function loadStatus() {
+      try {
+        const [status, me] = await Promise.all([
+          api("/api/auth/status"),
+          api("/api/auth/me")
+        ]);
+        $("statusBar").textContent = status.userCount ? "Listo" : "Sin cuentas";
+        if (me && me.authenticated) {
+          location.replace(profileUrl());
+        }
+      } catch (error) {
+        $("statusBar").textContent = "No se pudo leer el estado del sistema.";
+        showMessage(errorText(error.message), "error");
+      }
+    }
+
+    async function submitLogin() {
+      const identifier = ($("loginIdentifier").value || "").trim();
+      const password = $("loginPassword").value || "";
+      if (!identifier) return showMessage("Escribe tu usuario o mail.", "error");
+      if (!password) return showMessage("Escribe tu contrasena.", "error");
+      try {
+        await api("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier, password })
+        });
+        showMessage("Sesion iniciada. Redirigiendo...", "success");
+        location.replace(profileUrl());
+      } catch (error) {
+        showMessage(errorText(error.message), "error");
+      }
+    }
+
+    async function submitRegister() {
+      const payload = {
+        name: ($("registerName").value || "").trim(),
+        username: ($("registerUsername").value || "").trim(),
+        email: ($("registerEmail").value || "").trim(),
+        password: $("registerPassword").value || "",
+        securityQuestion: ($("registerQuestion").value || "").trim(),
+        securityAnswer: ($("registerAnswer").value || "").trim()
+      };
+      const password2 = $("registerPassword2").value || "";
+      if (!payload.name) return showMessage("Escribe tu nombre.", "error");
+      if (!payload.username) return showMessage("Escribe un usuario.", "error");
+      if (!payload.email) return showMessage("Escribe un mail.", "error");
+      if (!payload.password || payload.password.length < 4) return showMessage("Usa una contrasena de al menos 4 caracteres.", "error");
+      if (payload.password !== password2) return showMessage("La confirmacion de contrasena no coincide.", "error");
+      if (!payload.securityQuestion) return showMessage("Escribe una pregunta de seguridad.", "error");
+      if (!payload.securityAnswer) return showMessage("Completa la respuesta de seguridad.", "error");
+      try {
+        await api("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        showMessage("Cuenta creada. Redirigiendo...", "success");
+        location.replace(profileUrl());
+      } catch (error) {
+        showMessage(errorText(error.message), "error");
+      }
+    }
+
+    async function loadRecoveryQuestion() {
+      const identifier = ($("recoverIdentifier").value || "").trim();
+      if (!identifier) return showMessage("Escribe tu usuario o mail.", "error");
+      try {
+        const data = await api("/api/auth/recoveryQuestion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier })
+        });
+        state.recoveryQuestion = String(data.question || "");
+        $("recoverQuestionBox").textContent = state.recoveryQuestion || "Sin pregunta guardada.";
+        showMessage("Pregunta cargada.", "success");
+      } catch (error) {
+        state.recoveryQuestion = "";
+        $("recoverQuestionBox").textContent = "No se encontro una pregunta para esa cuenta.";
+        showMessage(errorText(error.message), "error");
+      }
+    }
+
+    async function submitRecover() {
+      const identifier = ($("recoverIdentifier").value || "").trim();
+      const securityAnswer = ($("recoverAnswer").value || "").trim();
+      const newPassword = $("recoverPassword").value || "";
+      const confirmPassword = $("recoverPassword2").value || "";
+      if (!identifier) return showMessage("Escribe tu usuario o mail.", "error");
+      if (!state.recoveryQuestion) return showMessage("Primero carga la pregunta de seguridad.", "error");
+      if (!securityAnswer) return showMessage("Completa la respuesta de seguridad.", "error");
+      if (!newPassword || newPassword.length < 4) return showMessage("Usa una contrasena de al menos 4 caracteres.", "error");
+      if (newPassword !== confirmPassword) return showMessage("La confirmacion de contrasena no coincide.", "error");
+      try {
+        await api("/api/auth/recover", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier, securityAnswer, newPassword })
+        });
+        showMessage("Contrasena actualizada. Ahora puedes ingresar.", "success");
+        setTab("login");
+        $("loginIdentifier").value = identifier;
+        $("loginPassword").value = "";
+      } catch (error) {
+        showMessage(errorText(error.message), "error");
+      }
+    }
+
+    $$('[data-tab]').forEach((btn) => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+    $("btnLogin").addEventListener("click", submitLogin);
+    $("btnRegister").addEventListener("click", submitRegister);
+    $("btnToLogin").addEventListener("click", () => setTab("login"));
+    $("btnLoadQuestion").addEventListener("click", loadRecoveryQuestion);
+    $("btnRecover").addEventListener("click", submitRecover);
+    $("loginPassword").addEventListener("keydown", (ev) => { if (ev.key === "Enter") submitLogin(); });
+
+    loadStatus();
+  </script>
+</body>
+</html>

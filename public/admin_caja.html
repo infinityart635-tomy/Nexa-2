@@ -1,0 +1,2243 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Caja & Cierre</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+..cashGrid{display:grid; gap:12px; grid-template-columns: 1fr;}
+    .cashCol{display:flex; flex-direction:column; gap:12px;}
+    @media (min-width: 980px){ ..cashGrid{grid-template-columns: 1fr 1fr;} }
+    details.panel > summary{list-style:none; cursor:pointer;}
+    details.panel > summary::-webkit-details-marker{display:none;}
+    details.panel[open] > summary{border-bottom:1px solid var(--line);}
+    .panelBody{padding:14px 16px 18px;}
+    .viewTabs{
+      position:sticky;
+      top:118px;
+      z-index:80;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-top:12px;
+      padding:8px 0;
+      background: linear-gradient(180deg, rgba(8,8,10,.95), rgba(8,8,10,.25));
+      backdrop-filter: blur(6px);
+    }
+    .viewTab{
+      min-width:150px;
+      padding:14px 18px;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      font-size:12px;
+      font-weight:900;
+    }
+    .viewTab.active{
+      border-color: rgba(120,240,190,.65);
+      background: rgba(120,240,190,.12);
+      color:#eafff5;
+    }
+    .rangeBtn.active{
+      border-color: rgba(120,240,190,.65);
+      background: rgba(120,240,190,.12);
+      color:#eafff5;
+    }
+    .modalScrim{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:3000;
+      padding:16px;
+    }
+    .modalCard{
+      width:min(520px, 92vw);
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(22,22,26,.98), rgba(10,10,12,.98));
+      box-shadow: 0 26px 80px rgba(0,0,0,.6);
+      padding:18px 18px 16px;
+    }
+    .modalTitle{font-weight:900; letter-spacing:.12em; text-transform:uppercase; font-size:12px;}
+    .modalText{margin-top:8px; color:var(--muted);}
+    .modalActions{display:flex; gap:10px; justify-content:flex-end; margin-top:14px; flex-wrap:wrap;}
+    .btnDanger{
+      border-color: rgba(255,90,90,.65);
+      background: linear-gradient(180deg, rgba(255,90,90,.35), rgba(180,60,60,.2));
+      color:#ffecec;
+    }
+    .btnSuccess{
+      border-color: rgba(80,220,120,.95);
+      background: linear-gradient(180deg, rgba(80,220,120,.32), rgba(60,190,110,.2));
+      color:#eafff5;
+    }
+    .turnFooter{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:120;
+      background: linear-gradient(180deg, rgba(10,10,12,.1), rgba(8,8,10,.95));
+      padding:10px 0 12px;
+    }
+    .turnFooterInner{
+      width:min(1200px, 96vw);
+      margin:0 auto;
+      padding:0 8px;
+    }
+    .turnFooterBalance .panelBody{
+      padding:10px 12px 12px;
+    }
+    .turnFooter .cashActions{
+      margin-top:10px;
+      justify-content:flex-start;
+    }
+    .turnFooterSpacer{
+      height:220px;
+    }
+    .summaryGrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:8px;
+    }
+    @media (max-width: 900px){
+      .summaryGrid{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+    .summaryCard{
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:10px 12px;
+      background: rgba(0,0,0,.18);
+    }
+    .summaryLabel{
+      font-size:10px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .summaryValue{
+      margin-top:4px;
+      font-size:16px;
+      font-weight:800;
+    }
+    .summaryEm{
+      border-color: rgba(120,240,190,.45);
+      background: rgba(120,240,190,.12);
+    }
+    .cashStatusBar{
+      position:sticky;
+      top:70px;
+      z-index:81;
+    }
+    .cashStatusBar.closing{
+      background: rgba(240,180,40,.9);
+      color:#1a1200;
+    }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Caja ? apertura ? movimientos ? cierre del d?a</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap fullWidth">
+    <div id="cashStatusBar" class="cashStatusBar">-</div>
+    <div class="viewTabs">
+      <button class="btn viewTab active" type="button" data-view-tab="today">Hoy</button>
+      <button class="btn viewTab" type="button" data-view-tab="tickets">Tickets</button>
+      <button class="btn viewTab" type="button" data-view-tab="moves">Movimientos</button>
+      <button class="btn viewTab" type="button" data-view-tab="close">Arqueo y Cierre</button>
+      <button class="btn viewTab" type="button" data-view-tab="history">Historial</button>
+      <button class="btn viewTab" type="button" data-view-tab="test">Prueba</button>
+    </div>
+
+    <div data-view-panel="close">
+        
+
+              <section class="panel" style="margin-top:12px;">
+        <div class="panelHead">
+          <div>
+            <h2>Arqueo y Cierre</h2>
+            <p class="hint">Flujo guiado por pasos</p>
+          </div>
+          <div id="diffAlert" class="diffBadge zero">-</div>
+        </div>
+        <div class="panelBody">
+          <div class="row" id="closeStepper" style="gap:8px; flex-wrap:wrap;">
+            <button class="btn" type="button" data-step-jump="cash">1. Conteo efectivo</button>
+            <button class="btn" type="button" data-step-jump="noncash">2. No efectivo</button>
+            <button class="btn" type="button" data-step-jump="summary">3. Resumen</button>
+            <button class="btn primary" type="button" data-step-jump="close">4. Cerrar turno</button>
+          </div>
+        </div>
+      </section>
+<section class="panel" id="turnPanel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Arqueo por turno</h2>
+          <p class="hint">Dia / Tarde / Noche con conteo por denominaciones</p>
+        </div>
+        <div class="row" style="gap:8px;">
+          <div class="badge2">Turno <strong id="turnStatus">-</strong></div>
+          <div class="badge2">Cajero <strong id="turnCashierStatus">-</strong></div>
+          <div class="badge2">Abierto <strong id="turnOpenedAt">-</strong></div>
+        </div>
+      </div>
+      <div class="panelBody">
+        <div class="row" style="align-items:flex-end;">
+          <div style="flex:1">
+            <div class="small">Fecha</div>
+            <input id="dateKey" class="input" type="date"/>
+          </div>
+          <div class="badge2">Estado <strong id="wsStatus">.</strong></div>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <input id="turnDate" class="input" type="date" style="width:160px"/>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div class="small">Turnos</div>
+            <select id="turnShift" class="input" style="width:140px">
+              <option value="dia">Dia</option>
+              <option value="tarde">Tarde</option>
+              <option value="noche">Noche</option>
+            </select>
+          </div>
+          <input id="turnCashier" class="input" placeholder="Cajero" style="flex:1; min-width:160px"/>
+        </div>
+        <div class="mini" id="turnOpenInfo" style="margin-top:8px;">-</div>
+        <div class="splitPanels" style="margin-top:12px;">
+          <div class="panel compactPanel">
+            <div class="panelHead">
+              <div>
+                <h2>Turnos abiertos</h2>
+                <p class="hint">Cerrar turnos activos</p>
+              </div>
+            </div>
+            <div class="panelBody" id="openTurnsList">-</div>
+          </div>
+
+          <div class="panel compactPanel" style="display:none;"></div>
+        </div>
+
+        <div id="turnWork" style="display:none; margin-top:12px;">
+          <div class="cashGrid">
+            <div class="cashCol">
+              <div class="cashCountSplit">
+                <div class="panel cashCountHalf" id="stepCash">
+                  <div class="panelHead">
+                    <div><h2>Detalle de billetes</h2><p class="hint">Apertura y cierre por denominaciones</p></div>
+                    <div class="row" style="gap:8px;">
+                      <div class="badge2">Resultado <strong id="closeTotal">-</strong></div>
+                    </div>
+                  </div>
+                  <div class="panelBody">
+                    <div class="cashCountActions">
+                      <div class="cashCountCol">
+                        <button id="btnOpenCashCount" class="btn cashCountBtn primary" type="button">Abrir turno</button>
+                        <input id="turnOpeningCash" class="input cashCountInput" type="number" inputmode="numeric" placeholder="Efectivo apertura"/>
+                        <div class="badge2">Total <strong id="openTotal">-</strong></div>
+                    <div class="row" style="margin-top:10px; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+                      <div style="flex:1; min-width:200px;">
+                        <div class="small">Total contado (opcion simple)</div>
+                        <input id="closingTotalSimple" data-allow-closed="1" class="input" type="number" inputmode="decimal" placeholder="Total efectivo contado"/>
+                      </div>
+                      <button id="btnToggleDenoms" data-allow-closed="1" onclick="setCloseDetailVisible(true)" class="btn" type="button">Detallar billetes</button>
+                    </div>
+                      </div>
+                      <div class="cashCountCol">
+                        <button id="btnCloseCashCount" class="btn cashCountBtn" type="button">Cerrar turno</button>
+                      </div>
+                    </div>
+                    <div class="denomTableWrap" id="denomTableWrap" style="display:none;">
+                      <table class="denomTable">
+                        <thead>
+                          <tr>
+                            <th>Billete</th>
+                            <th>Cantidad</th>
+                            <th>Importe</th>
+                            <th>Billete</th>
+                            <th>Cantidad</th>
+                            <th>Importe</th>
+                          </tr>
+                        </thead>
+                        <tbody id="denomTableBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel compactPanel">
+                  <div class="panelHead">
+                    <div>
+                      <h2>Resumen completo</h2>
+                      <p class="hint">Turno y dia para cuadrar caja</p>
+                    </div>
+                  </div>
+                  <div class="panelBody">
+                    <div class="small">Turno: lo que deberia haber vs lo que se conto</div>
+                    <div class="summaryGrid">
+                      <div class="summaryCard summaryEm">
+                        <div class="summaryLabel">Esperado (contable)</div>
+                        <div class="summaryValue" id="turnSaldoContable">-</div>
+                      </div>
+                      <div class="summaryCard summaryEm">
+                        <div class="summaryLabel">Contado (fisico)</div>
+                        <div class="summaryValue" id="turnSaldoFisico">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Diferencia</div>
+                        <div class="summaryValue" id="turnDiffValue">-</div>
+                      </div>
+                    </div>
+                    <div class="row" style="margin-top:8px;">
+                      <div id="turnDiffStatus" class="diffBadge zero">-</div>
+                    </div>
+                    <div class="summaryGrid">
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Apertura</div>
+                        <div class="summaryValue" id="openTotalMirror">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Efectivo ventas</div>
+                        <div class="summaryValue" id="closeCashSales">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">No efectivo</div>
+                        <div class="summaryValue" id="closeNonCashSales">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Entradas</div>
+                        <div class="summaryValue" id="turnEntries">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Salidas</div>
+                        <div class="summaryValue" id="turnExits">-</div>
+                      </div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="small">Dia: cierre general</div>
+                    <div class="summaryGrid">
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Ventas</div>
+                        <div class="summaryValue" id="dayTotalInline">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Tickets</div>
+                        <div class="summaryValue" id="daySalesCountInline">-</div>
+                      </div>
+                      <div class="summaryCard summaryEm">
+                        <div class="summaryLabel">Esperado</div>
+                        <div class="summaryValue" id="dayCashExpectedInline">-</div>
+                      </div>
+                      <div class="summaryCard summaryEm">
+                        <div class="summaryLabel">Contado</div>
+                        <div class="summaryValue" id="dayCashCountedInline">-</div>
+                      </div>
+                      <div class="summaryCard">
+                        <div class="summaryLabel">Diferencia</div>
+                        <div class="summaryValue" id="dayDiffInline">-</div>
+                      </div>
+                    </div>
+                    <div class="row" style="margin-top:8px;">
+                      <div id="dayDiffStatusInline" class="diffBadge zero">-</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel" style="display:none;">
+                <div class="panelHead">
+                  <div><h2>Ajustes de ventas del turno</h2><p class="hint">Solo si necesitas corregir el arqueo</p></div>
+                  <div class="badge2">Total <strong id="entriesTotal">-</strong></div>
+                </div>
+                <div class="panelBody">
+                  <div class="row">
+                    <input id="entZ" class="input" type="number" inputmode="decimal" placeholder="Informe Z"/>
+                    <input id="entB" class="input" type="number" inputmode="decimal" placeholder="Factura / Informe B"/>
+                    <input id="entAportes" class="input" type="number" inputmode="decimal" placeholder="Aportes"/>
+                    <input id="entAnulados" class="input" type="number" inputmode="decimal" placeholder="Tickets anulados (-)"/>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel" id="stepNonCash">
+                <div class="panelHead">
+                  <div><h2>Cobros no efectivo</h2><p class="hint">Tarjeta / MP / vales</p></div>
+                </div>
+                <div class="panelBody" id="nonCashList"></div>
+              </div>
+            </div>
+            <div class="cashCol">
+            </div>
+          </div>
+          <div class="turnFooter" id="turnFooter" data-step="close">
+            <div class="turnFooterInner">
+              <div class="panel compactPanel turnFooterBalance">
+                <div class="panelHead">
+                  <div><h2>Balance del arqueo</h2><p class="hint">Totales y diferencia</p></div>
+                </div>
+                <div class="panelBody">
+                  <div class="row">
+                    <div class="badge2">Total Entradas <strong id="sumEntries">-</strong></div>
+                    <div class="badge2">Total Salidas <strong id="sumExits">-</strong></div>
+                    <div class="badge2">Saldo Contable <strong id="sumContable">-</strong></div>
+                    <div class="badge2">Saldo Fisico <strong id="sumFisico">-</strong></div>
+                    <div class="badge2">Diferencia <strong id="sumDiff">-</strong></div>
+                  </div>
+                  <div class="row" style="margin-top:8px;">
+                    <div id="sumDiffStatus" class="diffBadge zero">-</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row cashActions">
+                <button id="btnTurnSave" class="btn cashActionBtn" type="button">Guardar cambios</button>
+                <button id="btnTurnClose" class="btn primary cashActionBtn" type="button">Cerrar turno</button>
+                <button id="btnPrintTurn" class="btn cashActionBtn" type="button">Imprimir cierre</button>
+                <div class="mini" id="turnLockInfo">-</div>
+              </div>
+            </div>
+          </div>
+          <div class="turnFooterSpacer"></div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <div data-view-panel="moves" style="display:none;">
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelHead">
+          <div>
+            <h2>Movimientos</h2>
+            <p class="hint">Ingresos/Egresos manuales (no son ventas)</p>
+          </div>
+          <button id="btnMovOpen" class="btn primary" type="button">+ Registrar movimiento</button>
+        </div>
+        <div class="panelBody">
+          <div class="row movFilters">
+            <select id="movFilterType" class="input" style="width:160px">
+              <option value="all">Todos</option>
+              <option value="in">Ingresos</option>
+              <option value="out">Egresos</option>
+            </select>
+            <select id="movFilterMethod" class="input" style="width:180px">
+              <option value="all">Todos los medios</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="mercadopago">Mercado Pago</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="otro">Otro</option>
+            </select>
+            <input id="movFilterText" class="input" placeholder="Buscar concepto o metodo" style="flex:1; min-width:200px"/>
+          </div>
+          <div class="hr"></div>
+          <div id="movList" class="small">-</div>
+        </div>
+      </section>
+
+      
+      
+      
+      
+    </div>
+
+    <div data-view-panel="tickets" style="display:none;">
+      
+
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelHead">
+          <div>
+            <h2>Tickets</h2>
+            <p class="hint">Ver detalle y reimprimir</p>
+          </div>
+        </div>
+        <div class="panelBody">
+          <div class="row">
+            <input id="ticketDate" class="input" type="date" style="width:170px"/>
+            <select id="ticketStatusFilter" class="input" style="width:170px">
+              <option value="all">Todos</option>
+              <option value="abierta">Abiertos</option>
+              <option value="cerrada">Cerrados</option>
+              <option value="anulada">Anulados</option>
+            </select>
+            <input id="ticketSearch" class="input" placeholder="Buscar por mesa, canal, cliente o id" style="flex:1; min-width:240px"/>
+          </div>
+          <div class="hr"></div>
+          <div id="ticketsList" class="small">-</div>
+        </div>
+      </section>
+    </div>
+<div data-view-panel="today" style="display:none;">
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Hoy</h2>
+          <p class="hint">Estado del turno y resumen rapido</p>
+        </div>
+        <div class="badge2" id="todayTurnState">-</div>
+      </div>
+      <div class="panelBody">
+        <div class="row" style="gap:10px; flex-wrap:wrap;">
+          <div class="badge2">Cajero <strong id="todayTurnCashier">-</strong></div>
+          <div class="badge2">Apertura <strong id="todayTurnOpenedAt">-</strong></div>
+        </div>
+      </div>
+    </section>
+<section class="panel cashSummary" id="cashSummary" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Resumen del turno (hoy)</h2>
+          <p class="hint">Ventas, efectivo, no efectivo y diferencia</p>
+        </div>
+        <div class="badge2">Turno <strong id="summaryTurnState">-</strong></div>
+      </div>
+        <div class="panelBody">
+          <div class="kpis">
+          <div class="kpi">
+            <div class="label">Ventas del turno</div>
+            <div class="value" id="kpiTotalTurn">-</div>
+            <div class="sub" id="kpiTurnMeta">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Efectivo esperado</div>
+            <div class="value" id="kpiCash">-</div>
+            <div class="sub">Segun caja</div>
+          </div>
+          <div class="kpi">
+            <div class="label">No efectivo</div>
+            <div class="value" id="kpiNonCash">-</div>
+            <div class="sub">Tarjeta, MP, vales</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Movimientos netos</div>
+            <div class="value" id="kpiExits">-</div>
+            <div class="sub">Entradas - salidas</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Saldo contable</div>
+            <div class="value" id="kpiContable">-</div>
+            <div class="sub">Apertura + entradas - salidas</div>
+          </div>
+            <div class="kpi">
+              <div class="label">Diferencia</div>
+              <div class="value" id="kpiDiff">-</div>
+              <div class="sub" id="kpiDiffLabel">-</div>
+            </div>
+          </div>
+          </div>
+        </div>
+    </section>
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Acciones rapidas</h2>
+          <p class="hint">Operaciones frecuentes</p>
+        </div>
+      </div>
+      <div class="panelBody">
+        <div class="row" style="gap:10px; flex-wrap:wrap;">
+          <button class="btn primary" id="btnQuickMov" type="button">Registrar movimiento</button>
+          <button class="btn" id="btnQuickTransfer" type="button">Transferir caja</button>
+          <button class="btn" id="btnQuickTicket" type="button">Buscar ticket / Reimprimir</button>
+          <button class="btn" id="btnQuickArqueo" type="button">Ir a arqueo</button>
+          <button class="btn" id="btnQuickCloseTurn" type="button">Cerrar turno</button>
+        </div>
+      </div>
+    </section>
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Ultimos movimientos</h2>
+          <p class="hint">Ultimos 5 registros</p>
+        </div>
+      </div>
+      <div class="panelBody" id="todayMovList">-</div>
+    </section>
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Ultimos tickets</h2>
+          <p class="hint">Ultimos 5 tickets</p>
+        </div>
+      </div>
+      <div class="panelBody" id="todayTicketList">-</div>
+    </section>
+
+        <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Resumen del dia</h2>
+          <p class="hint">Ventas cerradas del dia</p>
+        </div>
+        <div class="badge2" id="closeStatus">-</div>
+      </div>
+      <div class="panelBody">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Total ventas</div>
+            <div class="value" id="dayTotal">-</div>
+            <div class="sub" id="daySalesCount">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Ticket promedio</div>
+            <div class="value" id="dayAvgTicket">-</div>
+            <div class="sub">Por ticket</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Ganancia</div>
+            <div class="value" id="dayProfit">-</div>
+            <div class="sub" id="dayMargin">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Diferencia caja</div>
+            <div class="value" id="dayDiff">-</div>
+            <div class="sub">Esperado vs contado</div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <div class="badge2">Esperado <strong id="dayCashExpected">-</strong></div>
+          <div class="badge2">Contado <strong id="dayCashCounted">-</strong></div>
+          <div id="dayDiffStatus" class="diffBadge zero">-</div>
+        </div>
+        <div class="hr"></div>
+        <div class="splitPanels">
+          <div class="panel compactPanel">
+            <div class="panelHead">
+              <div>
+                <h2>Por canal</h2>
+                <p class="hint">Salon, mostrador, delivery</p>
+              </div>
+            </div>
+            <div class="panelBody" id="dayByChannel">-</div>
+          </div>
+          <div class="panel compactPanel">
+            <div class="panelHead">
+              <div>
+                <h2>Por medio de pago</h2>
+                <p class="hint">Efectivo, MP, tarjeta, etc</p>
+              </div>
+            </div>
+            <div class="panelBody" id="dayByPayment">-</div>
+          </div>
+        </div>
+        <section class="panel compactPanel" style="margin-top:12px;">
+          <div class="panelHead">
+            <div>
+              <h2>Top productos</h2>
+              <p class="hint">Por facturacion</p>
+            </div>
+          </div>
+          <div class="panelBody" id="dayTopProducts">-</div>
+        </section>
+        <div class="row">
+          <input id="dayCash" class="input" type="number" inputmode="numeric" placeholder="Efectivo contado (ARS)" style="flex:1"/>
+          <input id="dayNote" class="input" placeholder="Nota (opcional)" style="flex:2"/>
+          <button id="btnCloseDay" class="btn primary" type="button">Cerrar dia</button>
+        </div>
+        <div class="mini" style="margin-top:10px;" id="dayInfo">-</div>
+      </div>
+    </section>
+    </div>
+
+
+    <div data-view-panel="test" style="display:none;">
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelHead">
+          <div>
+            <h2>Caja/Cierre - Nueva UI (Prueba)</h2>
+            <p class="hint">Implementacion desde cero (en pruebas)</p>
+          </div>
+        </div>
+        <div class="panelBody">
+          <div class="row" style="gap:10px; flex-wrap:wrap;">
+            <div class="badge2">Estado <strong id="testTurnState">-</strong></div>
+            <div class="badge2">Cajero <strong id="testTurnCashier">-</strong></div>
+            <div class="badge2">Apertura <strong id="testTurnOpened">-</strong></div>
+          </div>
+          <div class="hr"></div>
+          <div class="kpis">
+            <div class="kpi"><div class="label">Ventas</div><div class="value" id="testSales">-</div></div>
+            <div class="kpi"><div class="label">Efectivo esperado</div><div class="value" id="testCash">-</div></div>
+            <div class="kpi"><div class="label">No efectivo</div><div class="value" id="testNonCash">-</div></div>
+            <div class="kpi"><div class="label">Diferencia</div><div class="value" id="testDiff">-</div></div>
+          </div>
+        </div>
+      </section>
+    </div>    <div data-view-panel="history" style="display:none;">
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelHead">
+          <div>
+            <h2>Historial de arqueos</h2>
+            <p class="hint">Por dia, semana o mes</p>
+          </div>
+          <div class="badge2">Total <strong id="turnHistoryCount">-</strong></div>
+        </div>
+        <div class="panelBody">
+          <div class="row" style="align-items:center;">
+            <button class="btn rangeBtn" type="button" data-range="day">Dia</button>
+            <button class="btn rangeBtn" type="button" data-range="week">Semana</button>
+            <button class="btn rangeBtn" type="button" data-range="month">Mes</button>
+            <input id="turnFrom" class="input" type="date" style="width:160px"/>
+            <input id="turnTo" class="input" type="date" style="width:160px"/>
+            <button id="btnTurnFilter" class="btn" type="button">Filtrar</button>
+            <input id="turnHistorySearch" class="input" placeholder="Buscar por fecha, turno o cajero" style="flex:1; min-width:220px"/>
+          </div>
+          <div class="hr"></div>
+          <div id="turnHistoryList" class="small">-</div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <div style="display:none;">
+    <div id="sessionInfo"></div>
+    <div id="countSaldoContable"></div>
+    <div id="countResultado"></div>
+    <div id="closeTotalMirror"></div>
+  </div>
+
+    <div class="modalScrim" id="movModal">
+    <div class="modalCard">
+      <div class="modalTitle">Registrar movimiento</div>
+      <div class="modalText">Completa el comprobante</div>
+      <div class="hr" style="margin-top:10px;"></div>
+      <div class="row" style="margin-top:10px; gap:8px; flex-wrap:wrap;">
+        <select id="movKind" class="input" style="width:180px">
+          <option value="gasto">Gasto</option>
+          <option value="ingreso">Ingreso</option>
+          <option value="retiro">Retiro</option>
+          <option value="transferencia">Transferencia</option>
+        </select>
+        <select id="movMethod" class="input" style="width:180px">
+          <option value="efectivo">Efectivo</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="mercadopago">Mercado Pago</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="otro">Otro</option>
+        </select>
+        <input id="movAmt" class="input" type="number" inputmode="decimal" placeholder="Monto" style="width:160px"/>
+        <input id="movNote" class="input" placeholder="Nota (opcional)" style="flex:1; min-width:200px"/>
+      </div>
+      <div class="row" id="movTransferBlock" style="margin-top:10px; gap:8px; display:none; flex-wrap:wrap;">
+        <select id="movTransferDir" class="input" style="width:240px">
+          <option value="toMayor">Caja chica -> Caja grande</option>
+          <option value="toChica">Caja grande -> Caja chica</option>
+        </select>
+        <input id="movTransferAmt" class="input" type="number" inputmode="decimal" placeholder="Monto" style="width:160px"/>
+        <input id="movTransferNote" class="input" placeholder="Nota" style="flex:1; min-width:200px"/>
+      </div>
+      <div class="modalActions">
+        <button class="btn" id="movCancel" type="button">Cancelar</button>
+        <button class="btn primary" id="btnMov" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+<div class="modalScrim" id="openTurnModal">
+    <div class="modalCard">
+      <div class="modalTitle">Turno abierto</div>
+      <div class="modalText" id="openTurnModalText">-</div>
+      <div class="modalActions">
+        <button class="btn btnDanger" id="openTurnCloseBtn" type="button">Cerrar turno</button>
+        <button class="btn btnSuccess" id="openTurnKeepBtn" type="button">Mantener abierto</button>
+      </div>
+    </div>
+  </div>
+
+    <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+    const $ = (id)=>document.getElementById(id);
+    connect("admin", "Admin");
+
+    function ymdLocal(d = new Date()){
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    const localToday = ymdLocal();
+    let today = localToday;
+    $("dateKey").value = today;
+    $("turnDate").value = today;
+    $("turnFrom").value = today;
+    $("turnTo").value = today;
+    const ticketDateInput = $("ticketDate");
+    if(ticketDateInput) ticketDateInput.value = today;
+
+    const DENOMS = [20000,10000,5000,2000,1000,500,200,100,50,20,10,5,2,1];
+    let currentTurn = null;
+    let transferState = { inList: [], outList: [] };
+    let useSimpleClose = true;
+    let didPromptOpenTurn = false;
+    let openTurnPromptResolve = null;
+    let closingAttempt = false;
+    let lastClosedResult = null;
+    let lastClosedDateKey = null;
+    const LS_OPEN_TURN_DATE = "nexa_open_turn_date";
+    const LS_LAST_ACTIVE = "nexa_last_active_at";
+    const ACTIVE_GRACE_MS = 12 * 60 * 60 * 1000;
+function setActiveView(name){
+      document.querySelectorAll("[data-view-panel]").forEach(p=>{
+        p.style.display = (p.getAttribute("data-view-panel") === name) ? "" : "none";
+      });
+      document.querySelectorAll("[data-view-tab]").forEach(b=>{
+        b.classList.toggle("active", b.getAttribute("data-view-tab") === name);
+      });
+      const footer = $("turnFooter");
+      if(footer) footer.style.display = (name === "close") ? "" : "none";
+    }
+
+    function sumNumber(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+
+    function calcDenomsTotal(denoms){
+      if(!denoms) return 0;
+      return Object.keys(denoms).reduce((a,k)=>a + (Number(k||0) * Number(denoms[k]||0)), 0);
+    }
+
+    function calcTurnTotals(turn){
+      const entries = turn.entries || {};
+      const nonCash = Array.isArray(turn.nonCash) ? turn.nonCash : [];
+      const exits = turn.exits || {};
+      const transfersIn = Array.isArray(entries.transfersIn) ? entries.transfersIn : [];
+      const transfersOut = Array.isArray(exits.transfersOut) ? exits.transfersOut : [];
+      const transfersInTotal = transfersIn.reduce((a,x)=>a + sumNumber(x.amount), 0);
+      const transfersOutTotal = transfersOut.reduce((a,x)=>a + sumNumber(x.amount), 0);
+      const nonCashTotal = nonCash.reduce((a,x)=>a + sumNumber(x.amount), 0);
+      const totalEntries = sumNumber(entries.billingZ) + sumNumber(entries.billingB) + sumNumber(entries.aportes) + nonCashTotal + transfersInTotal - sumNumber(entries.anulados);
+      const totalExits =
+        (Array.isArray(exits.providers)? exits.providers.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+        (Array.isArray(exits.expenses)? exits.expenses.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+        (Array.isArray(exits.withdrawals)? exits.withdrawals.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+        (Array.isArray(exits.extraPay)? exits.extraPay.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+        (Array.isArray(exits.advances)? exits.advances.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+        (Array.isArray(exits.others)? exits.others.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+        transfersOutTotal;
+      const saldoContable = sumNumber(turn.openingTotal) + totalEntries - totalExits;
+      const hasClosingCount = !!(turn.closingDenoms && Object.keys(turn.closingDenoms).length);
+      const saldoFisico = hasClosingCount ? sumNumber(turn.closingTotal) : null;
+      const diferencia = hasClosingCount ? (saldoFisico - saldoContable) : null;
+      return { totalEntries, totalExits, saldoContable, saldoFisico, diferencia, nonCashTotal };
+    }
+
+    function setDiffLabels(value){
+      if(value === null || value === undefined || !Number.isFinite(Number(value))){
+        const diffBadge = $("sumDiffStatus");
+        if(diffBadge){
+          diffBadge.className = "diffBadge zero";
+          diffBadge.textContent = "-";
+        }
+        const kpiDiffLabel = $("kpiDiffLabel");
+        if(kpiDiffLabel) kpiDiffLabel.textContent = "-";
+        return;
+      }
+      const label = value > 0 ? "Sobrante" : (value < 0 ? "Faltante" : "OK");
+      const cls = value > 0 ? "pos" : (value < 0 ? "neg" : "zero");
+      const diffBadge = $("sumDiffStatus");
+      if(diffBadge){
+        diffBadge.className = `diffBadge ${cls}`;
+        diffBadge.textContent = label;
+      }
+      const kpiDiffLabel = $("kpiDiffLabel");
+      if(kpiDiffLabel) kpiDiffLabel.textContent = label;
+    }
+
+    function setDiffBadge(id, value){
+      const el = $(id);
+      if(!el) return;
+      if(value === null || value === undefined || !Number.isFinite(Number(value))){
+        el.className = "diffBadge zero";
+        el.textContent = "-";
+        return;
+      }
+      const label = value > 0 ? "Sobrante" : (value < 0 ? "Faltante" : "OK");
+      const cls = value > 0 ? "pos" : (value < 0 ? "neg" : "zero");
+      el.className = `diffBadge ${cls}`;
+      el.textContent = label;
+    }
+
+    function getCutoffMinutes(db){
+      const hour = Number(db && db.settings && db.settings.cash && db.settings.cash.dayCloseCutoffHour);
+      const safeHour = Number.isFinite(hour) ? Math.max(0, Math.min(23.99, hour)) : 2;
+      return Math.round(safeHour * 60);
+    }
+
+    function dateKeyToMs(key){
+      const t = new Date(String(key || "") + "T00:00:00").getTime();
+      return Number.isFinite(t) ? t : 0;
+    }
+
+    function dateKeyAddDaysLocal(key, days){
+      const t = dateKeyToMs(key);
+      if (!t) return String(key || "");
+      return ymdLocal(new Date(t + (Number(days || 0) * 86400000)));
+    }
+
+    function getBusinessDateKey(db, ts = Date.now()){
+      const cutoffMinutes = getCutoffMinutes(db);
+      if (cutoffMinutes <= 0) return ymdLocal(new Date(ts));
+      const d = new Date(ts);
+      const minutes = d.getHours() * 60 + d.getMinutes();
+      const base = ymdLocal(d);
+      return minutes <= cutoffMinutes ? dateKeyAddDaysLocal(base, -1) : base;
+    }
+
+    function updateSummary(turn, totals){
+      if(!turn || !totals){
+        ["kpiTotalTurn","kpiCash","kpiNonCash","kpiExits","kpiContable","kpiDiff"].forEach(id=>{
+          const el = $(id);
+          if(el) el.textContent = "-";
+        });
+        const meta = $("kpiTurnMeta");
+        if(meta) meta.textContent = "-";
+        setDiffLabels(null);
+        return;
+      }
+      const cashIn = totals.totalEntries - totals.nonCashTotal;
+      $("kpiTotalTurn").textContent = money(totals.totalEntries || 0);
+      $("kpiCash").textContent = money(cashIn || 0);
+      $("kpiNonCash").textContent = money(totals.nonCashTotal || 0);
+      $("kpiExits").textContent = money(totals.totalExits || 0);
+      $("kpiContable").textContent = money(totals.saldoContable || 0);
+      $("kpiDiff").textContent = (totals.diferencia === null || totals.diferencia === undefined) ? "-" : money(totals.diferencia || 0);
+      const meta = $("kpiTurnMeta");
+      if(meta) meta.textContent = `${turn.shift || "-"} - ${turn.cashier || "-"}`;
+      setDiffLabels(totals.diferencia);
+    }
+
+    function showOpenTurnPrompt(dateKey, opts = {}){
+      const modal = $("openTurnModal");
+      const text = $("openTurnModalText");
+      const closeBtn = $("openTurnCloseBtn");
+      const keepBtn = $("openTurnKeepBtn");
+      if(!modal || !text || !closeBtn || !keepBtn) return Promise.resolve("keep");
+      const allowKeep = opts.allowKeep !== false;
+      text.textContent = allowKeep
+        ? `Hay un turno abierto de ${dateKey}. Queres mantenerlo abierto?`
+        : `Hay un turno abierto antiguo (${dateKey}). Debes cerrarlo para continuar.`;
+      keepBtn.style.display = allowKeep ? "" : "none";
+      modal.style.display = "flex";
+      return new Promise(resolve=>{
+        openTurnPromptResolve = resolve;
+        const cleanup = ()=>{
+          modal.style.display = "none";
+          openTurnPromptResolve = null;
+          closeBtn.onclick = null;
+          keepBtn.onclick = null;
+          keepBtn.style.display = "";
+        };
+        closeBtn.onclick = ()=>{
+          cleanup();
+          resolve("close");
+        };
+        keepBtn.onclick = ()=>{
+          cleanup();
+          resolve("keep");
+        };
+      });
+    }
+
+    function updateSteps(turn, totals){
+      const stepReview = $("stepReview");
+      const stepCash = $("stepCash");
+      const stepClose = $("stepClose");
+      if(!stepReview || !stepCash || !stepClose) return;
+      const cashReady = totals ? (sumNumber(totals.saldoFisico) > 0) : false;
+      const closed = !!(turn && (turn.closedAt || turn.locked));
+      stepReview.classList.toggle("active", !!turn);
+      stepCash.classList.toggle("active", !!turn && cashReady);
+      stepClose.classList.toggle("active", closed);
+    }
+
+    function markTurnClosedLocal(turnId){
+      if(!turnId || !window.__db || !window.__db.cash || !Array.isArray(window.__db.cash.turns)) return;
+      const t = window.__db.cash.turns.find(x=>x && x.id === turnId);
+      if(!t) return;
+      t.closedAt = Date.now();
+      t.locked = true;
+    }
+
+    function renderDenomTable(openData, closeData, openDisabled, closeDisabled){
+      const body = $("denomTableBody");
+      if(!body) return;
+      body.innerHTML = DENOMS.map(d=>{
+        const openVal = openData && openData[d] ? openData[d] : "";
+        const closeVal = closeData && closeData[d] ? closeData[d] : "";
+        return `
+          <tr>
+            <td>${d}</td>
+            <td><input class="input denomQty" data-side="open" data-denom="${d}" type="number" inputmode="numeric" min="0" value="${esc(openVal)}" ${openDisabled?"disabled":""}/></td>
+            <td class="denomAmt" data-side="open" data-amt="${d}">-</td>
+            <td>${d}</td>
+            <td><input class="input denomQty" data-side="close" data-denom="${d}" type="number" inputmode="numeric" min="0" value="${esc(closeVal)}" ${closeDisabled?"disabled":""}/></td>
+            <td class="denomAmt" data-side="close" data-amt="${d}">-</td>
+          </tr>
+        `;
+      }).join("");
+      updateDenomRowTotals();
+    }
+
+    function readDenomsSide(side){
+      const out = {};
+      document.querySelectorAll(`[data-side="${side}"][data-denom]`).forEach(inp=>{
+        const d = inp.getAttribute("data-denom");
+        const v = Number(inp.value||0);
+        if(v>0) out[d] = v;
+      });
+      return out;
+    }
+
+    function setCloseDetailVisible(show){
+      const wrap = $("denomTableWrap");
+      if(wrap) wrap.style.display = show ? "" : "none";
+      useSimpleClose = !show;
+      const btn = $("btnToggleDenoms");
+      if(btn) btn.textContent = show ? "Usar total simple" : "Detallar billetes";
+      updateCashCountButtons();
+      updateTurnTotalsFromDom();
+    }
+    function updateDenomRowTotals(){
+      document.querySelectorAll(".denomAmt").forEach(cell=>{
+        const side = cell.getAttribute("data-side");
+        const denom = Number(cell.getAttribute("data-amt") || 0);
+        const input = document.querySelector(`[data-side="${side}"][data-denom="${denom}"]`);
+        const qty = input ? Number(input.value || 0) : 0;
+        const amt = denom * qty;
+        cell.textContent = amt ? money(amt) : "-";
+      });
+      updateCashCountButtons();
+    }
+
+    function renderTransfers(turn, locked){
+      const wrap = $("transferList");
+      if(!wrap) return;
+      const inList = (turn && turn.entries && Array.isArray(turn.entries.transfersIn)) ? turn.entries.transfersIn : [];
+      const outList = (turn && turn.exits && Array.isArray(turn.exits.transfersOut)) ? turn.exits.transfersOut : [];
+      transferState = { inList: inList.slice(), outList: outList.slice() };
+      const rows = []
+        .concat(outList.map(x=>({ dir:"Caja chica ? Caja grande", amount:x.amount, note:x.note, at:x.at })))
+        .concat(inList.map(x=>({ dir:"Caja grande ? Caja chica", amount:x.amount, note:x.note, at:x.at })))
+        .sort((a,b)=>(Number(b.at||0) - Number(a.at||0)));
+      wrap.innerHTML = rows.length ? rows.map(x=>{
+        const when = x.at ? new Date(x.at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+        return `
+          <div class="row" style="justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+            <div>${esc(x.dir)} ? ${esc(x.note||"")}</div>
+            <div><strong>${esc(money(x.amount||0))}</strong> ? ${esc(when)}</div>
+          </div>
+        `;
+      }).join("") : "Sin movimientos.";
+      const btn = $("btnTransfer");
+      if(btn) btn.disabled = !!locked;
+    }
+
+    function updateCashCountButtons(){
+      const openBtn = $("btnOpenCashCount");
+      const closeBtn = $("btnCloseCashCount");
+      const cashier = ($("turnCashier").value || "").trim();
+      const target = getOpeningTarget();
+      const openTotal = calcDenomsTotal(readDenomsSide("open"));
+      const closeTotal = calcDenomsTotal(readDenomsSide("close"));
+      const dateKey = ($("turnDate").value || today).trim();
+      const dayOpen = isDayOpen(window.__db || {}, dateKey);
+      const canOpen = !!cashier && target !== null && target > 0 && openTotal === target && !currentTurn;
+      const canClose = closeTotal > 0 && dayOpen;
+      if(openBtn){
+        openBtn.classList.toggle("active", canOpen);
+        openBtn.disabled = !canOpen;
+      }
+      if(closeBtn){
+        closeBtn.classList.toggle("active", canClose);
+        closeBtn.disabled = !canClose;
+      }
+    }
+
+    function renderNonCash(list, disabled){
+      const wrap = $("nonCashList");
+      const rows = (list||[]).map((x,i)=>`
+        <div class="row" data-row="nonCash">
+          <select class="input" data-f="method" style="width:180px" ${disabled?"disabled":""}>
+            <option value="tarjeta" ${x.method==="tarjeta"?"selected":""}>Tarjeta</option>
+            <option value="mercadopago" ${x.method==="mercadopago"?"selected":""}>Mercado Pago</option>
+            <option value="transferencia" ${x.method==="transferencia"?"selected":""}>Transferencia</option>
+            <option value="vale" ${x.method==="vale"?"selected":""}>Vale</option>
+            <option value="otro" ${x.method==="otro"?"selected":""}>Otro</option>
+          </select>
+          <input class="input" data-f="amount" type="number" inputmode="decimal" placeholder="Importe" style="width:160px" value="${esc(x.amount||"")}" ${disabled?"disabled":""}/>
+          <input class="input" data-f="note" placeholder="Nota" style="flex:1" value="${esc(x.note||"")}" ${disabled?"disabled":""}/>
+          <button class="btn" data-del="${i}" type="button" ${disabled?"disabled":""}>Quitar</button>
+        </div>
+      `).join("");
+      const addBtn = `<button id="btnAddNonCash" class="btn" type="button" data-add="nonCashList" ${disabled?"disabled":""}>Agregar cobro</button>`;
+      wrap.innerHTML = rows + addBtn;
+    }
+
+    function renderExitList(containerId, list, disabled, withDoc){
+      const wrap = $(containerId);
+      const rows = (list||[]).map((x,i)=>`
+        <div class="row" data-row="${containerId}">
+          <input class="input" data-f="name" placeholder="${withDoc?"Proveedor":"Concepto"}" style="flex:1; min-width:160px" value="${esc(x.name||"")}" ${disabled?"disabled":""}/>
+          ${withDoc ? `<input class="input" data-f="doc" placeholder="Comprobante" style="width:160px" value="${esc(x.doc||"")}" ${disabled?"disabled":""}/>` : ""}
+          <input class="input" data-f="amount" type="number" inputmode="decimal" placeholder="Importe" style="width:140px" value="${esc(x.amount||"")}" ${disabled?"disabled":""}/>
+          <input class="input" data-f="note" placeholder="Nota" style="flex:1; min-width:160px" value="${esc(x.note||"")}" ${disabled?"disabled":""}/>
+          <button class="btn" data-del="${i}" type="button" ${disabled?"disabled":""}>Quitar</button>
+        </div>
+      `).join("");
+      const addBtn = `<button class="btn" data-add="${containerId}" type="button" ${disabled?"disabled":""}>Agregar</button>`;
+      wrap.innerHTML = rows + addBtn;
+    }
+
+    function readRowList(containerId, withDoc){
+      const rows = Array.from($(containerId).querySelectorAll("[data-row]"));
+      return rows.map(r=>(
+        {
+          name: r.querySelector("[data-f='name']")?.value || "",
+          doc: withDoc ? (r.querySelector("[data-f='doc']")?.value || "") : "",
+          amount: Number(r.querySelector("[data-f='amount']")?.value || 0),
+          note: r.querySelector("[data-f='note']")?.value || ""
+        }
+      ));
+    }
+
+    function readNonCash(){
+      return Array.from($("nonCashList").querySelectorAll("[data-row]")).map(r=>(
+        {
+          method: r.querySelector("[data-f='method']")?.value || "otro",
+          amount: Number(r.querySelector("[data-f='amount']")?.value || 0),
+          note: r.querySelector("[data-f='note']")?.value || ""
+        }
+      ));
+    }
+
+    function getOpeningTarget(){
+      const input = $("turnOpeningCash");
+      if(!input) return null;
+      const raw = String(input.value || "").trim();
+      if(raw === "") return null;
+      const val = num(raw);
+      return Number.isFinite(val) ? val : null;
+    }
+
+    function syncOpeningTargetUI(){
+      const target = getOpeningTarget();
+      if(target === null) return;
+      $("openTotal").textContent = money(target);
+    }
+
+    function collectTurnFromDom(){
+      if(!currentTurn) return null;
+      const openingDenoms = readDenomsSide("open");
+      const closingDenoms = readDenomsSide("close");
+      const turn = {
+        id: currentTurn.id,
+        cashier: $("turnCashier").value || "",
+        openingDenoms,
+        closingDenoms,
+        entries: {
+          billingZ: Number($("entZ").value || 0),
+          billingB: Number($("entB").value || 0),
+          aportes: Number($("entAportes").value || 0),
+          anulados: Number($("entAnulados").value || 0),
+          transfersIn: transferState.inList.slice()
+        },
+        nonCash: readNonCash(),
+        exits: {
+          providers: readRowList("exitProviders", true),
+          expenses: readRowList("exitExpenses", false),
+          withdrawals: readRowList("exitWithdrawals", false),
+          extraPay: readRowList("exitExtraPay", false),
+          advances: readRowList("exitAdvances", false),
+          others: readRowList("exitOthers", false),
+          transfersOut: transferState.outList.slice()
+        }
+      };
+      turn.openingTotal = calcDenomsTotal(openingDenoms);
+      turn.closingTotal = calcDenomsTotal(closingDenoms);
+      return turn;
+    }
+
+    function setTurnDisabled(disabled){
+      const wrap = $("turnWork");
+      if(!wrap) return;
+      wrap.querySelectorAll("input, select, button").forEach(el=>{
+        if(el && el.getAttribute && el.getAttribute("data-allow-closed") === "1") return;
+        el.disabled = disabled;
+      });
+      if(disabled && !currentTurn){
+        wrap.querySelectorAll('[data-side="open"]').forEach(el=>{ el.disabled = false; });
+        const openBtn = $("btnOpenCashCount");
+        if(openBtn) openBtn.disabled = false;
+      }
+    }
+
+    function updateTurnTotalsFromDom(){
+      if(!currentTurn){
+        const target = getOpeningTarget();
+        const openingTotal = target !== null ? target : calcDenomsTotal(readDenomsSide("open"));
+        const closingTotal = calcDenomsTotal(readDenomsSide("close"));
+        $("openTotal").textContent = money(openingTotal);
+        const turnKey = ($("turnDate").value || today).trim();
+        $("closeTotal").textContent = (lastClosedDateKey === turnKey && lastClosedResult !== null)
+          ? money(lastClosedResult)
+          : "-";
+        $("openTotalMirror").textContent = $("openTotal").textContent;
+        const closeMirror = $("closeTotalMirror");
+        if(closeMirror) closeMirror.textContent = money(closingTotal);
+        $("closeCashSales").textContent = "-";
+        $("closeNonCashSales").textContent = "-";
+        const saldoContableEl = $("countSaldoContable");
+        if(saldoContableEl) saldoContableEl.textContent = "-";
+        $("turnSaldoContable").textContent = "-";
+        $("turnSaldoFisico").textContent = "-";
+        $("turnEntries").textContent = "-";
+        $("turnExits").textContent = "-";
+        $("turnDiffValue").textContent = "-";
+        setDiffBadge("turnDiffStatus", null);
+        const resultadoEl = $("countResultado");
+        if(resultadoEl) resultadoEl.textContent = "-";
+        updateCashCountButtons();
+        updateSummary(null, null);
+        updateSteps(null, null);
+        return;
+      }
+      const snapshot = collectTurnFromDom();
+      if(!snapshot) return;
+      const totals = calcTurnTotals(snapshot);
+      if(Number(snapshot.closingTotal || 0) > 0) closingAttempt = false;
+      const target = getOpeningTarget();
+      const openingTotal = target !== null ? target : Number(snapshot.openingTotal || 0);
+      const closingTotal = Number(snapshot.closingTotal || 0);
+      $("openTotal").textContent = money(openingTotal);
+      $("closeTotal").textContent = "-";
+      $("openTotalMirror").textContent = $("openTotal").textContent;
+      const closeMirror = $("closeTotalMirror");
+      if(closeMirror) closeMirror.textContent = money(closingTotal);
+      updateCashCountButtons();
+      const cashSales = totals.totalEntries - totals.nonCashTotal;
+      const resultado = totals.saldoContable - (snapshot.closingTotal || 0);
+      $("closeCashSales").textContent = money(cashSales || 0);
+      $("closeNonCashSales").textContent = money(totals.nonCashTotal || 0);
+      const saldoContableEl = $("countSaldoContable");
+      if(saldoContableEl) saldoContableEl.textContent = money(totals.saldoContable || 0);
+      $("turnSaldoContable").textContent = money(totals.saldoContable || 0);
+      $("turnSaldoFisico").textContent = money(totals.saldoFisico || 0);
+      $("turnEntries").textContent = money(totals.totalEntries || 0);
+      $("turnExits").textContent = money(totals.totalExits || 0);
+      $("turnDiffValue").textContent = (totals.diferencia === null || totals.diferencia === undefined) ? "-" : money(totals.diferencia || 0);
+      setDiffBadge("turnDiffStatus", totals.diferencia);
+      const resultadoEl = $("countResultado");
+      if(resultadoEl) resultadoEl.textContent = money(resultado || 0);
+      $("entriesTotal").textContent = money(totals.totalEntries || 0);
+      $("exitsTotal").textContent = money(totals.totalExits || 0);
+      $("sumEntries").textContent = money(totals.totalEntries || 0);
+      $("sumExits").textContent = money(totals.totalExits || 0);
+      $("sumContable").textContent = money(totals.saldoContable || 0);
+      $("sumFisico").textContent = money(totals.saldoFisico || 0);
+      $("sumDiff").textContent = (totals.diferencia === null || totals.diferencia === undefined) ? "-" : money(totals.diferencia || 0);
+      updateSummary(snapshot, totals);
+      updateSteps(currentTurn, totals);
+    }
+
+    function renderTurn(db){
+      const dateKey = ($("turnDate").value || today).trim();
+      const dayOpen = isDayOpen(db || {}, dateKey);
+      const turns = (db.cash && db.cash.turns) ? db.cash.turns : [];
+      currentTurn = turns.find(t=>t && t.dateKey === dateKey && !t.closedAt) || null;
+      if(!dayOpen){
+        const todayState = $("todayTurnState");
+        if(todayState) todayState.textContent = "Cerrado";
+        const todayCashier = $("todayTurnCashier");
+        if(todayCashier) todayCashier.textContent = "-";
+        const todayOpened = $("todayTurnOpenedAt");
+        if(todayOpened) todayOpened.textContent = "-";
+        $("turnStatus").textContent = "dia cerrado";
+        $("turnCashierStatus").textContent = "-";
+        $("turnOpenedAt").textContent = "-";
+        $("turnShift").disabled = false;
+        const summaryState = $("summaryTurnState");
+        if(summaryState) summaryState.textContent = "dia cerrado";
+        $("turnOpenInfo").textContent = "Al abrir el turno se abre la caja automaticamente.";
+        $("turnWork").style.display = "";
+        renderDenomTable({}, {}, false, true);
+        setCloseDetailVisible(false);
+        const simpleInput = $("closingTotalSimple"); if(simpleInput) simpleInput.value = "";
+        renderTransfers(null, true);
+        updateTurnTotalsFromDom();
+        setTurnDisabled(true);
+        document.querySelectorAll('[data-side="open"]').forEach(el=>{ el.disabled = false; });
+        const openingInput = $("turnOpeningCash");
+        if(openingInput) openingInput.disabled = false;
+        const cashierInput = $("turnCashier");
+        if(cashierInput) cashierInput.disabled = false;
+        const openBtn = $("btnOpenCashCount");
+        if(openBtn) openBtn.disabled = false;
+        updateSummary(null, null);
+        updateSteps(null, null);
+        return;
+      }
+      $("turnStatus").textContent = currentTurn ? `${currentTurn.shift} abierto` : "sin turno";
+      $("turnCashierStatus").textContent = currentTurn ? (currentTurn.cashier || "-") : "-";
+      $("turnOpenedAt").textContent = currentTurn ? new Date(currentTurn.openedAt).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+      const summaryState = $("summaryTurnState");
+      if(summaryState) summaryState.textContent = currentTurn ? `${currentTurn.shift || "-"} abierto` : "sin turno";
+      $("turnOpenInfo").textContent = currentTurn
+        ? (`Abierto por ${currentTurn.cashier||"-"} - ${new Date(currentTurn.openedAt).toLocaleString("es-AR")}`)
+        : "No hay turno abierto para esta fecha.";
+      $("turnWork").style.display = "";
+      if(!currentTurn){
+        $("turnShift").disabled = false;
+        renderDenomTable({}, {}, true, true);
+        setCloseDetailVisible(false);
+        const simpleInput = $("closingTotalSimple"); if(simpleInput) simpleInput.value = "";
+        renderTransfers(null, true);
+        updateTurnTotalsFromDom();
+        setTurnDisabled(true);
+        const openingInput = $("turnOpeningCash");
+        if(openingInput) openingInput.disabled = false;
+        const cashierInput = $("turnCashier");
+        if(cashierInput) cashierInput.disabled = false;
+        const openBtn = $("btnOpenCashCount");
+        if(openBtn) openBtn.disabled = false;
+        return;
+      }
+
+      $("turnCashier").value = currentTurn.cashier || "";
+      $("turnShift").value = currentTurn.shift || "dia";
+      $("turnShift").disabled = true;
+      const openingInput = $("turnOpeningCash");
+      if(openingInput) openingInput.disabled = true;
+      const locked = !!currentTurn.closedAt || !!currentTurn.locked;
+      renderDenomTable(currentTurn.openingDenoms || {}, currentTurn.closingDenoms || {}, locked, locked);
+      document.querySelectorAll('[data-side="open"]').forEach(el=>{ el.disabled = locked; });
+      renderTransfers(currentTurn, locked);
+      $("entZ").value = currentTurn.entries?.billingZ || 0;
+      $("entB").value = currentTurn.entries?.billingB || 0;
+      $("entAportes").value = currentTurn.entries?.aportes || 0;
+      $("entAnulados").value = currentTurn.entries?.anulados || 0;
+      renderNonCash(currentTurn.nonCash || [], locked);
+      renderExitList("exitProviders", currentTurn.exits?.providers || [], locked, true);
+      renderExitList("exitExpenses", currentTurn.exits?.expenses || [], locked, false);
+      renderExitList("exitWithdrawals", currentTurn.exits?.withdrawals || [], locked, false);
+      renderExitList("exitExtraPay", currentTurn.exits?.extraPay || [], locked, false);
+      renderExitList("exitAdvances", currentTurn.exits?.advances || [], locked, false);
+      renderExitList("exitOthers", currentTurn.exits?.others || [], locked, false);
+
+      updateTurnTotalsFromDom();
+      $("turnLockInfo").textContent = locked ? "Turno cerrado (bloqueado)." : "Turno abierto.";
+      $("btnTurnSave").disabled = locked;
+      $("btnTurnClose").disabled = locked;
+      setTurnDisabled(locked);
+      renderOpenTurns(db || {});
+    }
+
+    function renderTurnHistory(db){
+      const from = ($("turnFrom").value || "").trim();
+      const to = ($("turnTo").value || "").trim();
+      const search = (($("turnHistorySearch") && $("turnHistorySearch").value) || "").trim().toLowerCase();
+      const turns = (db.cash && db.cash.turns) ? db.cash.turns : [];
+      const list = turns.filter(t=>{
+        if(from && t.dateKey < from) return false;
+        if(to && t.dateKey > to) return false;
+        if(search){
+          const hay = `${t.dateKey||""} ${t.shift||""} ${t.cashier||""}`.toLowerCase();
+          if(!hay.includes(search)) return false;
+        }
+        return true;
+      });
+      const countEl = $("turnHistoryCount");
+      if(countEl) countEl.textContent = String(list.length || 0);
+      if(!list.length){ $("turnHistoryList").textContent = "Sin arqueos."; return; }
+      $("turnHistoryList").innerHTML = list.slice(0,200).map(t=>{
+        const totals = t.totals || calcTurnTotals(t);
+        return `
+          <div class="row" style="justify-content:space-between;">
+            <span><strong>${esc(t.dateKey)}</strong> - ${esc(t.shift)} - ${esc(t.cashier||"-")}</span>
+            <span>${money(totals.saldoContable||0)} - Dif ${totals.diferencia === null || totals.diferencia === undefined ? "-" : money(totals.diferencia||0)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function setHistoryRangeActive(mode){
+      document.querySelectorAll("[data-range]").forEach(b=>{
+        b.classList.toggle("active", b.getAttribute("data-range") === mode);
+      });
+    }
+
+    function setHistoryRange(mode){
+      const end = ymdLocal();
+      let start = end;
+      if(mode === "week") start = dateKeyAddDaysLocal(end, -6);
+      if(mode === "month") start = dateKeyAddDaysLocal(end, -29);
+      $("turnFrom").value = start;
+      $("turnTo").value = end;
+      setHistoryRangeActive(mode);
+      renderTurnHistory(window.__db || {});
+    }
+
+    function renderOpenTurns(db){
+      const wrap = $("openTurnsList");
+      if(!wrap) return;
+      const turns = (db.cash && db.cash.turns) ? db.cash.turns : [];
+      const openList = turns.filter(t=>t && !t.closedAt && !t.locked);
+      if(!openList.length){
+        wrap.textContent = "Sin turnos abiertos.";
+        return;
+      }
+      wrap.innerHTML = openList.map(t=>{
+        const when = t.openedAt ? new Date(t.openedAt).toLocaleString("es-AR") : "-";
+        return `
+          <div class="row" style="justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding:6px 0;">
+            <div>
+              <strong>${esc(t.dateKey || "-")}</strong> - ${esc(t.shift || "-")} - ${esc(t.cashier || "-")}
+              <div class="small">${esc(when)}</div>
+            </div>
+            <button class="btn" type="button" data-close-turn="${esc(t.id)}" data-date="${esc(t.dateKey||"")}">Cerrar</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+    function isDayOpen(db, dateKey){
+      const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+      return !!turns.find(t=>t && t.dateKey === dateKey && !t.closedAt && !t.locked);
+    }
+
+    function renderKeyValueList(list){
+      if(!list || !list.length) return "<div class=\"small\">-</div>";
+      return list.map(x=>{
+        return `<div class="row" style="justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+          <div>${esc(x.label)}</div>
+          <strong>${esc(x.value)}</strong>
+        </div>`;
+      }).join("");
+    }
+function renderDayReport(rep){
+      if(!rep){
+        ["dayTotal","daySalesCount","dayAvgTicket","dayProfit","dayMargin","dayDiff"].forEach(id=>{
+          const el = $(id);
+          if(el) el.textContent = "-";
+        });
+        ["dayCashExpected","dayCashCounted"].forEach(id=>{
+          const el = $(id);
+          if(el) el.textContent = "-";
+        });
+        const diffBadge = $("dayDiffStatus");
+        if(diffBadge){
+          diffBadge.className = "diffBadge zero";
+          diffBadge.textContent = "-";
+        }
+        ["dayTotalInline","daySalesCountInline","dayCashExpectedInline","dayCashCountedInline","dayDiffInline"].forEach(id=>{
+          const el = $(id);
+          if(el) el.textContent = "-";
+        });
+        setDiffBadge("dayDiffStatusInline", null);
+        $("dayByChannel").innerHTML = "-";
+        $("dayByPayment").innerHTML = "-";
+        $("dayTopProducts").innerHTML = "-";
+        return;
+      }
+      const totals = rep.totals || {};
+      const cash = rep.cash || {};
+      const salesCount = Number(totals.salesCount || 0);
+      const avgTicket = salesCount ? (Number(totals.total || 0) / salesCount) : 0;
+      $("dayTotal").textContent = money(totals.total || 0);
+      $("daySalesCount").textContent = `${salesCount} tickets`;
+      $("dayAvgTicket").textContent = money(avgTicket || 0);
+      $("dayProfit").textContent = money(totals.profit || 0);
+      $("dayMargin").textContent = `Margen ${(Number(totals.marginPct || 0) * 100).toFixed(1)}%`;
+      $("dayDiff").textContent = money(cash.difference || 0);
+      $("dayCashExpected").textContent = money(cash.expectedCash || 0);
+      $("dayCashCounted").textContent = (cash.closingCash === null || cash.closingCash === undefined) ? "-" : money(cash.closingCash || 0);
+      const diff = (cash.closingCash === null || cash.closingCash === undefined) ? null : Number(cash.difference || 0);
+      const diffLabel = diff === null ? "-" : (diff > 0 ? "Sobrante" : (diff < 0 ? "Faltante" : "OK"));
+      const diffClass = diff === null ? "zero" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : "zero"));
+      const diffBadge = $("dayDiffStatus");
+      if(diffBadge){
+        diffBadge.className = `diffBadge ${diffClass}`;
+        diffBadge.textContent = diffLabel;
+      }
+      const dayTotalInline = $("dayTotalInline");
+      if(dayTotalInline) dayTotalInline.textContent = money(totals.total || 0);
+      const daySalesCountInline = $("daySalesCountInline");
+      if(daySalesCountInline) daySalesCountInline.textContent = String(salesCount || 0);
+      const dayCashExpectedInline = $("dayCashExpectedInline");
+      if(dayCashExpectedInline) dayCashExpectedInline.textContent = money(cash.expectedCash || 0);
+      const dayCashCountedInline = $("dayCashCountedInline");
+      if(dayCashCountedInline) dayCashCountedInline.textContent = (cash.closingCash === null || cash.closingCash === undefined) ? "-" : money(cash.closingCash || 0);
+      const dayDiffInline = $("dayDiffInline");
+      if(dayDiffInline) dayDiffInline.textContent = (diff === null) ? "-" : money(diff || 0);
+      setDiffBadge("dayDiffStatusInline", diff);
+
+      const byChannel = Object.entries(totals.byChannel || {})
+        .map(([label, value])=>({ label, value: money(value || 0) }))
+        .sort((a,b)=>Number(b.value.replace(/[^\d.-]/g,"")) - Number(a.value.replace(/[^\d.-]/g,"")));
+      $("dayByChannel").innerHTML = renderKeyValueList(byChannel);
+
+      const byPayment = Object.entries(totals.byPayment || {})
+        .map(([label, value])=>({ label, value: money(value || 0) }))
+        .sort((a,b)=>Number(b.value.replace(/[^\d.-]/g,"")) - Number(a.value.replace(/[^\d.-]/g,"")));
+      $("dayByPayment").innerHTML = renderKeyValueList(byPayment);
+
+      const top = Array.isArray(rep.topProducts) ? rep.topProducts : [];
+      const topList = top.map(x=>({
+        label: `${x.name || "-"} ? ${x.qty || 0} u`,
+        value: money(x.total || 0)
+      }));
+      $("dayTopProducts").innerHTML = renderKeyValueList(topList);
+    }
+
+        function computeDayReportLocal(db, dateKey){
+      if(!db) return null;
+      const key = String(dateKey || "").trim();
+      if(!key) return null;
+      const sales = Array.isArray(db.sales) ? db.sales.filter(s => s && s.dateKey === key) : [];
+      const productsById = new Map((db.products || []).map(p => [p.id, p]));
+      const byChannel = {};
+      const byPayment = {};
+      const byFiscal = {};
+      const itemAgg = new Map(); // productId -> {qty,total}
+      let total = 0;
+      let cost = 0;
+      let profit = 0;
+      sales.forEach(s => {
+        const st = Number(s.total || 0);
+        total += st;
+        const sc = (s.cost !== undefined) ? Number(s.cost || 0) : 0;
+        cost += sc;
+        const sp = (s.profit !== undefined) ? Number(s.profit || 0) : (st - sc);
+        profit += sp;
+        const ch = String(s.channel || "otro");
+        byChannel[ch] = (byChannel[ch] || 0) + st;
+        const pm = String(s.paymentMethod || "otro");
+        byPayment[pm] = (byPayment[pm] || 0) + st;
+        const ft = String(s.fiscalType || "no_fiscal");
+        byFiscal[ft] = (byFiscal[ft] || 0) + st;
+        (s.items || []).forEach(it => {
+          const pid = String(it.productId || "");
+          const qty = Number(it.qty || 0);
+          const unit = Number(it.unitPrice || 0);
+          if(!pid || !Number.isFinite(qty) || qty <= 0) return;
+          const prev = itemAgg.get(pid) || { qty: 0, total: 0 };
+          prev.qty += qty;
+          prev.total += qty * unit;
+          itemAgg.set(pid, prev);
+        });
+      });
+      const topProducts = Array.from(itemAgg.entries())
+        .map(([productId, v]) => {
+          const p = productsById.get(productId);
+          return { productId, name: p ? p.name : productId, qty: v.qty, total: v.total };
+        })
+        .sort((a,b)=>b.total - a.total)
+        .slice(0, 12);
+      const mov = (db.cash && Array.isArray(db.cash.movements)) ? db.cash.movements.filter(m => m && m.dateKey === key) : [];
+      let cashIn = 0, cashOut = 0;
+      const byCashMethod = {};
+      mov.forEach(m => {
+        const amt = Number(m.amount || 0);
+        const sign = (m.type === "in") ? 1 : -1;
+        const method = String(m.method || "efectivo");
+        byCashMethod[method] = (byCashMethod[method] || 0) + sign * amt;
+        if(method === "efectivo"){
+          if(sign > 0) cashIn += amt;
+          else cashOut += amt;
+        }
+      });
+      const expectedCash = cashIn - cashOut;
+      const sessions = (db.cash && Array.isArray(db.cash.sessions)) ? db.cash.sessions.filter(s => s && s.dateKey === key) : [];
+      const lastSession = sessions.sort((a,b)=>(b.openedAt||0)-(a.openedAt||0))[0] || null;
+      const closure = (db.dayClosures || []).find(c => c && c.dateKey === key) || null;
+      const closingCash = closure ? Number(closure.closingCash || 0) : (lastSession && lastSession.closedAt ? Number(lastSession.closingCash || 0) : null);
+      const diff = (closingCash === null || closingCash === undefined) ? null : (closingCash - expectedCash);
+      const openTickets = (db.tickets || []).filter(t => t && t.status === "abierta");
+      const openTables = (db.tables || []).filter(t => t && t.status !== "libre");
+      return {
+        dateKey: key,
+        updatedAt: Date.now(),
+        totals: {
+          salesCount: sales.length,
+          total,
+          cost,
+          profit,
+          marginPct: total > 0 ? (profit / total) : 0,
+          byChannel,
+          byPayment,
+          byFiscal,
+        },
+        topProducts,
+        cash: {
+          expectedCash,
+          byMethodNet: byCashMethod,
+          session: lastSession,
+          closingCash,
+          difference: diff,
+        },
+        open: {
+          tickets: openTickets.length,
+          tables: openTables.length,
+        },
+        closure,
+      };
+    }
+function calcTicketTotalLocal(ticket){
+      const items = Array.isArray(ticket.items) ? ticket.items : [];
+      const subtotal = items.reduce((a,it)=>a + (Number(it.qty||0) * Number(it.unitPrice||0)), 0);
+      const discount = ticket && ticket.discount ? ticket.discount : null;
+      if(!discount) return subtotal;
+      if(discount.type === "percent") return subtotal - (subtotal * (Number(discount.value||0) / 100));
+      if(discount.type === "amount") return subtotal - Number(discount.value||0);
+      return subtotal;
+    }
+
+    function ticketDateKey(t){
+      const ts = t.closedAt || t.createdAt || 0;
+      return ymdLocal(new Date(ts));
+    }
+
+        function renderTodayQuick(db, dateKey){
+      const movWrap = $("todayMovList");
+      const tktWrap = $("todayTicketList");
+      if(!movWrap || !tktWrap || !db) return;
+      const key = String(dateKey || "").trim();
+      const mov = (db.cash && db.cash.movements) ? db.cash.movements.filter(m=>m && m.dateKey === key) : [];
+      const movList = mov.slice(0,5);
+      movWrap.innerHTML = movList.map(m=>{
+        const sign = m.type === "in" ? "+" : "-";
+        const time = m.at ? new Date(m.at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+        return `<div class="row" style="justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+          <div>${esc(time)} - ${esc(m.method||"")} - ${esc(m.note||"")}</div>
+          <strong>${esc(sign)} ${esc(money(m.amount||0))}</strong>
+        </div>`;
+      }).join("") || "<div class=\"small\">Sin movimientos.</div>";
+
+      const tickets = Array.isArray(db.tickets) ? db.tickets : [];
+      const list = tickets.filter(t=>{
+        if(!key) return false;
+        return ticketDateKey(t) === key;
+      }).slice(0,5);
+      tktWrap.innerHTML = list.map(t=>{
+        const total = calcTicketTotalLocal(t);
+        const when = t.closedAt || t.createdAt || 0;
+        const time = when ? new Date(when).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+        return `<div class="row" style="justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+          <div>${esc(time)} - ${esc(t.channel||"-")} - ${esc(t.status||"-")}</div>
+          <strong>${money(total||0)}</strong>
+        </div>`;
+      }).join("") || "<div class=\"small\">Sin tickets.</div>";
+    }
+function renderTicketsList(db){
+      const wrap = $("ticketsList");
+      if(!wrap) return;
+      const dateFilter = ($("ticketDate")?.value || "").trim();
+      const statusFilter = ($("ticketStatusFilter")?.value || "all").trim();
+      const search = ($("ticketSearch")?.value || "").trim().toLowerCase();
+      const tickets = Array.isArray(db.tickets) ? db.tickets : [];
+      const filtered = tickets.filter(t=>{
+        if(statusFilter !== "all" && String(t.status||"") !== statusFilter) return false;
+        if(dateFilter && ticketDateKey(t) !== dateFilter) return false;
+        if(search){
+          const hay = `${t.id||""} ${t.channel||""} ${t.tableId||""} ${t.customerName||""} ${t.createdBy||""}`.toLowerCase();
+          if(!hay.includes(search)) return false;
+        }
+        return true;
+      });
+      if(!filtered.length){ wrap.innerHTML = "<div class=\"small\">Sin tickets.</div>"; return; }
+      wrap.innerHTML = filtered.slice(0,200).map(t=>{
+        const total = calcTicketTotalLocal(t);
+        const when = t.closedAt || t.createdAt || 0;
+        const time = when ? new Date(when).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+        const itemsCount = Array.isArray(t.items) ? t.items.reduce((a,it)=>a + Number(it.qty||0),0) : 0;
+        const canPrint = !!t.id;
+        const detail = (Array.isArray(t.items) && t.items.length)
+          ? t.items.map(it=>`<div class="row" style="justify-content:space-between; padding:4px 0;">
+              <span>${esc(it.name||it.productId||"-")} ? ${esc(it.qty||0)}</span>
+              <span>${money((Number(it.qty||0) * Number(it.unitPrice||0)) || 0)}</span>
+            </div>`).join("")
+          : "<div class=\"small\">Sin items.</div>";
+        return `
+          <div class="panel compactPanel" style="margin-bottom:10px;">
+            <div class="panelBody">
+              <div class="row" style="justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>${esc(t.channel||"-")}</strong> ? Mesa ${esc(t.tableId||"-")} ? ${esc(t.status||"-")}
+                  <div class="small">${esc(time)} ? ${esc(t.createdBy||"-")} ? ${esc(t.id||"")}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div><strong>${money(total||0)}</strong></div>
+                  <div class="small">${esc(itemsCount)} items</div>
+                </div>
+              </div>
+              <div class="row" style="margin-top:8px;">
+                ${canPrint ? `<a class="btn" href="/print.html?id=${encodeURIComponent(t.id)}" target="_blank">Reimprimir</a>` : ""}
+                <button class="btn" type="button" data-ticket-toggle="${esc(t.id)}">Ver detalle</button>
+              </div>
+              <div class="small" data-ticket-detail="${esc(t.id)}" style="display:none; margin-top:8px;">${detail}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function render(db, ok){
+      $("wsStatus").textContent = ok ? "conectado" : "offline";
+      if(!db) return;
+
+      const businessKey = getBusinessDateKey(db);
+      const openTurnsAll = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns.filter(t=>t && !t.closedAt && !t.locked) : [];
+      if(!openTurnsAll.length && businessKey && businessKey !== localToday){
+        const ids = ["dateKey","turnDate","turnFrom","turnTo","ticketDate"];
+        ids.forEach(id=>{
+          const el = $(id);
+          if(!el) return;
+          if(!el.value || el.value === localToday) el.value = businessKey;
+        });
+        today = businessKey;
+      }
+      const storedOpenDate = localStorage.getItem(LS_OPEN_TURN_DATE) || "";
+      const storedPick = storedOpenDate ? openTurnsAll.find(t=>t.dateKey === storedOpenDate) : null;
+      if(!openTurnsAll.length){
+        localStorage.removeItem(LS_OPEN_TURN_DATE);
+      }
+      if(storedPick && (!currentTurn || currentTurn.dateKey !== storedPick.dateKey)){
+        $("turnDate").value = storedPick.dateKey;
+        const dateKeyInput = $("dateKey");
+        if(dateKeyInput) dateKeyInput.value = storedPick.dateKey;
+        setActiveView("today");
+    setCloseDetailVisible(false);
+        renderTurn(db);
+        renderOpenTurns(db);
+        renderTurnHistory(db);
+      } else if(openTurnsAll.length && !storedPick) {
+        const pick = openTurnsAll.slice().sort((a,b)=>Number(a.openedAt||0)-Number(b.openedAt||0))[0];
+        if(pick){
+          $("turnDate").value = pick.dateKey;
+          const dateKeyInput = $("dateKey");
+          if(dateKeyInput) dateKeyInput.value = pick.dateKey;
+          setActiveView("today");
+    setCloseDetailVisible(false);
+          renderTurn(db);
+          renderOpenTurns(db);
+          renderTurnHistory(db);
+        }
+      }
+
+      if(!didPromptOpenTurn){
+        const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+        const openTurns = turns.filter(t=>t && !t.closedAt && !t.locked);
+        if(openTurns.length){
+          const lastActiveAt = Number(localStorage.getItem(LS_LAST_ACTIVE) || 0);
+          const hasRecentActivity = lastActiveAt && (Date.now() - lastActiveAt) <= ACTIVE_GRACE_MS;
+          const pick = openTurns.slice().sort((a,b)=>Number(a.openedAt||0)-Number(b.openedAt||0))[0];
+          const businessKey = getBusinessDateKey(db);
+          const minKeepKey = dateKeyAddDaysLocal(businessKey, -1);
+          const allowKeep = dateKeyToMs(pick.dateKey) >= dateKeyToMs(minKeepKey);
+          didPromptOpenTurn = true;
+          if(hasRecentActivity){
+            $("turnDate").value = pick.dateKey;
+            const dateKeyInput = $("dateKey");
+            if(dateKeyInput) dateKeyInput.value = pick.dateKey;
+            localStorage.setItem(LS_OPEN_TURN_DATE, pick.dateKey);
+            setActiveView("today");
+    setCloseDetailVisible(false);
+            renderTurn(db);
+            renderOpenTurns(db);
+            renderTurnHistory(db);
+            render(db, true);
+          } else if(allowKeep){
+            $("turnDate").value = pick.dateKey;
+            const dateKeyInput = $("dateKey");
+            if(dateKeyInput) dateKeyInput.value = pick.dateKey;
+            localStorage.setItem(LS_OPEN_TURN_DATE, pick.dateKey);
+            setActiveView("today");
+    setCloseDetailVisible(false);
+            renderTurn(db);
+            renderOpenTurns(db);
+            renderTurnHistory(db);
+            render(db, true);
+          } else {
+            showOpenTurnPrompt(pick.dateKey, { allowKeep }).then(choice=>{
+              if(choice === "close"){
+                $("turnDate").value = pick.dateKey;
+                const dateKeyInput = $("dateKey");
+                if(dateKeyInput) dateKeyInput.value = pick.dateKey;
+                setActiveView("today");
+    setCloseDetailVisible(false);
+                renderTurn(db);
+                renderOpenTurns(db);
+                renderTurnHistory(db);
+                toast("Completa el arqueo y cerra el turno.");
+                closingAttempt = true;
+                const denomWrap = document.querySelector(".denomTableWrap");
+                if(denomWrap) denomWrap.scrollIntoView({ behavior:"smooth", block:"start" });
+              } else if(choice === "keep") {
+                $("turnDate").value = pick.dateKey;
+                const dateKeyInput = $("dateKey");
+                if(dateKeyInput) dateKeyInput.value = pick.dateKey;
+                localStorage.setItem(LS_OPEN_TURN_DATE, pick.dateKey);
+                setActiveView("today");
+    setCloseDetailVisible(false);
+                renderTurn(db);
+                renderOpenTurns(db);
+                renderTurnHistory(db);
+                render(db, true);
+              }
+            });
+          }
+        }
+      } else {
+        const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+        const openTurns = turns.filter(t=>t && !t.closedAt && !t.locked);
+        if(openTurns.length){
+          const pick = openTurns.slice().sort((a,b)=>Number(a.openedAt||0)-Number(b.openedAt||0))[0];
+          if(pick && (!currentTurn || pick.id !== currentTurn.id)){
+            $("turnDate").value = pick.dateKey;
+            setActiveView("today");
+    setCloseDetailVisible(false);
+            renderTurn(db);
+            renderOpenTurns(db);
+            renderTurnHistory(db);
+          }
+        }
+      }
+
+      const d = localToday;
+      const turnKey = ($("turnDate").value||today).trim() || today;
+
+            fetch("/api/dayReport?date="+encodeURIComponent(d)).then(r=>{
+              if(!r.ok) throw new Error("dayReport");
+              return r.json();
+            }).then(rep=>{
+              $("closeStatus").innerHTML = rep.closure ? "Cerrado" : "Abierto";
+              $("dayInfo").textContent = rep.closure
+                ? ("Cerrado por " + (rep.closure.closedBy||"") + " - " + new Date(rep.closure.at).toLocaleString("es-AR"))
+                : "Aun no se cerro el dia.";
+              renderDayReport(rep);
+            }).catch(()=>{
+              const local = computeDayReportLocal(window.__db || null, d);
+              if(local){
+                $("closeStatus").innerHTML = local.closure ? "Cerrado" : "Abierto";
+                $("dayInfo").textContent = local.closure
+                  ? ("Cerrado por " + (local.closure.closedBy||"") + " - " + new Date(local.closure.at).toLocaleString("es-AR"))
+                  : "No se pudo cargar reporte del dia. Mostrando datos locales.";
+                renderDayReport(local);
+          setDayDebug("dayReport: fallback local | fecha=" + d + " | ventas=" + (local.totals ? local.totals.salesCount : 0));
+              } else {
+                renderDayReport(null);
+          setDayDebug("dayReport: error | fecha=" + d);
+                $("dayInfo").textContent = "No se pudo cargar el reporte del dia.";
+              }
+            });
+
+      const turnOpen = (db.cash && Array.isArray(db.cash.turns))
+        ? db.cash.turns.find(t=>t && t.dateKey===turnKey && !t.closedAt && !t.locked)
+        : null;
+      const bar = $("cashStatusBar");
+      if(bar){
+        const open = !!turnOpen;
+        const cashier = turnOpen && turnOpen.cashier ? String(turnOpen.cashier) : "";
+        if(open && closingAttempt){
+          bar.textContent = cashier ? `CERRANDO TURNO ? ${cashier}` : "CERRANDO TURNO";
+        } else {
+          bar.textContent = open ? (cashier ? `TURNO ABIERTO ? ${cashier}` : "TURNO ABIERTO") : "TURNO CERRADO";
+        }
+        bar.classList.toggle("open", open);
+        bar.classList.toggle("closed", !open);
+        bar.classList.toggle("closing", open && closingAttempt);
+      }
+      window.__openingCash = turnOpen ? Number(turnOpen.openingTotal || 0) : 0;
+      const openingInput = $("turnOpeningCash");
+      if(openingInput){
+        if(turnOpen && !openingInput.value){
+          openingInput.value = window.__openingCash ? String(window.__openingCash) : "";
+        }
+        const lockedTurn = !!(currentTurn && (currentTurn.closedAt || currentTurn.locked));
+        openingInput.disabled = lockedTurn;
+      }
+      const sessionInfo = $("sessionInfo");
+      if(sessionInfo){
+        sessionInfo.textContent = turnOpen
+          ? ("Turno abierto " + new Date(turnOpen.openedAt).toLocaleString("es-AR") + " - Apertura: " + money(turnOpen.openingTotal||0))
+          : "No hay turno abierto en esta fecha.";
+      }
+
+      const mov = (db.cash && db.cash.movements) ? db.cash.movements.filter(m=>m.dateKey===d).slice(0,40) : [];
+      const typeFilter = ($("movFilterType").value || "all").trim();
+      const methodFilter = ($("movFilterMethod").value || "all").trim();
+      const textFilter = ($("movFilterText").value || "").trim().toLowerCase();
+      const filteredMov = mov.filter(m=>{
+        if(typeFilter !== "all" && m.type !== typeFilter) return false;
+        if(methodFilter !== "all" && m.method !== methodFilter) return false;
+        if(textFilter){
+          const hay = `${m.note||""} ${m.method||""}`.toLowerCase();
+          if(!hay.includes(textFilter)) return false;
+        }
+        return true;
+      });
+      const movNet = mov.reduce((a,m)=>a + ((m.type === "in") ? Number(m.amount||0) : -Number(m.amount||0)), 0);
+      const kpiMov = $("kpiExits");
+      if(kpiMov) kpiMov.textContent = money(movNet || 0);
+      renderTodayQuick(db, d);
+      $("movList").innerHTML = filteredMov.map(m=>{
+        const sign = m.type==="in" ? "+" : "-";
+        return `<div style="display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--line);">
+          <div>${esc(new Date(m.at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}))} - <strong>${esc(m.method||"")}</strong> - ${esc(m.note||"")}</div>
+          <div style="font-weight:900">${esc(sign)} ${esc(money(m.amount||0))}</div>
+        </div>`;
+      }).join("") || "-";
+    }
+
+    const movModal = $("movModal");
+    function openMovModal(kind){
+      if(!movModal) return;
+      movModal.style.display = "flex";
+      if(kind){
+        const k = $("movKind");
+        if(k) k.value = kind;
+      }
+      const ksel = $("movKind");
+      if(ksel) ksel.dispatchEvent(new Event("change"));
+    }
+    function closeMovModal(){
+      if(!movModal) return;
+      movModal.style.display = "none";
+      if($("movAmt")) $("movAmt").value = "";
+      if($("movNote")) $("movNote").value = "";
+      if($("movTransferAmt")) $("movTransferAmt").value = "";
+      if($("movTransferNote")) $("movTransferNote").value = "";
+    }
+    const btnMovOpen = $("btnMovOpen");
+    if(btnMovOpen) btnMovOpen.addEventListener("click", ()=>openMovModal());
+    const movCancel = $("movCancel");
+    if(movCancel) movCancel.addEventListener("click", closeMovModal);
+    if(movModal){
+      movModal.addEventListener("click", (e)=>{ if(e.target === movModal) closeMovModal(); });
+    }
+    const movKind = $("movKind");
+    if(movKind) movKind.addEventListener("change", ()=>{
+      const show = (movKind.value === "transferencia");
+      const block = $("movTransferBlock");
+      if(block) block.style.display = show ? "flex" : "none";
+    });
+    const btnMov = $("btnMov");
+    if(btnMov) btnMov.addEventListener("click", ()=>{
+      const kind = $("movKind")?.value || "gasto";
+      if(kind === "transferencia"){
+        const amount = num($("movTransferAmt")?.value);
+        if(amount <= 0) return toast("Ingresa el monto de transferencia");
+        sendAction("cash:transfer", { dateKey: ($("turnDate").value || today).trim(), direction: $("movTransferDir").value, amount, note: ($("movTransferNote").value||"").trim() });
+        toast("Transferencia registrada");
+        closeMovModal();
+        return;
+      }
+      const type = (kind === "ingreso") ? "in" : "out";
+      const amount = num($("movAmt")?.value);
+      if(amount <= 0) return toast("Ingresa el monto");
+      sendAction("cash:movement", { type, method: $("movMethod").value, amount, note: ($("movNote").value||"").trim() });
+      toast("Movimiento registrado");
+      closeMovModal();
+    });
+        const btnQuickMov = $("btnQuickMov");
+    if(btnQuickMov) btnQuickMov.addEventListener("click", ()=>{ setActiveView("moves"); openMovModal(); });
+    const btnQuickTransfer = $("btnQuickTransfer");
+    if(btnQuickTransfer) btnQuickTransfer.addEventListener("click", ()=>{ setActiveView("moves"); openMovModal("transferencia"); });
+    const btnQuickTicket = $("btnQuickTicket");
+    if(btnQuickTicket) btnQuickTicket.addEventListener("click", ()=>{ setActiveView("tickets"); const s = $("ticketSearch"); if(s) s.focus(); });
+    const btnQuickArqueo = $("btnQuickArqueo");
+    if(btnQuickArqueo) btnQuickArqueo.addEventListener("click", ()=>{ setActiveView("close"); });
+    const btnQuickCloseTurn = $("btnQuickCloseTurn");
+    if(btnQuickCloseTurn) btnQuickCloseTurn.addEventListener("click", ()=>{ const b = $("btnTurnClose"); if(b) b.click(); });
+$("btnCloseDay").addEventListener("click", ()=>{
+      sendAction("day:close", { closingCash: num($("dayCash").value), note: ($("dayNote").value||"").trim(), closedBy: "Admin" });
+      toast("Dia cerrado");
+    });
+    $("dateKey").addEventListener("change", ()=>render(window.__db||null, true));
+    $("movFilterType").addEventListener("change", ()=>render(window.__db||null, true));
+    $("movFilterMethod").addEventListener("change", ()=>render(window.__db||null, true));
+    $("movFilterText").addEventListener("input", ()=>render(window.__db||null, true));
+
+    $("turnDate").addEventListener("change", ()=>renderTurn(window.__db || {}));
+    $("btnTurnSave").addEventListener("click", ()=>{
+      const dateKey = ($("turnDate").value || today).trim();
+      if(!isDayOpen(window.__db || {}, dateKey)) return toast("Abri el dia en Caja/Cierre antes de guardar el turno");
+      const turn = collectTurnFromDom();
+      if(!turn) return;
+      sendAction("cash:turnUpdate", turn);
+      toast("Arqueo actualizado");
+    });
+    $("btnTurnClose").addEventListener("click", ()=>{
+      const turn = collectTurnFromDom();
+      if(!turn) return;
+      const totals = calcTurnTotals(turn);
+      const diff = totals.diferencia;
+      if(diff !== null && diff !== undefined && diff !== 0){
+        const reason = ($("diffReason")?.value || "").trim();
+        if(!reason) return toast("Indica el motivo de la diferencia.");
+      }
+      if(!currentTurn) return;
+      const dateKey = ($("turnDate").value || today).trim();
+      if(!isDayOpen(window.__db || {}, dateKey)) return toast("Abri el dia en Caja/Cierre antes de cerrar el turno");
+      const closingTotal = calcDenomsTotal(turn.closingDenoms || {});
+      if(closingTotal <= 0){
+        closingAttempt = true;
+        render(window.__db || {}, true);
+        const denomWrap = document.querySelector(".denomTableWrap");
+        if(denomWrap) denomWrap.scrollIntoView({ behavior:"smooth", block:"start" });
+        const firstCloseInput = document.querySelector(".denomQty[data-side=\"close\"]");
+        if(firstCloseInput) firstCloseInput.focus();
+        return toast("Completa el conteo de cierre antes de cerrar el turno.");
+      }
+      if(!confirm("Cerrar turno? Quedara bloqueado.")) return;
+      sendAction("cash:turnUpdate", turn);
+      sendAction("cash:turnClose", { id: currentTurn.id, dateKey, closingDenoms: turn.closingDenoms });
+      lastClosedResult = Number(turn.closingTotal || 0) - Number(turn.openingTotal || 0);
+      lastClosedDateKey = dateKey;
+      $("turnFrom").value = dateKey;
+      $("turnTo").value = dateKey;
+      markTurnClosedLocal(currentTurn.id);
+      currentTurn = null;
+      closingAttempt = false;
+      renderTurn(window.__db || {});
+      renderTurnHistory(window.__db || {});
+      renderOpenTurns(window.__db || {});
+      toast("Turno cerrado");
+    });
+    $("btnPrintTurn").addEventListener("click", ()=>{
+      window.print();
+    });
+    $("btnTurnFilter").addEventListener("click", ()=>renderTurnHistory(window.__db || {}));
+    $("turnHistorySearch").addEventListener("input", ()=>renderTurnHistory(window.__db || {}));
+    document.querySelectorAll("[data-range]").forEach(btn=>{
+      btn.addEventListener("click", ()=>setHistoryRange(btn.getAttribute("data-range")));
+    });
+    $("ticketDate")?.addEventListener("change", ()=>renderTicketsList(window.__db || {}));
+    $("ticketStatusFilter")?.addEventListener("change", ()=>renderTicketsList(window.__db || {}));
+    $("ticketSearch")?.addEventListener("input", ()=>renderTicketsList(window.__db || {}));
+    $("ticketsList")?.addEventListener("click", (e)=>{
+      const id = e.target && e.target.getAttribute && e.target.getAttribute("data-ticket-toggle");
+      if(!id) return;
+      const detail = document.querySelector(`[data-ticket-detail="${id}"]`);
+      if(detail) detail.style.display = (detail.style.display === "none" || !detail.style.display) ? "block" : "none";
+    });
+    $("openTurnsList").addEventListener("click", (e)=>{
+      const id = e.target && e.target.getAttribute && e.target.getAttribute("data-close-turn");
+      const dateKey = e.target && e.target.getAttribute && e.target.getAttribute("data-date");
+      if(!id) return;
+      if(!confirm("Cerrar este turno?")) return;
+      sendAction("cash:turnClose", { id, dateKey: dateKey || today, closingDenoms: {} });
+      $("turnFrom").value = dateKey || today;
+      $("turnTo").value = dateKey || today;
+      markTurnClosedLocal(id);
+      currentTurn = null;
+      renderTurn(window.__db || {});
+      renderTurnHistory(window.__db || {});
+      renderOpenTurns(window.__db || {});
+      toast("Turno cerrado");
+    });
+
+    document.addEventListener("input", (e)=>{
+      if(e.target && e.target.matches && e.target.matches(".denomQty")){
+        updateDenomRowTotals();
+        updateTurnTotalsFromDom();
+      }
+    });
+    $("turnCashier").addEventListener("input", ()=>updateCashCountButtons());
+    $("turnOpeningCash").addEventListener("input", ()=>{
+      syncOpeningTargetUI();
+      updateTurnTotalsFromDom();
+    });
+        document.querySelectorAll("[data-step-jump]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-step-jump");
+        const map = { cash:"stepCash", noncash:"stepNonCash", summary:"stepSummary", close:"turnFooter" };
+        const el = id ? document.getElementById(map[id] || map.cash) : null;
+        if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+    });
+document.querySelectorAll("[data-view-tab]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        setActiveView(btn.getAttribute("data-view-tab"));
+      });
+    });
+    setActiveView("today");
+    setCloseDetailVisible(false);
+    setHistoryRangeActive("day");
+    $("turnOpeningCash").addEventListener("change", ()=>{
+      syncOpeningTargetUI();
+      updateTurnTotalsFromDom();
+      const dateKey = ($("dateKey").value || today).trim();
+      const target = getOpeningTarget();
+      if(target === null) return;
+      const db = window.__db || {};
+      const ses = (db.cash && Array.isArray(db.cash.sessions)) ? db.cash.sessions.find(s=>s && s.dateKey === dateKey && !s.closedAt) : null;
+      if(!ses) return;
+      sendAction("cash:sessionUpdate", { dateKey, openingCash: target });
+    });
+    $("btnOpenCashCount").addEventListener("click", ()=>{
+      const dateKey = ($("turnDate").value || today).trim();
+      if(currentTurn) return toast("Ya hay un turno abierto");
+      const shift = $("turnShift").value || "dia";
+      const cashier = ($("turnCashier").value || "").trim();
+      const openingDenoms = readDenomsSide("open");
+      if(!cashier) return toast("Pon el cajero");
+      const target = getOpeningTarget();
+      if(target === null || target <= 0) return toast("Pone el efectivo de apertura.");
+      const openTotal = calcDenomsTotal(openingDenoms);
+      if(openTotal !== target) return toast("El total de billetes no coincide con la apertura.");
+      if(!isDayOpen(window.__db || {}, dateKey)){
+        sendAction("cash:open", { dateKey, openingCash: target, note: "Desde conteo" });
+      }
+      sendAction("cash:turnOpen", { dateKey, shift, cashier, openingDenoms });
+      toast("Turno abierto");
+    });
+    $("btnCloseCashCount").addEventListener("click", ()=>{
+      const dateKey = ($("turnDate").value || today).trim();
+      if(!isDayOpen(window.__db || {}, dateKey)) return toast("La caja ya esta cerrada.");
+      const closeTotal = calcDenomsTotal(readDenomsSide("close"));
+      if(closeTotal <= 0) return toast("Completa el cierre de efectivo.");
+      sendAction("cash:close", { closingCash: closeTotal, note: "Desde conteo" });
+      toast("Caja cerrada");
+    });
+
+    ["entZ","entB","entAportes","entAnulados"].forEach(id=>{
+      const el = $(id);
+      el.addEventListener("input", ()=>updateTurnTotalsFromDom());
+    });
+
+    ["nonCashList","exitProviders","exitExpenses","exitWithdrawals","exitExtraPay","exitAdvances","exitOthers"].forEach(id=>{
+      const wrap = $(id);
+      if(!wrap) return;
+      wrap.addEventListener("click", (e)=>{
+        if(!currentTurn) return toast("Abri un turno primero");
+        if(currentTurn && currentTurn.locked) return toast("Turno cerrado");
+        const del = e.target && e.target.getAttribute && e.target.getAttribute("data-del");
+        const add = e.target && e.target.getAttribute && e.target.getAttribute("data-add");
+        if(del !== null){
+          const idx = Number(del);
+          if(id === "nonCashList"){
+            const list = readNonCash();
+            list.splice(idx,1);
+            renderNonCash(list, false);
+          } else {
+            const list = readRowList(id, id === "exitProviders");
+            list.splice(idx,1);
+            renderExitList(id, list, false, id === "exitProviders");
+          }
+          updateTurnTotalsFromDom();
+        }
+        if(add){
+          if(add === "nonCashList"){
+            const list = readNonCash();
+            list.push({ method:"tarjeta", amount:0, note:"" });
+            renderNonCash(list, false);
+          } else {
+            const list = readRowList(add, add === "exitProviders");
+            list.push({ name:"", doc:"", amount:0, note:"" });
+            renderExitList(add, list, false, add === "exitProviders");
+          }
+          updateTurnTotalsFromDom();
+        }
+      });
+      wrap.addEventListener("input", ()=>updateTurnTotalsFromDom());
+      wrap.addEventListener("change", ()=>updateTurnTotalsFromDom());
+    });
+
+    onState((db, ok)=>{ window.__db=db; render(db, ok); renderTurn(db || {}); renderTurnHistory(db || {}); renderTicketsList(db || {}); renderOpenTurns(db || {}); });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

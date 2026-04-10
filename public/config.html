@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Ajustes</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .configGrid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:minmax(260px,320px) minmax(0,1fr);
+      height:100%;
+      min-height:0;
+      overflow:hidden;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){ .configGrid{grid-template-columns:minmax(0,1fr); overflow:auto;} }
+    .configGrid > aside,
+    .configGrid > section{min-height:0;}
+    .sideCard,
+    .sectionCard{
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:
+        linear-gradient(180deg, rgba(24,26,32,.98), rgba(12,14,18,.98)),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      box-shadow:0 18px 40px rgba(0,0,0,.24);
+      position:relative;
+      overflow:hidden;
+    }
+    .sideCard::before,
+    .sectionCard::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto;
+      height:3px;
+      background:linear-gradient(90deg, rgba(120,240,190,.72), rgba(120,220,255,.36));
+    }
+    .sideCard{
+      padding:14px;
+      position:sticky;
+      top:0;
+      height:100%;
+      min-height:0;
+      overflow:auto;
+    }
+    @media (max-width: 980px){ .sideCard{position:static; height:auto; overflow:visible;} }
+    .sectionCard{padding:14px;}
+    .eyebrow{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);}
+    .title{margin:4px 0 0; font-size:24px; line-height:1.08; font-weight:900;}
+    .sub{margin-top:6px; color:var(--muted); line-height:1.4;}
+    .metaList{display:grid; gap:8px; margin-top:14px;}
+    .metaBox{border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:10px; background:rgba(255,255,255,.02);}
+    .metaLabel{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);}
+    .metaValue{margin-top:6px; font-weight:800; line-height:1.4;}
+    .sectionHead{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;}
+    .sectionHead h2{margin:0; font-size:20px;}
+    .sectionHead p{display:none;}
+    .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px;}
+    @media (max-width: 720px){ .formGrid{grid-template-columns:minmax(0,1fr);} }
+    .field{display:flex; flex-direction:column; gap:6px;}
+    .field.full{grid-column:1 / -1;}
+    .configGrid .small{
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(241,241,244,.64);
+    }
+    .configGrid .input{
+      border-radius:8px;
+      padding:12px 13px;
+      background:rgba(0,0,0,.22);
+      border-color:rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .configGrid .input:focus{
+      border-color:rgba(120,240,190,.45);
+      box-shadow: 0 0 0 3px rgba(120,240,190,.10), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .fieldHint{font-size:12px; color:var(--muted); line-height:1.38;}
+    .buttonRow{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+    .configGrid .btn{
+      border-radius:8px;
+      padding:10px 14px;
+      font-size:11px;
+    }
+    .configGrid .btn.primary{
+      border-color:rgba(120,240,190,.42);
+      background:linear-gradient(180deg, rgba(120,240,190,.18), rgba(120,240,190,.08));
+      color:#ecfff6;
+    }
+    .msgBox{display:none; margin-top:10px; padding:9px 11px; border-radius:8px; border:1px solid rgba(255,255,255,.08); line-height:1.4;}
+    .msgBox.show{display:block;}
+    .msgBox.error{border-color:rgba(255,110,110,.34); background:rgba(120,28,28,.18); color:#ffd7d7;}
+    .msgBox.success{border-color:rgba(120,240,190,.34); background:rgba(18,86,52,.18); color:#d9ffe9;}
+    .configMain{display:grid; gap:12px; overflow:auto; min-height:0; padding-right:2px;}
+    @media (max-height: 860px){
+      .sideCard,.sectionCard{padding:12px;}
+      .title{font-size:22px;}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Ajustes</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap configGrid">
+    <aside>
+      <section class="sideCard">
+        <div class="eyebrow">Restaurante activo</div>
+        <h1 class="title" id="restaurantTitle">Cargando...</h1>
+        <div class="sub" id="restaurantSub">Cargando...</div>
+
+        <div class="metaList">
+          <div class="metaBox">
+            <div class="metaLabel">Cuenta</div>
+            <div class="metaValue" id="ownerName">-</div>
+          </div>
+          <div class="metaBox">
+            <div class="metaLabel">Mail</div>
+            <div class="metaValue" id="ownerEmail">-</div>
+          </div>
+          <div class="metaBox">
+            <div class="metaLabel">Rol actual</div>
+            <div class="metaValue" id="ownerRole">-</div>
+          </div>
+        </div>
+
+        <div class="buttonRow">
+          <a class="btn" href="/profile.html">Ir a perfil</a>
+          <button id="btnLogout" class="btn flat" type="button">Cerrar sesion</button>
+        </div>
+
+        <div class="msgBox" id="sideMsg"></div>
+      </section>
+    </aside>
+
+    <section class="configMain">
+      <section class="sectionCard">
+        <div class="sectionHead">
+          <div><h2>Restaurante</h2></div>
+        </div>
+        <div class="msgBox" id="settingsMsg"></div>
+        <div class="formGrid">
+          <div class="field full">
+            <label class="small" for="restaurantName">Nombre del restaurante</label>
+            <input id="restaurantName" class="input" placeholder="Nombre del restaurante"/>
+          </div>
+          <div class="field">
+            <label class="small" for="ticketWidth">Ancho de ticket</label>
+            <select id="ticketWidth" class="input">
+              <option value="80">80 mm</option>
+              <option value="58">58 mm</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="small" for="themeSelect">Tema</label>
+            <select id="themeSelect" class="input"></select>
+            <div class="fieldHint">El tema se aplica al restaurante actual.</div>
+          </div>
+        </div>
+        <div class="buttonRow">
+          <button id="btnSaveSettings" class="btn primary" type="button">Guardar</button>
+        </div>
+      </section>
+
+      <section class="sectionCard">
+        <div class="sectionHead">
+          <div><h2>Backups</h2></div>
+        </div>
+        <div class="buttonRow">
+          <a class="btn primary" href="/api/exportDb">Descargar backup</a>
+          <a class="btn" href="/admin_backup.html">Abrir backups</a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function showMessage(id, text, kind) {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = "msgBox" + (text ? " show" : "") + (kind ? ` ${kind}` : "");
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, Object.assign({ cache: "no-store" }, options || {}));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const error = new Error(data && data.error ? data.error : "request_failed");
+        error.payload = data;
+        throw error;
+      }
+      return data;
+    }
+
+    function fillThemes() {
+      const sel = $("themeSelect");
+      const labels = { noir: "Noir", ember: "Ember", mint: "Mint", cobalt: "Cobalt", sand: "Sand" };
+      const themes = (window.RestoApp && window.RestoApp.themes) ? window.RestoApp.themes : Object.keys(labels);
+      sel.innerHTML = themes.map((theme) => `<option value="${theme}">${labels[theme] || theme}</option>`).join("");
+      sel.value = window.RestoApp && window.RestoApp.getTheme ? window.RestoApp.getTheme() : "noir";
+      sel.addEventListener("change", () => {
+        if (window.RestoApp && window.RestoApp.setTheme) window.RestoApp.setTheme(sel.value);
+      });
+    }
+
+    async function loadPage() {
+      try {
+        const [me, settings] = await Promise.all([
+          api("/api/auth/me"),
+          api("/api/settings")
+        ]);
+        if (!me || !me.authenticated || me.role !== "admin") {
+          location.replace("/profile.html");
+          return;
+        }
+        $("restaurantTitle").textContent = me.restaurantName || settings.restaurantName || "Restaurante";
+        $("restaurantSub").textContent = "Restaurante activo";
+        $("ownerName").textContent = me.name || "-";
+        $("ownerEmail").textContent = me.email || "-";
+        $("ownerRole").textContent = "Restaurante";
+        $("restaurantName").value = settings.restaurantName || me.restaurantName || "";
+        $("ticketWidth").value = String((settings.printing && settings.printing.ticketWidthMm) || 80) === "58" ? "58" : "80";
+        fillThemes();
+      } catch (error) {
+        showMessage("sideMsg", "No se pudieron cargar los ajustes.", "error");
+      }
+    }
+
+    $("btnSaveSettings").addEventListener("click", () => {
+      const restaurantName = ($("restaurantName").value || "").trim();
+      const ticketWidthMm = Number(($("ticketWidth").value || "80")) === 58 ? 58 : 80;
+      if (!window.RestoApp || !window.RestoApp.sendAction) {
+        showMessage("settingsMsg", "La conexion de ajustes no esta lista.", "error");
+        return;
+      }
+      window.RestoApp.sendAction("settings:update", {
+        patch: {
+          restaurantName,
+          printing: { ticketWidthMm }
+        }
+      });
+      showMessage("settingsMsg", "Ajustes enviados. Si el socket estaba activo, ya quedaron guardados.", "success");
+    });
+
+    $("btnLogout").addEventListener("click", async () => {
+      try { await api("/api/auth/logout"); } catch (error) {}
+      location.replace("/login.html");
+    });
+
+    loadPage();
+  </script>
+</body>
+</html>

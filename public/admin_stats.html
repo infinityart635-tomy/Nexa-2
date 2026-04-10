@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Estad?sticas</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+    .controls .btn{padding:10px 12px}
+    .kpi{display:grid; gap:10px; grid-template-columns:1fr 1fr}
+    @media (min-width:860px){ .kpi{grid-template-columns:repeat(4,1fr)} }
+    .kpi .box{border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:12px; background:rgba(0,0,0,.18)}
+    .kpi .v{font-weight:900; font-size:18px}
+    .kpi .l{color:var(--muted); font-size:12px; margin-top:6px}
+    canvas{width:100%; height:220px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.12); border-radius:16px}
+    .twocol{display:grid; gap:12px}
+    @media (min-width:980px){ .twocol{grid-template-columns:1fr 1fr} }
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th,td{padding:8px 8px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; vertical-align:top}
+    th{color:var(--muted); font-weight:700}
+    .right{text-align:right}
+    .tag{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.04); font-size:11px; color:var(--muted)}
+    .analysisBoard{
+      margin-top:12px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(420px 220px at 10% 0%, rgba(255,200,120,.12), transparent 70%),
+        radial-gradient(360px 220px at 90% 20%, rgba(120,190,255,.10), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+      box-shadow: 0 26px 60px rgba(0,0,0,.45);
+      padding:18px;
+    }
+    .analysisHeader{display:flex; align-items:flex-end; justify-content:space-between; gap:10px}
+    .analysisTitle{font-size:16px; letter-spacing:.22em; text-transform:uppercase; font-weight:800}
+    .analysisSub{color:var(--muted); font-size:12px; margin-top:6px}
+    .analysisControls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px}
+    .analysisKpis{margin-top:12px}
+    .analysisChartRow{display:grid; gap:14px; margin-top:12px}
+    @media (min-width: 980px){ .analysisChartRow{grid-template-columns: 1.4fr .9fr;} }
+    .analysisCard{border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px; background:rgba(0,0,0,.26)}
+    .analysisCard h3{margin:0; font-size:13px; letter-spacing:.18em; text-transform:uppercase}
+    .analysisCard .hint{margin-top:6px; font-size:12px; color:var(--muted)}
+    .ringCard{display:flex; gap:12px; align-items:center; justify-content:space-between}
+    .ring{
+      --ring: 0%;
+      width:160px; height:160px; border-radius:999px;
+      background: conic-gradient(#f3b361 0% var(--ring), rgba(255,255,255,.08) var(--ring) 100%);
+      position:relative;
+    }
+    .ring::after{
+      content:"";
+      position:absolute; inset:14px;
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(10,10,12,.95), rgba(0,0,0,.85));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .ringCenter{
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:6px; z-index:2; text-align:center;
+    }
+    .ringValue{font-weight:900; font-size:18px}
+    .ringLabel{font-size:12px; color:var(--muted)}
+    .ringPct{font-size:12px; color:#f3b361; font-weight:800}
+    .miniGrid{display:grid; gap:10px}
+    .miniPanel{border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:12px; background:rgba(0,0,0,.18)}
+    .miniPanel .label{font-size:12px; color:var(--muted); margin-bottom:6px}
+    .analysisFooter{display:grid; gap:12px; margin-top:12px}
+    @media (min-width:980px){ .analysisFooter{grid-template-columns:1fr 1fr;} }
+    .attCard{
+      border:1px solid rgba(255,215,90,.35);
+      background:
+        radial-gradient(240px 140px at 10% 0%, rgba(255,215,90,.18), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.22));
+    }
+    .attKpis{display:grid; gap:10px; grid-template-columns:repeat(3,1fr); margin-top:10px}
+    .attBox{border:1px solid rgba(255,215,90,.22); border-radius:14px; padding:10px; background:rgba(0,0,0,.22)}
+    .attVal{font-weight:900; font-size:18px}
+    .attLbl{font-size:12px; color:var(--muted); margin-top:4px}
+    .attList{margin-top:10px}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>Estad?sticas</h1>
+          <p>Semana / mes / rango ? costes ? beneficio ? top productos</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo.html">Mozo</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding:18px 0 40px;">
+    
+
+    <section class="analysisBoard">
+      <div class="analysisHeader">
+        <div>
+          <div class="analysisTitle">Analisis</div>
+          <div class="analysisSub" id="rangeLabel">-</div>
+        </div>
+        <div class="badge2">Actualizado <strong id="updated">-</strong></div>
+      </div>
+
+      <div class="analysisControls">
+        <button class="btn primary" id="pWeek" type="button">Semana</button>
+        <button class="btn" id="pMonth" type="button">Mes</button>
+        <button class="btn" id="p30" type="button">Ultimos 30 dias</button>
+
+        <div style="flex:1"></div>
+
+        <label class="mini muted">Desde</label>
+        <input class="input" id="from" type="date" style="width:auto; padding:10px 10px"/>
+        <label class="mini muted">Hasta</label>
+        <input class="input" id="to" type="date" style="width:auto; padding:10px 10px"/>
+        <button class="btn" id="pApply" type="button">Aplicar</button>
+        <button class="btn" id="btnRangePrint" type="button">Imprimir periodo</button>
+        <button class="btn primary" id="btnRangeClose" type="button">Guardar cierre</button>
+      </div>
+
+      <div class="analysisKpis kpi">
+        <div class="box">
+          <div class="v" id="kTotal">-</div>
+          <div class="l">Ventas</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kCost">-</div>
+          <div class="l">Coste produccion</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kProfit">-</div>
+          <div class="l">Beneficio estimado</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kMargin">-</div>
+          <div class="l">Margen</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kTickets">-</div>
+          <div class="l">Tickets</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kAvg">-</div>
+          <div class="l">Ticket medio</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kCash">-</div>
+          <div class="l">Efectivo</div>
+        </div>
+        <div class="box">
+          <div class="v" id="kMP">-</div>
+          <div class="l">MercadoPago</div>
+        </div>
+      </div>
+
+      <div class="analysisCard attCard" style="margin-top:12px;">
+        <h3>Presentismo</h3>
+        <div class="hint" id="attRangeLabel">-</div>
+        <div class="attKpis">
+          <div class="attBox">
+            <div class="attVal" id="attInCount">-</div>
+            <div class="attLbl">Entradas</div>
+          </div>
+          <div class="attBox">
+            <div class="attVal" id="attOutCount">-</div>
+            <div class="attLbl">Salidas</div>
+          </div>
+          <div class="attBox">
+            <div class="attVal" id="attActiveCount">-</div>
+            <div class="attLbl">En turno</div>
+          </div>
+        </div>
+        <div class="attList" id="attList">-</div>
+      </div>
+
+      <div class="analysisChartRow">
+        <div class="analysisCard">
+          <h3>Evolucion diaria</h3>
+          <div class="hint">Ventas / coste / beneficio por dia</div>
+          <div style="margin-top:10px;">
+            <canvas id="chart" width="1100" height="260"></canvas>
+          </div>
+        </div>
+        <div class="analysisSide" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="analysisCard ringCard">
+            <div>
+              <h3>Top metodos de pago</h3>
+              <div class="hint">Mas usado del rango</div>
+              <div id="payLegend" class="mini" style="margin-top:8px;">-</div>
+            </div>
+            <div class="ring" id="payRing">
+              <div class="ringCenter">
+                <div class="ringValue" id="topPayValue">-</div>
+                <div class="ringLabel" id="topPayLabel">-</div>
+                <div class="ringPct" id="topPayPct">-</div>
+              </div>
+            </div>
+          </div>
+          <div class="miniGrid">
+            <div class="miniPanel">
+              <div class="label">Medio de pago</div>
+              <div id="byPayment"></div>
+            </div>
+            <div class="miniPanel">
+              <div class="label">Canal</div>
+              <div id="byChannel"></div>
+            </div>
+            <div class="miniPanel">
+              <div class="label">Fiscal</div>
+              <div id="byFiscal"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysisFooter">
+        <div class="analysisCard">
+          <h3>Top productos</h3>
+          <div class="hint">Por ventas y por beneficio</div>
+          <div class="hr" style="margin:12px 0;"></div>
+          <div class="row" style="gap:14px; align-items:flex-start;">
+            <div style="flex:1">
+              <div class="muted mini" style="margin-bottom:6px;">Top ventas</div>
+              <div id="topRevenue"></div>
+            </div>
+            <div style="flex:1">
+              <div class="muted mini" style="margin-bottom:6px;">Top beneficio</div>
+              <div id="topProfit"></div>
+            </div>
+          </div>
+        </div>
+        <div class="analysisCard">
+          <h3>Notas rapidas</h3>
+          <div class="hint">Tip: si el coste sale 0, pon Coste en Productos.</div>
+          <div class="hr" style="margin:12px 0;"></div>
+          <div class="mini">Usa los botones de rango para comparar tendencias y detectar horas pico.</div>
+        </div>
+      </div>
+    </section>
+
+      <section class="analysisCard" style="margin-top:12px;">
+      <div class="chartHead">
+        <div>
+          <h3>Cierres guardados</h3>
+          <div class="hint">Mes, quincena, semana o rango guardado.</div>
+        </div>
+        <button class="btn" id="btnReloadClosures" type="button">Actualizar</button>
+      </div>
+      <div class="hr" style="margin-top:10px;"></div>
+      <div id="periodList" class="mini">-</div>
+    </section>
+<section class="card">
+      <div class="row" style="align-items:flex-end;">
+        <div style="flex:1">
+          <div class="small">Fecha</div>
+          <input id="dayDateKey" class="input" type="date"/>
+        </div>
+        <div class="badge2">Estado <strong id="dayWsStatus">.</strong></div>
+      </div>
+      <div id="dayAuthWarn" class="mini" style="display:none; color:#b11; margin-top:8px;">Necesitas iniciar sesion para ver reportes y movimientos.</div>
+      <div class="hr"></div>
+
+      <div class="kpi">
+        <div class="box">
+          <div class="v" id="daySales">-</div>
+          <div class="l">Ventas</div>
+        </div>
+        <div class="box">
+          <div class="v" id="dayCash">-</div>
+          <div class="l">Efectivo esperado</div>
+          <div class="l" id="dayDiff">-</div>
+        </div>
+        <div class="box">
+          <div class="v" id="dayOpen">-</div>
+          <div class="l">Abiertos</div>
+          <div class="l" id="dayOpen2">-</div>
+        </div>
+        <div class="box">
+          <div class="v" id="daySalesN">-</div>
+          <div class="l">Ventas del dia</div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <a class="btn" id="btnDayPrint" href="#" style="flex:1; text-align:center;">Imprimir reporte</a>
+        <button class="btn" id="btnDayDemo" type="button" style="flex:1">Simular ventas</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+
+    function money(n, currency){
+      const v = Number(n||0);
+      try{
+        return new Intl.NumberFormat("es-AR", { style:"currency", currency: currency || "ARS", maximumFractionDigits:0 }).format(v);
+      }catch{ return "$" + Math.round(v); }
+    }
+
+    function fmtPct(p){
+      const v = Number(p||0);
+      return (v*100).toFixed(1) + "%";
+    }
+
+    function ymd(d){
+      const x = d ? new Date(d) : new Date();
+      const yyyy = x.getFullYear();
+      const mm = String(x.getMonth()+1).padStart(2,"0");
+      const dd = String(x.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function startOfWeekISO(d){
+      const x = new Date(d);
+      const day = (x.getDay()+6)%7; // 0=lunes
+      x.setDate(x.getDate() - day);
+      return ymd(x);
+    }
+
+    function startOfMonth(d){
+      const x = new Date(d);
+      x.setDate(1);
+      return ymd(x);
+    }
+
+    function renderKV(obj, currency){
+      const keys = Object.keys(obj||{});
+      if(!keys.length) return `<div class="muted mini">?</div>`;
+      const rows = keys
+        .map(k => ({k, v:Number(obj[k]||0)}))
+        .sort((a,b)=>b.v-a.v)
+        .map(r => `<div class="row" style="justify-content:space-between; gap:10px; margin:6px 0;"><div>${escapeHtml(r.k)}</div><div style="font-weight:900">${money(r.v,currency)}</div></div>`)
+        .join("");
+      return rows;
+    }
+
+    function renderTop(list, currency){
+      const a = (list||[]).slice(0,10);
+      if(!a.length) return `<div class="muted mini">?</div>`;
+      return `<table>
+        <thead><tr><th>Producto</th><th class="right">Uds</th><th class="right">Importe</th></tr></thead>
+        <tbody>
+          ${a.map(r => `<tr><td>${escapeHtml(r.name||r.productId)}</td><td class="right">${Math.round(Number(r.qty||0))}</td><td class="right">${money(r.revenue,currency)}</td></tr>`).join("")}
+        </tbody>
+      </table>`;
+    }
+
+    function escapeHtml(s){
+      return String(s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+
+    function drawChart(series){
+      const c = $("chart");
+      const ctx = c.getContext("2d");
+      const W = c.width, H = c.height;
+      ctx.clearRect(0,0,W,H);
+
+      const pad = {l:44, r:14, t:16, b:28};
+      const plotW = W - pad.l - pad.r;
+      const plotH = H - pad.t - pad.b;
+
+      const s = (series||[]).slice(-60);
+      const maxV = Math.max(1, ...s.map(d => Math.max(Number(d.total||0), Number(d.cost||0), Number(d.profit||0))));
+      const minV = Math.min(0, ...s.map(d => Math.min(Number(d.total||0), Number(d.cost||0), Number(d.profit||0))));
+
+      function x(i){ return pad.l + (s.length<=1 ? 0 : (i/(s.length-1))*plotW); }
+      function y(v){ 
+        const t = (v - minV) / (maxV - minV);
+        return pad.t + (1 - t) * plotH;
+      }
+
+      // grid
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = "rgba(255,255,255,.10)";
+      ctx.lineWidth = 1;
+      for(let j=0;j<=4;j++){
+        const yy = pad.t + (j/4)*plotH;
+        ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(W-pad.r, yy); ctx.stroke();
+      }
+
+      // axes labels
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for(let j=0;j<=4;j++){
+        const v = maxV - (j/4)*(maxV-minV);
+        const yy = pad.t + (j/4)*plotH;
+        ctx.fillText(Math.round(v).toLocaleString("es-AR"), pad.l-6, yy);
+      }
+
+      function drawLine(getV, stroke){
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for(let i=0;i<s.length;i++){
+          const v = getV(s[i]);
+          const xx = x(i), yy = y(v);
+          if(i===0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+        }
+        ctx.stroke();
+      }
+
+      drawLine(d=>Number(d.total||0), "rgba(212,175,55,.95)");
+      drawLine(d=>Number(d.cost||0), "rgba(255,255,255,.65)");
+      drawLine(d=>Number(d.profit||0), "rgba(140,255,180,.75)");
+
+      // legend
+      const lx = pad.l, ly = 10;
+      ctx.textAlign = "left"; ctx.textBaseline = "top";
+      ctx.fillStyle = "rgba(212,175,55,.95)"; ctx.fillText("Ventas", lx, ly);
+      ctx.fillStyle = "rgba(255,255,255,.65)"; ctx.fillText("Coste", lx+90, ly);
+      ctx.fillStyle = "rgba(140,255,180,.75)"; ctx.fillText("Beneficio", lx+170, ly);
+
+      // x labels (first/last)
+      if(s.length){
+        ctx.fillStyle = "rgba(255,255,255,.55)";
+        ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+        ctx.fillText(String(s[0].dateKey||""), pad.l, H-10);
+        ctx.textAlign = "right";
+        ctx.fillText(String(s[s.length-1].dateKey||""), W-pad.r, H-10);
+      }
+    }
+
+    async function loadStats(params){
+      const qs = new URLSearchParams(params||{}).toString();
+      const url = "/api/stats" + (qs ? "?" + qs : "");
+      const data = await fetch(url, {cache:"no-store"}).then(r=>r.json());
+
+      const cur = data.currency || "ARS";
+      $("rangeLabel").textContent = `${data.fromKey} ? ${data.toKey}`;
+      $("updated").textContent = new Date(data.updatedAt||Date.now()).toLocaleString("es-AR");
+
+      $("kTotal").textContent = money(data.totals.total, cur);
+      $("kCost").textContent = money(data.totals.cost, cur);
+      $("kProfit").textContent = money(data.totals.profit, cur);
+      $("kMargin").textContent = fmtPct(data.totals.marginPct);
+
+      $("kTickets").textContent = String(data.totals.salesCount||0);
+      $("kAvg").textContent = money(data.totals.avgTicket, cur);
+
+      const bp = data.totals.byPayment || {};
+      $("kCash").textContent = money(bp.efectivo||0, cur);
+      $("kMP").textContent = money(bp.mercadopago||0, cur);
+
+      $("byPayment").innerHTML = renderKV(data.totals.byPayment, cur);
+      $("byChannel").innerHTML = renderKV(data.totals.byChannel, cur);
+      $("byFiscal").innerHTML = renderKV(data.totals.byFiscal, cur);
+
+      $("topRevenue").innerHTML = renderTop(data.topProducts, cur);
+      $("topProfit").innerHTML = renderTop(data.topProfitProducts, cur);
+
+      const payEntries = Object.entries(bp || {}).map(([k,v])=>({ k, v:Number(v||0) })).sort((a,b)=>b.v-a.v);
+      const payTotal = payEntries.reduce((a,x)=>a + x.v, 0) || 0;
+      const topPay = payEntries[0] || { k:"-", v:0 };
+      const pct = payTotal ? Math.round((topPay.v / payTotal) * 100) : 0;
+      const ring = $("payRing");
+      if(ring) ring.style.setProperty("--ring", pct + "%");
+      const tpv = $("topPayValue"); if(tpv) tpv.textContent = money(topPay.v, cur);
+      const tpl = $("topPayLabel"); if(tpl) tpl.textContent = topPay.k || "-";
+      const tpp = $("topPayPct"); if(tpp) tpp.textContent = pct + "%";
+      const legend = $("payLegend");
+      if(legend){
+        legend.innerHTML = payEntries.slice(0,4).map(r=>`<div style="display:flex; justify-content:space-between; gap:10px; margin:4px 0;"><span>${escapeHtml(r.k)}</span><strong>${money(r.v, cur)}</strong></div>`).join("") || "-";
+      }
+
+      drawChart(data.series || []);
+      return data;
+    }
+
+    function setDates(from, to){
+      $("from").value = from || "";
+      $("to").value = to || "";
+    }
+
+    function presetWeek(){
+      const today = new Date();
+      setDates(startOfWeekISO(today), ymd(today));
+      return loadStats({ from: $("from").value, to: $("to").value });
+    }
+
+    function presetMonth(){
+      const today = new Date();
+      setDates(startOfMonth(today), ymd(today));
+      return loadStats({ from: $("from").value, to: $("to").value });
+    }
+
+    function preset30(){
+      const today = new Date();
+      const from = new Date(today); from.setDate(from.getDate()-29);
+      setDates(ymd(from), ymd(today));
+      return loadStats({ from: $("from").value, to: $("to").value });
+    }
+
+    $("pWeek").addEventListener("click", presetWeek);
+    $("pMonth").addEventListener("click", presetMonth);
+    $("p30").addEventListener("click", preset30);
+
+    $("pApply").addEventListener("click", ()=>{
+      const from = $("from").value || "";
+      const to = $("to").value || "";
+      if(!from || !to) return presetMonth();
+      loadStats({ from, to });
+    });
+
+    // boot: mes por defecto
+    presetMonth();
+  </script>
+    <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction } = window.RestoApp || {};
+    const $$ = (id)=>document.getElementById(id);
+    if(connect) connect("admin", "Admin");
+
+    const today = new Date().toISOString().slice(0,10);
+    if($$("dayDateKey")) $$("dayDateKey").value = today;
+
+    function renderAttendance(db){
+      const label = $$("attRangeLabel");
+      const listEl = $$("attList");
+      const inEl = $$("attInCount");
+      const outEl = $$("attOutCount");
+      const activeEl = $$("attActiveCount");
+      if(!label || !listEl || !inEl || !outEl || !activeEl) return;
+      if(!db){
+        label.textContent = "-";
+        listEl.innerHTML = `<div class="muted mini">?</div>`;
+        inEl.textContent = "-";
+        outEl.textContent = "-";
+        activeEl.textContent = "-";
+        return;
+      }
+      const dateKey = ($$("dayDateKey") && $$("dayDateKey").value) || (typeof ymd === "function" ? ymd() : today);
+      const att = (db.attendance||[]).filter(a => a.dateKey === dateKey);
+      const empById = new Map(((db.people && db.people.employees)||[]).map(e=>[e.id,e]));
+      const lastByEmp = new Map();
+      for(const a of att){
+        if(!lastByEmp.has(a.employeeId)) lastByEmp.set(a.employeeId, a);
+      }
+      const inCount = att.filter(a => a.type === "in").length;
+      const outCount = att.filter(a => a.type === "out").length;
+      const activeCount = Array.from(lastByEmp.values()).filter(a => a.type === "in").length;
+      inEl.textContent = String(inCount);
+      outEl.textContent = String(outCount);
+      activeEl.textContent = String(activeCount);
+      label.textContent = "Fecha: " + dateKey;
+
+      const esc = (typeof escapeHtml === "function") ? escapeHtml : (s)=>String(s||"");
+      const rows = att.slice(0, 10).map(a=>{
+        const emp = empById.get(a.employeeId);
+        const name = emp ? (emp.name || emp.id) : (a.employeeId || "Mozo");
+        const hh = new Date(a.at || Date.now()).toLocaleTimeString("es-AR", {hour:"2-digit", minute:"2-digit"});
+        const kind = (a.type === "in") ? "Entrada" : "Salida";
+        return `<div class="row" style="justify-content:space-between; gap:10px; margin:4px 0;"><div>${esc(name)}</div><div class="muted mini">${kind} ${hh}</div></div>`;
+      }).join("");
+      listEl.innerHTML = rows || `<div class="muted mini">Sin marcas</div>`;
+    }
+
+    function renderDay(ok){
+      if(!$$("dayDateKey")) return;
+      $$("dayWsStatus").textContent = ok ? "conectado" : "offline";
+      const d = ($$("dayDateKey").value || today).trim() || today;
+      $$("btnDayPrint").href = "/print.html?day=" + encodeURIComponent(d);
+
+      fetch("/api/dayReport?date="+encodeURIComponent(d)).then(r=>{
+        if(!r.ok) throw new Error("dayReport");
+        return r.json();
+      }).then(rep=>{
+        const warn = $$("dayAuthWarn");
+        if(warn) warn.style.display = "none";
+        const tot = rep.totals || {};
+        const cash = rep.cash || {};
+        $$("daySales").textContent = money(tot.total||0);
+        $$("daySalesN").textContent = (tot.salesCount||0) + " ventas";
+        $$("dayCash").textContent = money(cash.expectedCash||0);
+        const diff = (cash.difference===null||cash.difference===undefined) ? "-" : money(cash.difference);
+        $$("dayDiff").textContent = "Dif: " + diff;
+        $$("dayOpen").textContent = (rep.open && rep.open.tickets) || 0;
+        $$("dayOpen2").textContent = ((rep.open && rep.open.tables) || 0) + " mesas";
+      }).catch(()=>{
+        const warn = $$("dayAuthWarn");
+        if(warn){
+          warn.style.display = "block";
+          warn.textContent = "Necesitas iniciar sesion para ver reportes y movimientos.";
+        }
+      });
+    }
+
+    if($$("btnDayDemo")){
+      $$("btnDayDemo").addEventListener("click", ()=>{
+        if(sendAction) sendAction("demo:generateSales", { count: 50 });
+      });
+    }
+    if($$("dayDateKey")){
+      $$("dayDateKey").addEventListener("change", ()=>{
+        renderDay(true);
+        renderAttendance(window.__db || null);
+      });
+    }
+
+    
+    let __meName = "Admin";
+    fetch("/api/auth/me", { cache:"no-store" })
+      .then(r=>r.json())
+      .then(me=>{ if(me && me.name) __meName = String(me.name); })
+      .catch(()=>{});
+
+    function renderPeriodClosures(list){
+      const wrap = $$("periodList");
+      if(!wrap) return;
+      if(!Array.isArray(list) || !list.length){
+        wrap.innerHTML = '<div class="muted">Sin cierres guardados.</div>';
+        return;
+      }
+      wrap.innerHTML = list.slice(0,30).map(c=>{
+        const rep = c.report || {};
+        const totals = rep.totals || {};
+        const adj = Array.isArray(c.adjustments) ? c.adjustments : [];
+        const adjSum = adj.reduce((a,x)=> a + ((x.type==="in") ? Number(x.amount||0) : -Number(x.amount||0)), 0);
+        const total = Number(totals.total||0);
+        const label = c.label || (c.fromKey + " ? " + c.toKey);
+        return `
+          <div class="row" style="justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.08);">
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:800;">${escapeHtml(label)}</div>
+              <div class="mini muted">${escapeHtml(c.fromKey||"")} ? ${escapeHtml(c.toKey||"")}</div>
+              <div class="mini muted">Total: ${money(total)} ${adjSum ? (' ? Ajustes: '+money(adjSum)) : ''}</div>
+            </div>
+            <div class="row" style="gap:8px; flex-wrap:wrap;">
+              <a class="btn" href="/print.html?period=${encodeURIComponent(c.id)}" target="_blank">Imprimir</a>
+              <button class="btn" type="button" data-adj="${escapeHtml(c.id)}">Ajuste</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+      wrap.querySelectorAll("[data-adj]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-adj") || "";
+          const raw = prompt("Monto (+ ingreso / - egreso):", "");
+          if(raw === null) return;
+          const num = Number(String(raw).replace(",","."));
+          if(!Number.isFinite(num) || num === 0) return alert("Monto inv?lido");
+          const note = prompt("Motivo:", "Ajuste") || "Ajuste";
+          const type = num >= 0 ? "in" : "out";
+          if(sendAction) sendAction("period:adjust", { closureId: id, amount: Math.abs(num), type, note, by: __meName });
+          setTimeout(loadPeriodClosures, 600);
+        });
+      });
+    }
+
+    async function loadPeriodClosures(){
+      try{
+        const r = await fetch("/api/periodClosures", { cache:"no-store" });
+        if(!r.ok) return renderPeriodClosures([]);
+        const list = await r.json();
+        renderPeriodClosures(Array.isArray(list) ? list : []);
+      }catch{ renderPeriodClosures([]); }
+    }
+
+    if($$("btnReloadClosures")) $$("btnReloadClosures").addEventListener("click", loadPeriodClosures);
+
+    if($$("btnRangePrint")) $$("btnRangePrint").addEventListener("click", ()=>{
+      const r = window.__statsRange || { from: $$("from")?.value || "", to: $$("to")?.value || "" };
+      if(!r.from || !r.to) return alert("Selecciona un rango");
+      window.open("/print.html?from=" + encodeURIComponent(r.from) + "&to=" + encodeURIComponent(r.to), "_blank");
+    });
+
+    if($$("btnRangeClose")) $$("btnRangeClose").addEventListener("click", ()=>{
+      const r = window.__statsRange || { from: $$("from")?.value || "", to: $$("to")?.value || "" };
+      if(!r.from || !r.to) return alert("Selecciona un rango");
+      const label = prompt("Nombre del cierre:", r.from + " - " + r.to) || "";
+      const note = prompt("Nota (opcional):", "") || "";
+      if(sendAction) sendAction("period:close", { fromKey: r.from, toKey: r.to, label, note, closedBy: __meName });
+      setTimeout(loadPeriodClosures, 800);
+    });
+
+    loadPeriodClosures();
+if(onState){
+      onState((db, ok)=>{
+        window.__db = db;
+        renderDay(ok);
+        renderAttendance(db);
+      });
+    } else {
+      renderDay(true);
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Caja/Cierre</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .miniGrid{display:grid; gap:10px; grid-template-columns: repeat(3,minmax(0,1fr));}
+    @media (max-width: 900px){ .miniGrid{grid-template-columns: repeat(2,minmax(0,1fr));} }
+    .stickyTotal{position:sticky; top:88px; z-index:5;}
+    .cashStatusBar{
+      border:1px solid #2b2f35;
+      background:#14171c;
+      padding:10px 14px;
+      border-radius:0;
+      font-weight:700;
+      letter-spacing:.04em;
+      position:sticky;
+      top:96px;
+      z-index:60;
+      width:100vw;
+      margin-left:calc(50% - 50vw);
+      margin-right:calc(50% - 50vw);
+      box-sizing:border-box;
+      border-left:none;
+      border-right:none;
+    }
+    .cashStatusBar.open{border-color:#1c7a4a; color:#bff2d1; background:linear-gradient(135deg,#0e1b13,#121a15);}
+    .cashStatusBar.closed{border-color:#7a2b2b; color:#f2c3c3; background:linear-gradient(135deg,#1b0e0e,#1a1212);}
+    .twoCol{display:grid; gap:12px; grid-template-columns: minmax(0,1fr) minmax(0,1fr);}
+    @media (max-width: 1024px){ .twoCol{grid-template-columns: minmax(0,1fr);} }
+    .stepBlock{border:1px solid #2b2f35; border-radius:12px; padding:10px; background:linear-gradient(180deg,#14171c,#121417);}
+    .stepHead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
+    .stepBadge{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:12px; letter-spacing:.04em; background:#0f1318; border:1px solid #2b2f35;}
+    .stepTitle{font-weight:700; font-size:14px;}
+    .stepHint{opacity:.8; font-size:12px;}
+    .summaryCard input.input{margin-top:6px;}
+    .actionRow{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+    .miniTabs{display:flex; gap:16px; flex-wrap:wrap; margin:6px 0 10px; justify-content:center; width:100%; padding-left:32px;}
+    .miniTab{
+      padding:14px 20px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.16);
+      background:linear-gradient(180deg,rgba(28,32,40,.9),rgba(18,20,26,.95));
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      min-width:220px;
+      text-align:left;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.06);
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .miniTab:hover{transform: translateY(-1px); box-shadow: 0 16px 32px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.1);}
+    .miniTab:active{transform: translateY(0); box-shadow: 0 10px 24px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08);}
+    .miniTab{color:#fff;}
+    .miniTab .tabTitle{font-weight:800; font-size:13px; color:#fff;}
+    .miniTab .tabHint{display:none;}
+    .miniTab.active{
+      border-color:#46d49b;
+      color:#eafff5;
+      box-shadow: 0 0 0 2px rgba(70,212,155,.25), 0 14px 34px rgba(0,0,0,.55);
+    }
+    .miniTab.mainTab{
+      border-color:rgba(70,212,155,.45);
+      background:linear-gradient(135deg,#0f1b16,#0e1512);
+    }
+    .miniTab.histTab{
+      border-color:rgba(140,120,255,.45);
+      background:linear-gradient(135deg,#151225,#12101b);
+    }
+    .historyList{border:1px solid #2b2f35; border-radius:12px; padding:10px; background:#0f1318; max-height:360px; overflow:auto;}
+    #arqueoHistory .historyList{max-height:none; overflow:visible;}
+    .historyItem{display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid #1f2329;}
+    .historyItem:last-child{border-bottom:none;}
+    .historyMeta{font-size:12px; opacity:.85;}
+    .ticketItemsLarge .historyMeta{font-size:13px; opacity:.95;}
+    .ticketItemsLarge .btn{padding:6px 10px; font-size:11px;}
+    .ticketItemControls{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;}
+    .ticketItemControls select, .ticketItemControls input{min-width:180px;}
+    .centerStage{width:min(1300px, 96vw); margin:0 auto;}
+    .twoCol{width:100%;}
+    body{overflow-x:hidden;}
+    .compactTop .panel{margin-top:2px !important;}
+    .compactTop{padding-top:0 !important; padding-bottom:6px !important;}
+    .compactTop .twoCol{margin-top:0 !important;}
+    .miniTabs{margin:2px 0 4px;}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Caja/Cierre</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div id="testStatusBar" class="cashStatusBar" style="margin:4px 0 0;">-</div>
+  <div class="wrap fullWidth compactTop" style="margin-top:22px; padding-top:0;">
+    <div class="miniTabs">
+      <button id="tabMainView" class="miniTab mainTab active" type="button">
+        <span class="tabTitle">Principal</span>
+      </button>
+      <button id="tabMovView" class="miniTab mainTab" type="button">
+        <span class="tabTitle">Movimientos de caja</span>
+      </button>
+      <button id="tabArqueoHist" class="miniTab histTab" type="button">
+        <span class="tabTitle">Historial de arqueos</span>
+      </button>
+    </div>
+  </div>
+<main class="wrap fullWidth compactTop" style="margin-top:0; padding-top:0;">
+  <div id="mainView">
+  <div class="twoCol">
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Detalle de billetes</h2>
+          <p class="hint">Apertura y cierre por denominaciones</p>
+        </div>
+        <div class="badge2 stickyTotal">Resultado cierre <strong id="closeTotal">-</strong></div>
+      </div>
+      <div class="panelBody">
+        <div class="cashCountActions">
+          <div class="cashCountCol">
+            <div class="small">Cajero</div>
+            <input id="cashierName" class="input cashCountInput" type="text" placeholder="Nombre del cajero"/>
+            <div class="small" style="margin-top:8px;">Turno</div>
+            <select id="shiftSelect" class="input cashCountInput">
+              <option value="Dia">Dia</option>
+              <option value="Tarde">Tarde</option>
+              <option value="Noche">Noche</option>
+              <option value="Custom">Otro (personalizado)</option>
+            </select>
+            <input id="shiftCustom" class="input cashCountInput" type="text" placeholder="Nombre del turno" style="display:none; margin-top:6px;"/>
+            <div class="badge2">Total apertura <strong id="openTotal">$ 0</strong></div>
+          </div>
+          <div class="cashCountCol" style="flex:1; min-width:220px;">
+          </div>
+        </div>
+        <div class="twoCol" style="margin-top:6px;">
+          <div class="denomTableWrap">
+            <div style="display:flex; justify-content:center; margin:6px 0 10px;">
+              <button id="btnOpenCashCount" class="btn cashCountBtn primary" type="button">Abrir turno</button>
+            </div>
+            <table class="denomTable">
+              <thead>
+                <tr>
+                  <th>Billete</th>
+                  <th>Cantidad</th>
+                  <th>Importe</th>
+                </tr>
+              </thead>
+              <tbody id="denomTableBodyOpen"></tbody>
+            </table>
+          </div>
+          <div class="denomTableWrap">
+            <div style="display:flex; justify-content:center; margin:6px 0 10px;">
+              <button id="btnCloseCashCount" class="btn cashCountBtn" type="button">Cerrar turno</button>
+            </div>
+            <table class="denomTable">
+              <thead>
+                <tr>
+                  <th>Billete</th>
+                  <th>Cantidad</th>
+                  <th>Importe</th>
+                </tr>
+              </thead>
+              <tbody id="denomTableBodyClose"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel compactPanel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Cierre contable del dia</h2>
+          <p class="hint">Turno y dia para cuadrar caja</p>
+        </div>
+      </div>
+      <div class="panelBody">
+        <div class="stepBlock">
+          <div class="stepHead">
+            <div class="stepBadge">Resumen</div>
+            <div class="stepHint">Lectura rapida del dia</div>
+          </div>
+          <div class="miniGrid">
+            <div class="summaryCard">
+              <div class="summaryLabel">Ventas</div>
+              <div class="summaryValue" id="dayTotalInline">$ 0</div>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryLabel">Tickets</div>
+              <div class="summaryValue" id="daySalesCountInline">0</div>
+            </div>
+            <div class="summaryCard summaryEm">
+              <div class="summaryLabel">Esperado</div>
+              <div class="summaryValue" id="dayCashExpectedInline">$ 0</div>
+            </div>
+            <div class="summaryCard summaryEm">
+              <div class="summaryLabel">Contado</div>
+              <div class="summaryValue" id="dayCashCountedInline">$ 0</div>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryLabel">Diferencia</div>
+              <div class="summaryValue" id="dayDiffInline">$ 0</div>
+            </div>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="stepBlock">
+          <div class="stepHead">
+            <div class="stepBadge">Paso 1</div>
+            <div class="stepTitle">Contado final</div>
+            <div class="stepHint">Carg? lo que realmente qued?</div>
+          </div>
+          <div class="miniGrid">
+            <div class="summaryCard">
+              <div class="summaryLabel">Efectivo contado final</div>
+              <input id="dayCountedCash" class="input" type="number" inputmode="decimal" value="0"/>
+              <button id="btnUseTurnClose" class="btn" type="button" style="margin-top:6px;">Usar cierre de turno</button>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryLabel">No efectivo declarado</div>
+              <input id="dayCountedNonCash" class="input" type="number" inputmode="decimal" value="0"/>
+            </div>
+            <div class="summaryCard summaryEm">
+              <div class="summaryLabel">Diferencia final</div>
+              <div class="summaryValue" id="dayDiffFinal">$ 0</div>
+              <div class="mini muted" id="dayDiffExplain" style="margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="stepBlock">
+          <div class="stepHead">
+            <div class="stepBadge">Paso 2</div>
+            <div class="stepTitle">Ajustes (opcional)</div>
+            <div class="stepHint">Si hay diferencia, explicala</div>
+          </div>
+          <div class="miniGrid">
+            <div class="summaryCard">
+              <div class="summaryLabel">Ajuste efectivo (+/-)</div>
+              <input id="adjCash" class="input" type="number" inputmode="decimal" value="0"/>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryLabel">Ajuste no efectivo (+/-)</div>
+              <input id="adjNonCash" class="input" type="number" inputmode="decimal" value="0"/>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryLabel">Motivo</div>
+              <input id="adjReason" class="input" type="text" placeholder="Obligatorio si hay ajuste o diferencia"/>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryLabel">Observaciones</div>
+              <input id="adjNote" class="input" type="text" placeholder="Opcional"/>
+            </div>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="stepBlock">
+          <div class="stepHead">
+            <div class="stepBadge">Paso 3</div>
+            <div class="stepTitle">Acciones</div>
+            <div class="stepHint">Cerrar dia con motivo si aplica</div>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <div id="dayRuleStatus" class="diffBadge zero">Listo</div>
+          </div>
+          <div class="actionRow" style="margin-top:10px;">
+            <button id="btnSaveDraft" class="btn" type="button">Guardar borrador</button>
+            <button id="btnApplyAdjust" class="btn" type="button">Aplicar ajustes</button>
+            <button id="btnCloseDay" class="btn cashCountBtn primary" type="button">Cerrar dia</button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+  <div id="movementsView" style="display:none; margin-top:6px;">
+    <div class="row" style="margin:0 0 8px 0;">
+      <div class="small">Movimientos</div>
+    </div>
+    <div class="row" style="margin:0 0 10px 0; gap:8px; flex-wrap:wrap; align-items:center;">
+      <button id="btnMovTransferToMayor" class="btn primary" type="button">Transferir ? Caja grande</button>
+      <button id="btnMovTransferToChica" class="btn" type="button">Transferir ? Caja chica</button>
+      <input id="movTransferAmount" class="input" type="number" inputmode="numeric" min="0" placeholder="Monto"/>
+      <input id="movTransferNote" class="input" type="text" placeholder="Nota (opcional)"/>
+    </div>
+    <div class="twoCol" style="margin-bottom:10px; align-items:stretch;">
+      <div class="stepBlock">
+        <div class="stepHead">
+          <div class="stepBadge">Manual</div>
+          <div class="stepHint">Registrar ingresos/egresos</div>
+        </div>
+        <div class="row" style="gap:8px; flex-wrap:wrap; align-items:center;">
+          <select id="movManualTarget" class="input">
+            <option value="chica">Caja chica</option>
+            <option value="grande">Caja grande</option>
+          </select>
+          <select id="movManualType" class="input">
+            <option value="in">Ingreso</option>
+            <option value="out">Egreso</option>
+          </select>
+          <select id="movManualMethod" class="input">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="mercadopago">MercadoPago</option>
+            <option value="otro">Otro</option>
+          </select>
+          <input id="movManualAmount" class="input" type="number" inputmode="numeric" min="0" placeholder="Monto"/>
+          <input id="movManualNote" class="input" type="text" placeholder="Nota (opcional)"/>
+          <button id="btnMovManual" class="btn primary" type="button">Agregar</button>
+        </div>
+      </div>
+      <div class="stepBlock">
+        <div class="stepHead">
+          <div class="stepBadge">Resumen</div>
+          <div class="stepHint">Saldos manuales</div>
+        </div>
+        <div class="miniGrid">
+          <div class="summaryCard summaryEm">
+            <div class="summaryLabel">Caja chica <span id="movCashActive" class="mini muted"></span></div>
+            <div class="summaryValue" id="movSmallTotal">$ 0</div>
+            <div class="historyMeta">Ingresos <strong id="movSmallIn">$ 0</strong> ? Egresos <strong id="movSmallOut">$ 0</strong></div>
+          </div>
+          <div class="summaryCard summaryEm">
+            <div class="summaryLabel">Caja grande</div>
+            <div class="summaryValue" id="movBigTotal">$ 0</div>
+            <div class="historyMeta">Ingresos <strong id="movBigIn">$ 0</strong> ? Egresos <strong id="movBigOut">$ 0</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin:0 0 8px 0; gap:8px; align-items:center;">
+      <div class="small">Historial manual</div>
+      <button id="btnToggleAutoMov" class="btn" type="button">Ver autom?ticos</button>
+    </div>
+    <div class="twoCol">
+      <div>
+        <div class="small" style="margin:0 0 6px;">Caja chica</div>
+        <div class="historyList" id="movementsListSmall">-</div>
+      </div>
+      <div>
+        <div class="small" style="margin:0 0 6px;">Caja grande</div>
+        <div class="historyList" id="movementsListBig">-</div>
+      </div>
+    </div>
+  </div>
+  <div id="arqueoHistory" style="display:none; margin-top:6px;">
+    <div id="arqueoTicketsPage" style="display:none; margin-bottom:10px;">
+      <div class="row" style="margin:0 0 8px 0; gap:8px; align-items:center;">
+        <button id="btnBackArqueo" class="btn" type="button">Volver</button>
+        <div class="small" id="arqueoTicketsTitle">Tickets del arqueo</div>
+        <a id="btnPrintDay" class="btn" href="/print.html?day=" target="_blank">Imprimir d?a</a>
+      </div>
+      <div class="historyList" id="arqueoTicketsList">-</div>
+      <div class="row" style="margin-top:8px; gap:8px;">
+        <button id="btnTicketsPrev" class="btn" type="button">Anterior</button>
+        <div class="small" id="ticketsPageInfo">P?gina 1</div>
+        <button id="btnTicketsNext" class="btn" type="button">Siguiente</button>
+      </div>
+    </div>
+    <div class="historyList" id="historyList">-</div>
+  </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const DENOMS = [20000,10000,2000,1000,500,200,100,50,20,10,5,2,1];
+    const money = (n)=>{
+      if(window.RestoApp && window.RestoApp.money) return window.RestoApp.money(n);
+      const v = Number(n || 0);
+      return new Intl.NumberFormat("es-AR",{
+        style:"currency",
+        currency:"ARS",
+        maximumFractionDigits:0
+      }).format(v);
+    };
+    const { connect, onState, sendAction, toast } = window.RestoApp || {};
+
+    let openedAt = null;
+    let cashier = "";
+    let shiftName = "Dia";
+    let currentTurn = null;
+    let dayReport = null;
+    let dateKey = null;
+    let adjApplied = false;
+
+    const statusBar = document.getElementById("testStatusBar");
+    const shiftSelect = document.getElementById("shiftSelect");
+    const shiftCustom = document.getElementById("shiftCustom");
+
+    function ymdLocal(d = new Date()){
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function getBusinessDateKey(db, ts = Date.now()){
+      const hour = Number(db && db.settings && db.settings.cash && db.settings.cash.dayCloseCutoffHour);
+      const safeHour = Number.isFinite(hour) ? Math.max(0, Math.min(23.99, hour)) : 2;
+      const cutoffMinutes = Math.round(safeHour * 60);
+      if (cutoffMinutes <= 0) return ymdLocal(new Date(ts));
+      const d = new Date(ts);
+      const minutes = d.getHours() * 60 + d.getMinutes();
+      const base = ymdLocal(d);
+      if (minutes > cutoffMinutes) return base;
+      const back = new Date(d.getTime() - 86400000);
+      return ymdLocal(back);
+    }
+
+    function renderStatus(){
+      if(!statusBar) return;
+      if(currentTurn){
+        statusBar.className = "cashStatusBar open";
+        const sh = currentTurn.shift || shiftName;
+        const cj = currentTurn.cashier || cashier;
+        statusBar.textContent = `TURNO ABIERTO ? ${sh || "-"} ? Cajero: ${cj || "-"}`;
+      } else {
+        statusBar.className = "cashStatusBar closed";
+        statusBar.textContent = "TURNO CERRADO";
+      }
+    }
+
+    function renderDenoms(targetId, className){
+      const rows = DENOMS.map(d=>{
+        return `
+          <tr>
+            <td>${d}</td>
+            <td><input class="input ${className}" data-denom="${d}" type="number" inputmode="numeric" min="0" value=""/></td>
+            <td class="denomAmt" data-amt="${className}-${d}">-</td>
+          </tr>
+        `;
+      });
+      document.getElementById(targetId).innerHTML = rows.join("");
+    }
+
+    function sumDenoms(selectorClass, amtPrefix){
+      let total = 0;
+      document.querySelectorAll(`.${selectorClass}`).forEach(inp=>{
+        const d = Number(inp.getAttribute("data-denom") || 0);
+        const q = Number(inp.value || 0);
+        total += d * q;
+        const cell = document.querySelector(`.denomAmt[data-amt="${amtPrefix}-${d}"]`);
+        if(cell) cell.textContent = q ? money(d * q) : "-";
+      });
+      return total;
+    }
+
+    function getOpening(){
+      return sumDenoms("denomQtyOpen", "denomQtyOpen");
+    }
+    function getClosing(){
+      return sumDenoms("denomQtyClose", "denomQtyClose");
+    }
+
+    function updateSummary(){
+      const opening = getOpening();
+      const closing = getClosing();
+      const expected = opening;
+      const diff = closing ? (closing - expected) : 0;
+
+      const setText = (id, val)=>{
+        const el = document.getElementById(id);
+        if(el) el.textContent = val;
+      };
+      setText("openTotal", money(opening || 0));
+      setText("closeTotal", closing ? money(closing) : "-");
+      setText("turnSaldoContable", money(expected || 0));
+      setText("turnSaldoFisico", closing ? money(closing) : "-");
+      setText("turnDiffValue", closing ? money(diff) : "-");
+    }
+
+    function updateDaySummary(){
+      const baseSales = dayReport && dayReport.totals ? Number(dayReport.totals.total || 0) : 0;
+      const baseTickets = dayReport && dayReport.totals ? Number(dayReport.totals.salesCount || 0) : 0;
+      const baseExpected = dayReport && dayReport.cash ? Number(dayReport.cash.expectedCash || 0) : 0;
+
+      const adjCash = Number(document.getElementById("adjCash").value || 0);
+      const adjNonCash = Number(document.getElementById("adjNonCash").value || 0);
+      const adjReason = document.getElementById("adjReason").value.trim();
+
+      const countedCash = Number(document.getElementById("dayCountedCash").value || 0);
+      const countedNonCash = Number(document.getElementById("dayCountedNonCash").value || 0);
+
+      const expected = baseExpected + adjCash + adjNonCash;
+      const counted = countedCash + countedNonCash;
+      const diff = counted - expected;
+
+      document.getElementById("dayTotalInline").textContent = money(baseSales);
+      document.getElementById("daySalesCountInline").textContent = baseTickets;
+      document.getElementById("dayCashExpectedInline").textContent = money(expected);
+      document.getElementById("dayCashCountedInline").textContent = money(counted);
+      document.getElementById("dayDiffInline").textContent = money(diff);
+      document.getElementById("dayDiffFinal").textContent = money(diff);
+      const explainEl = document.getElementById("dayDiffExplain");
+      if(explainEl){
+        if(diff === 0){
+          explainEl.textContent = "";
+        } else if(currentTurn){
+          const entries = currentTurn.entries || {};
+          const exits = currentTurn.exits || {};
+          const nonCash = Array.isArray(currentTurn.nonCash) ? currentTurn.nonCash : [];
+          const transfersIn = Array.isArray(entries.transfersIn) ? entries.transfersIn : [];
+          const transfersOut = Array.isArray(exits.transfersOut) ? exits.transfersOut : [];
+          const sumArr = (arr)=>arr.reduce((a,x)=>a + Number(x?.amount||0), 0);
+          const totalEntries =
+            Number(entries.billingZ||0) +
+            Number(entries.billingB||0) +
+            Number(entries.aportes||0) +
+            sumArr(nonCash) +
+            sumArr(transfersIn) -
+            Number(entries.anulados||0);
+          const totalExits =
+            sumArr(exits.providers||[]) +
+            sumArr(exits.expenses||[]) +
+            sumArr(exits.withdrawals||[]) +
+            sumArr(exits.extraPay||[]) +
+            sumArr(exits.advances||[]) +
+            sumArr(exits.others||[]) +
+            sumArr(transfersOut);
+          const opening = Number(currentTurn.openingTotal || 0);
+          const saldoContable = opening + totalEntries - totalExits;
+          const tag = diff < 0 ? "Faltante" : "Sobrante";
+          explainEl.textContent = `${tag}: ${money(Math.abs(diff))}. Turno: Apertura ${money(opening)} + Entradas ${money(totalEntries)} - Salidas ${money(totalExits)} = ${money(saldoContable)}.`;
+        } else {
+          const tag = diff < 0 ? "Faltante" : "Sobrante";
+          explainEl.textContent = `${tag}: ${money(Math.abs(diff))}. Sin turno abierto para desglosar entradas/salidas.`;
+        }
+      }
+
+      const status = document.getElementById("dayRuleStatus");
+      let ok = true;
+      let msg = "Listo";
+      let cls = "zero";
+
+      if(adjCash !== 0 || adjNonCash !== 0 || diff !== 0){
+        if(!adjReason){
+          ok = false;
+          msg = "Falta motivo";
+          cls = "neg";
+        }
+      }
+      if((adjCash !== 0 || adjNonCash !== 0) && !currentTurn){
+        ok = false;
+        msg = "Ajustes requieren turno abierto";
+        cls = "neg";
+      }
+      if(Math.abs(diff) > 0){
+        cls = diff > 0 ? "pos" : "neg";
+        if(ok) msg = diff > 0 ? "Sobrante" : "Faltante";
+      }
+
+      status.className = `diffBadge ${cls}`;
+      status.textContent = msg;
+
+      document.getElementById("btnApplyAdjust").disabled = !ok || adjApplied;
+      document.getElementById("btnCloseDay").disabled = !ok;
+    }
+
+    function setButtons(){
+      const btnOpen = document.getElementById("btnOpenCashCount");
+      const btnClose = document.getElementById("btnCloseCashCount");
+      if(btnOpen) btnOpen.disabled = !!currentTurn;
+      if(btnClose) btnClose.disabled = !currentTurn;
+    }
+
+    renderDenoms("denomTableBodyOpen", "denomQtyOpen");
+    renderDenoms("denomTableBodyClose", "denomQtyClose");
+    updateSummary();
+    updateDaySummary();
+    renderStatus();
+    setButtons();
+
+    function readShift(){
+      if(shiftSelect.value === "Custom"){
+        shiftCustom.style.display = "";
+        shiftName = shiftCustom.value.trim();
+      } else {
+        shiftCustom.style.display = "none";
+        shiftName = shiftSelect.value;
+      }
+      if(!shiftName) shiftName = "Personalizado";
+    }
+
+    shiftSelect.addEventListener("change", ()=>{
+      readShift();
+      renderStatus();
+    });
+    shiftCustom.addEventListener("input", ()=>{
+      readShift();
+      renderStatus();
+    });
+
+    document.addEventListener("input", (e)=>{
+      if(e.target && (e.target.classList.contains("denomQtyOpen") || e.target.classList.contains("denomQtyClose"))){
+        updateSummary();
+      }
+      if(e.target && (e.target.id === "adjCash" || e.target.id === "adjNonCash" || e.target.id === "adjReason" || e.target.id === "adjNote" || e.target.id === "dayCountedCash" || e.target.id === "dayCountedNonCash")){
+        updateDaySummary();
+        adjApplied = false;
+      }
+      renderStatus();
+    });
+
+    document.getElementById("btnOpenCashCount").addEventListener("click", ()=>{
+      const name = document.getElementById("cashierName").value.trim();
+      if(!name) return alert("Ingresa el nombre del cajero");
+      readShift();
+      const openingDenoms = {};
+      document.querySelectorAll(".denomQtyOpen").forEach(inp=>{
+        const d = Number(inp.getAttribute("data-denom") || 0);
+        const q = Number(inp.value || 0);
+        if(q > 0) openingDenoms[d] = q;
+      });
+      const openingTotal = getOpening();
+      if(openingTotal <= 0) return alert("Completa el conteo de apertura.");
+      if(sendAction){
+        if(!dateKey) dateKey = ymdLocal();
+sendAction("cash:open", { dateKey, openingCash: openingTotal, note: "Desde Caja/Cierre" });
+        sendAction("cash:turnOpen", { dateKey, shift: shiftName, cashier: name, openingDenoms });
+        toast ? toast("Turno abierto") : alert("Turno abierto");
+      }
+    });
+
+    document.getElementById("btnCloseCashCount").addEventListener("click", ()=>{
+      if(!currentTurn) return alert("No hay turno abierto.");
+      const closingDenoms = {};
+      document.querySelectorAll(".denomQtyClose").forEach(inp=>{
+        const d = Number(inp.getAttribute("data-denom") || 0);
+        const q = Number(inp.value || 0);
+        if(q > 0) closingDenoms[d] = q;
+      });
+      const closingTotal = getClosing();
+      if(closingTotal <= 0) return alert("Completa el conteo de cierre.");
+      if(sendAction){
+        if(!dateKey) dateKey = ymdLocal();
+        sendAction("cash:turnClose", { id: currentTurn.id, dateKey, closingDenoms });
+        toast ? toast("Turno cerrado") : alert("Turno cerrado");
+      }
+    });
+
+    document.getElementById("btnUseTurnClose").addEventListener("click", ()=>{
+      const closing = getClosing();
+      document.getElementById("dayCountedCash").value = closing || 0;
+      updateDaySummary();
+      toast ? toast("Efectivo contado cargado desde cierre de turno") : alert("Efectivo contado cargado desde cierre de turno");
+    });
+
+    document.getElementById("btnSaveDraft").addEventListener("click", ()=>{
+      toast ? toast("Borrador guardado") : alert("Borrador guardado");
+    });
+    document.getElementById("btnApplyAdjust").addEventListener("click", ()=>{
+      updateDaySummary();
+      const adjCash = Number(document.getElementById("adjCash").value || 0);
+      const adjNonCash = Number(document.getElementById("adjNonCash").value || 0);
+      const adjReason = document.getElementById("adjReason").value.trim();
+      if(!adjReason && (adjCash !== 0 || adjNonCash !== 0)) return alert("Falta motivo.");
+      if((adjCash !== 0 || adjNonCash !== 0) && !currentTurn) return alert("Necesitas un turno abierto para aplicar ajustes.");
+      if(sendAction && !adjApplied){
+        if(adjCash !== 0){
+          sendAction("cash:movement", {
+            type: adjCash > 0 ? "in" : "out",
+            method: "efectivo",
+            amount: Math.abs(adjCash),
+            note: `Ajuste manual: ${adjReason}`
+          });
+        }
+        if(adjNonCash !== 0){
+          sendAction("cash:movement", {
+            type: adjNonCash > 0 ? "in" : "out",
+            method: "no_efectivo",
+            amount: Math.abs(adjNonCash),
+            note: `Ajuste no efectivo: ${adjReason}`
+          });
+        }
+        adjApplied = true;
+        toast ? toast("Ajustes aplicados") : alert("Ajustes aplicados");
+      }
+    });
+    document.getElementById("btnCloseDay").addEventListener("click", ()=>{
+      updateDaySummary();
+      if(document.getElementById("btnCloseDay").disabled) return;
+      const closingCash = Number(document.getElementById("dayCountedCash").value || 0);
+      const adjReason = document.getElementById("adjReason").value.trim();
+      const adjNote = document.getElementById("adjNote").value.trim();
+      const note = [adjReason, adjNote].filter(Boolean).join(" | ");
+      if(sendAction){
+        if(!dateKey) dateKey = ymdLocal();
+        sendAction("day:close", { closingCash, note, closedBy: "Admin" });
+        toast ? toast("Dia cerrado") : alert("Dia cerrado");
+      }
+    });
+
+    function fetchDayReport(){
+      if(!dateKey) return;
+      fetch("/api/dayReport?date=" + encodeURIComponent(dateKey))
+        .then(r=>r.ok ? r.json() : null)
+        .then(rep=>{
+          if(!rep) return;
+          dayReport = rep;
+          if(rep.cash && Number.isFinite(rep.cash.closingCash)){
+            const inp = document.getElementById("dayCountedCash");
+            if(inp && (inp.value === "" || inp.value === "0")) inp.value = String(rep.cash.closingCash || 0);
+          }
+          const closed = !!rep.closure;
+          document.getElementById("btnCloseDay").disabled = closed;
+          updateDaySummary();
+        })
+        .catch(()=>{});
+    }
+
+    function renderFromDb(db){
+      dateKey = getBusinessDateKey(db);
+      const turns = (db && db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+      const movements = (db && db.cash && Array.isArray(db.cash.movements)) ? db.cash.movements : [];
+      const bigMovements = (db && db.cajaMayor && Array.isArray(db.cajaMayor.movements)) ? db.cajaMayor.movements : [];
+      const sales = (db && Array.isArray(db.sales)) ? db.sales : [];
+      const products = (db && Array.isArray(db.products)) ? db.products : [];
+      currentTurn = turns.find(t=>t && t.dateKey === dateKey && !t.closedAt && !t.locked) || null;
+      if(currentTurn){
+        cashier = String(currentTurn.cashier || "");
+        shiftName = String(currentTurn.shift || shiftName);
+        const cashierInput = document.getElementById("cashierName");
+        if(cashierInput && !cashierInput.value) cashierInput.value = cashier;
+        if(shiftSelect){
+          const known = ["Dia","Tarde","Noche"];
+          shiftSelect.value = known.includes(shiftName) ? shiftName : "Custom";
+        }
+        if(shiftSelect && shiftSelect.value === "Custom"){
+          shiftCustom.style.display = "";
+          shiftCustom.value = shiftName;
+        }
+      }
+      setButtons();
+      renderStatus();
+      fetchDayReport();
+      renderArqueoHistory(turns, sales, products);
+      renderMovements(movements, bigMovements);
+    }
+
+    if(connect){
+      connect("admin", "Caja Test");
+      onState((db)=>{
+        window.__db = db || {};
+        renderFromDb(db || {});
+      });
+    }
+
+    function renderArqueoHistory(turns, sales, products){
+      const listEl = document.getElementById("historyList");
+      if(!listEl) return;
+      const closed = (turns || []).filter(t=>t && t.closedAt).slice(0, 20);
+      if(!closed.length){
+        listEl.textContent = "-";
+        return;
+      }
+      const denomLine = (denoms)=>{
+        const keys = Object.keys(denoms || {}).map(k=>Number(k)).filter(n=>Number.isFinite(n)).sort((a,b)=>b-a);
+        if(!keys.length) return "-";
+        return keys.map(k=>{
+          const q = Number(denoms[k] || 0);
+          const total = q * k;
+          return `<div class="historyMeta">${k} x ${q} = ${money(total)}</div>`;
+        }).join("");
+      };
+      listEl.innerHTML = closed.map(t=>{
+        const openTotal = Number(t.openingTotal || 0);
+        const closeTotal = Number(t.closingTotal || 0);
+        const diff = closeTotal - openTotal;
+        const when = t.closedAt ? new Date(t.closedAt).toLocaleString("es-AR") : "-";
+        const shift = t.shift || "-";
+        const cashier = t.cashier || "-";
+        const openAt = t.openedAt ? new Date(t.openedAt).toLocaleString("es-AR") : "-";
+        const entries = t.entries || {};
+        const exits = t.exits || {};
+        const nonCashCount = Array.isArray(t.nonCash) ? t.nonCash.length : 0;
+        return `
+          <div class="historyItem">
+            <div>
+              <div><strong>${shift}</strong> ? ${cashier}</div>
+              <div class="historyMeta">${when}</div>
+              <button class="btn" type="button" data-arch-detail="${t.id}" style="margin-top:6px;">Detalles</button>
+            </div>
+            <div style="text-align:right;">
+              <div>${money(closeTotal)}</div>
+              <div class="historyMeta">Dif: ${money(diff)}</div>
+            </div>
+          </div>
+          <div class="stepBlock" id="archDetail-${t.id}" style="display:none; margin-top:8px;">
+            <div class="stepHead">
+              <div class="stepBadge">Arqueo</div>
+              <div class="stepTitle">Detalle completo</div>
+              <div class="stepHint">Apertura: ${openAt} ? Cierre: ${when}</div>
+            </div>
+            <div class="miniGrid">
+              <div class="summaryCard">
+                <div class="summaryLabel">Apertura total</div>
+                <div class="summaryValue">${money(openTotal)}</div>
+              </div>
+              <div class="summaryCard">
+                <div class="summaryLabel">Cierre total</div>
+                <div class="summaryValue">${money(closeTotal)}</div>
+              </div>
+              <div class="summaryCard">
+                <div class="summaryLabel">Diferencia</div>
+                <div class="summaryValue">${money(diff)}</div>
+              </div>
+            </div>
+            <div class="hr"></div>
+            <div class="miniGrid">
+              <div class="summaryCard">
+                <div class="summaryLabel">Apertura por billetes</div>
+                ${denomLine(t.openingDenoms || {})}
+              </div>
+              <div class="summaryCard">
+                <div class="summaryLabel">Cierre por billetes</div>
+                ${denomLine(t.closingDenoms || {})}
+              </div>
+              <div class="summaryCard">
+                <div class="summaryLabel">No efectivo</div>
+                <div class="summaryValue">${nonCashCount}</div>
+              </div>
+            </div>
+            <div class="hr"></div>
+            <div class="miniGrid">
+              <div class="summaryCard">
+                <div class="summaryLabel">Entradas</div>
+                <div class="historyMeta">Z: ${money(entries.billingZ || 0)}</div>
+                <div class="historyMeta">B: ${money(entries.billingB || 0)}</div>
+                <div class="historyMeta">Aportes: ${money(entries.aportes || 0)}</div>
+                <div class="historyMeta">Anulados: ${money(entries.anulados || 0)}</div>
+              </div>
+              <div class="summaryCard">
+                <div class="summaryLabel">Salidas</div>
+                <div class="historyMeta">Proveedores: ${money((exits.providers||[]).reduce((a,x)=>a+Number(x.amount||0),0))}</div>
+                <div class="historyMeta">Gastos: ${money((exits.expenses||[]).reduce((a,x)=>a+Number(x.amount||0),0))}</div>
+                <div class="historyMeta">Retiros: ${money((exits.withdrawals||[]).reduce((a,x)=>a+Number(x.amount||0),0))}</div>
+                <div class="historyMeta">Otros: ${money((exits.others||[]).reduce((a,x)=>a+Number(x.amount||0),0))}</div>
+              </div>
+            </div>
+            <div class="hr"></div>
+            <div class="row" style="margin:0 0 6px;">
+              <button class="btn" type="button" data-arch-tickets="${t.id}">Tickets del arqueo</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    const TOP_TAB_KEY = "nexa:admin_caja_test:topTab";
+    function setTopTab(active, opts = {}){
+      const tabC = document.getElementById("tabMainView");
+      const tabM = document.getElementById("tabMovView");
+      const tabH = document.getElementById("tabArqueoHist");
+      const viewC = document.getElementById("mainView");
+      const viewM = document.getElementById("movementsView");
+      const viewH = document.getElementById("arqueoHistory");
+      if(!tabC || !tabM || !tabH || !viewC || !viewM || !viewH) return;
+      const safe = (active === "main" || active === "mov" || active === "hist") ? active : "main";
+      const showMain = active === "main";
+      const showMov = active === "mov";
+      const showHist = active === "hist";
+      tabC.classList.toggle("active", showMain);
+      tabM.classList.toggle("active", showMov);
+      tabH.classList.toggle("active", showHist);
+      viewC.style.display = showMain ? "" : "none";
+      viewM.style.display = showMov ? "" : "none";
+      viewH.style.display = showHist ? "" : "none";
+      if(!opts.skipSave){
+        try{ localStorage.setItem(TOP_TAB_KEY, safe); } catch(e){}
+      }
+    }
+
+    document.getElementById("tabMainView").addEventListener("click", ()=>setTopTab("main"));
+    document.getElementById("tabMovView").addEventListener("click", ()=>setTopTab("mov"));
+    document.getElementById("tabArqueoHist").addEventListener("click", ()=>setTopTab("hist"));
+    try{
+      const savedTopTab = localStorage.getItem(TOP_TAB_KEY);
+      if(savedTopTab) setTopTab(savedTopTab, { skipSave: true });
+    } catch(e){}
+
+    const btnMovManual = document.getElementById("btnMovManual");
+    if(btnMovManual){
+      btnMovManual.addEventListener("click", ()=>{
+        const target = String(document.getElementById("movManualTarget")?.value || "chica");
+        if(target === "chica" && !currentTurn) return alert("No hay turno abierto.");
+        const type = (document.getElementById("movManualType")?.value || "out") === "in" ? "in" : "out";
+        const method = String(document.getElementById("movManualMethod")?.value || "efectivo");
+        const amount = Number(document.getElementById("movManualAmount")?.value || 0);
+        const noteRaw = String(document.getElementById("movManualNote")?.value || "").trim();
+        if(amount <= 0) return alert("Ingresa un monto.");
+        const note = `Manual: ${noteRaw || "Movimiento manual"}`;
+        if(sendAction){
+          if(!dateKey) dateKey = ymdLocal();
+          if(target === "grande"){
+            sendAction("cash:movementBig", { dateKey, type, amount, note });
+          } else {
+            sendAction("cash:movement", { type, method, amount, note });
+          }
+        }
+        if(document.getElementById("movManualAmount")) document.getElementById("movManualAmount").value = "";
+        if(document.getElementById("movManualNote")) document.getElementById("movManualNote").value = "";
+        toast ? toast("Movimiento manual registrado") : alert("Movimiento manual registrado");
+      });
+    }
+
+    function handleTransfer(direction){
+      const amount = Number(document.getElementById("movTransferAmount")?.value || 0);
+      const noteRaw = String(document.getElementById("movTransferNote")?.value || "").trim();
+      if(amount <= 0) return alert("Ingresa un monto.");
+      const label = direction === "toChica" ? "Caja grande ? caja chica" : "Caja chica ? caja grande";
+      const note = `Transferencia: ${noteRaw || label}`;
+      if(sendAction){
+        if(!dateKey) dateKey = ymdLocal();
+        sendAction("cash:transfer", { dateKey, direction, amount, note });
+      }
+      if(document.getElementById("movTransferAmount")) document.getElementById("movTransferAmount").value = "";
+      if(document.getElementById("movTransferNote")) document.getElementById("movTransferNote").value = "";
+      toast ? toast("Transferencia registrada") : alert("Transferencia registrada");
+    }
+    const btnMovTransferToMayor = document.getElementById("btnMovTransferToMayor");
+    if(btnMovTransferToMayor){
+      btnMovTransferToMayor.addEventListener("click", ()=>handleTransfer("toMayor"));
+    }
+    const btnMovTransferToChica = document.getElementById("btnMovTransferToChica");
+    if(btnMovTransferToChica){
+      btnMovTransferToChica.addEventListener("click", ()=>handleTransfer("toChica"));
+    }
+
+    let showAutoMovements = false;
+    const btnToggleAutoMov = document.getElementById("btnToggleAutoMov");
+    if(btnToggleAutoMov){
+      btnToggleAutoMov.addEventListener("click", ()=>{
+        showAutoMovements = !showAutoMovements;
+        btnToggleAutoMov.textContent = showAutoMovements ? "Ocultar autom?ticos" : "Ver autom?ticos";
+        renderMovements(window.__db?.cash?.movements || [], window.__db?.cajaMayor?.movements || []);
+      });
+    }
+
+    function renderMovements(movements, bigMovements){
+      const listSmall = document.getElementById("movementsListSmall");
+      const listBig = document.getElementById("movementsListBig");
+      const cashActive = document.getElementById("movCashActive");
+      const setText = (id, val)=>{
+        const el = document.getElementById(id);
+        if(el) el.textContent = val;
+      };
+      if(!listSmall || !listBig) return;
+      const db = window.__db || {};
+      const isManual = (m)=>{
+        const note = String((m && m.note) || "");
+        const n = note.toLowerCase();
+        return n.startsWith("manual:") || n.startsWith("ajuste") || n.startsWith("transferencia:");
+      };
+      const filterMov = (m)=>m && (showAutoMovements ? true : isManual(m));
+      const list = (movements || []).filter(filterMov).slice(0, 200);
+      const listB = (bigMovements || []).filter(filterMov).slice(0, 200);
+      const listAll = (movements || []).filter(filterMov);
+      const listAllB = (bigMovements || []).filter(filterMov);
+      const sumBy = (items, pred)=>items.reduce((a,x)=>a + (pred(x) ? Number(x.amount||0) : 0), 0);
+      const smallIn = sumBy(list, m=>m.type === "in");
+      const smallOut = sumBy(list, m=>m.type === "out");
+      const smallTotal = sumBy(listAll, m=>m.type === "in") - sumBy(listAll, m=>m.type === "out");
+      const bigIn = sumBy(listB, m=>m.type === "in");
+      const bigOut = sumBy(listB, m=>m.type === "out");
+      const bigTotal = sumBy(listAllB, m=>m.type === "in") - sumBy(listAllB, m=>m.type === "out");
+      setText("movSmallIn", money(smallIn));
+      setText("movSmallOut", money(smallOut));
+      setText("movSmallTotal", money(smallTotal));
+      setText("movBigIn", money(bigIn));
+      setText("movBigOut", money(bigOut));
+      setText("movBigTotal", money(bigTotal));
+      if(cashActive){
+        cashActive.textContent = currentTurn ? "? Caja activa" : "";
+      }
+      const explainAdjust = (m)=>{
+        const dk = String(m && m.dateKey || "");
+        if(!dk) return "";
+        const closures = Array.isArray(db.dayClosures) ? db.dayClosures : [];
+        const closure = closures.find(c=>c && c.dateKey === dk);
+        const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns.filter(t=>t && t.dateKey === dk && t.closedAt) : [];
+        const t = turns[0];
+        if(!t){
+          return closure && closure.note ? `Motivo: ${closure.note}` : "";
+        }
+        const entries = t.entries || {};
+        const exits = t.exits || {};
+        const nonCash = Array.isArray(t.nonCash) ? t.nonCash : [];
+        const transfersIn = Array.isArray(entries.transfersIn) ? entries.transfersIn : [];
+        const transfersOut = Array.isArray(exits.transfersOut) ? exits.transfersOut : [];
+        const sumArr = (arr)=>arr.reduce((a,x)=>a + Number(x?.amount||0), 0);
+        const totalEntries =
+          Number(entries.billingZ||0) +
+          Number(entries.billingB||0) +
+          Number(entries.aportes||0) +
+          sumArr(nonCash) +
+          sumArr(transfersIn) -
+          Number(entries.anulados||0);
+        const totalExits =
+          sumArr(exits.providers||[]) +
+          sumArr(exits.expenses||[]) +
+          sumArr(exits.withdrawals||[]) +
+          sumArr(exits.extraPay||[]) +
+          sumArr(exits.advances||[]) +
+          sumArr(exits.others||[]) +
+          sumArr(transfersOut);
+        const opening = Number(t.openingTotal || 0);
+        const saldoContable = opening + totalEntries - totalExits;
+        const base = `Detalle: Apertura ${money(opening)} + Entradas ${money(totalEntries)} - Salidas ${money(totalExits)} = ${money(saldoContable)}`;
+        if(closure && closure.note){
+          return `${base}. Motivo: ${closure.note}`;
+        }
+        return base;
+      };
+      const renderList = (items)=>{
+        if(!items.length) return "-";
+        return items.map(m=>{
+          const sign = m.type === "in" ? "+" : "-";
+          const when = m.at ? new Date(m.at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+          const method = m.method || "caja mayor";
+          const note = m.note || "";
+          const noteLower = String(note || "").toLowerCase();
+          const extra = noteLower.startsWith("ajuste cierre") ? explainAdjust(m) : "";
+          const extraId = `movExtra-${m.id || ""}`;
+          const color = m.type === "in" ? "#58d68d" : "#f1948a";
+          return `
+            <div class="historyItem">
+              <div>
+                <div><strong>${method}</strong> ? ${note}</div>
+                <div class="historyMeta">${when}</div>
+                ${extra ? `
+                  <div class="row" style="margin-top:6px; gap:6px;">
+                    <button class="btn" type="button" data-mov-extra="${m.id}">Detalles</button>
+                  </div>
+                  <div class="historyMeta" id="${extraId}" style="display:none; margin-top:6px;">${extra}</div>
+                ` : ""}
+              </div>
+              <div style="text-align:right;">
+                <div style="color:${color}; font-weight:800;">${sign} ${money(m.amount || 0)}</div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      };
+      listSmall.innerHTML = renderList(list);
+      listBig.innerHTML = renderList(listB);
+    }
+
+    const ticketsState = { items: [], page: 1, pageSize: 50, title: "", openDetailId: null, turnId: null };
+
+    function openTicketsPage(turnId){
+      const db = window.__db || {};
+      const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+      const t = turns.find(x=>x && x.id === turnId);
+      if(ticketsState.turnId !== turnId){
+        ticketsState.openDetailId = null;
+        ticketsState.turnId = turnId;
+      }
+      const tickets = (db.tickets || []).filter(s=>{
+        if(!s) return false;
+        const created = Number(s.createdAt || s.updatedAt || 0);
+        if(t && t.openedAt && t.closedAt && created){
+          return created >= Number(t.openedAt) && created <= Number(t.closedAt);
+        }
+        if(t && t.openedAt && !t.closedAt && created){
+          return created >= Number(t.openedAt);
+        }
+        return t ? (getBusinessDateKey(db, created || Date.now()) === t.dateKey) : false;
+      });
+      ticketsState.items = tickets;
+      ticketsState.page = 1;
+      ticketsState.title = t ? `Tickets del arqueo (${t.shift || "-"} ? ${t.cashier || "-"})` : "Tickets del arqueo";
+      document.getElementById("arqueoTicketsTitle").textContent = ticketsState.title;
+      const printDay = document.getElementById("btnPrintDay");
+      if(printDay) printDay.href = `/print.html?day=${encodeURIComponent(t ? t.dateKey : dateKey || "")}`;
+      document.getElementById("arqueoTicketsPage").style.display = "";
+      document.getElementById("historyList").style.display = "none";
+      renderTicketsPage();
+    }
+
+    function renderTicketsPage(){
+      const db = window.__db || {};
+      const products = db.products || [];
+      const prodMap = new Map(products.map(p=>[p.id, p]));
+      const listEl = document.getElementById("arqueoTicketsList");
+      if(!listEl) return;
+      const total = ticketsState.items.length;
+      const pages = Math.max(1, Math.ceil(total / ticketsState.pageSize));
+      const page = Math.min(pages, Math.max(1, ticketsState.page));
+      ticketsState.page = page;
+      const start = (page - 1) * ticketsState.pageSize;
+      const slice = ticketsState.items.slice(start, start + ticketsState.pageSize);
+      if(!slice.length){
+        listEl.textContent = "-";
+      } else {
+        listEl.innerHTML = slice.map((s, idx)=>{
+          const num = s.number || s.ticketNumber || s.seq || s.id?.slice(-6) || (start + idx + 1);
+          const when = s.updatedAt ? new Date(s.updatedAt).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "-";
+          const method = s.paymentMethod || "-";
+          const channel = s.channel || "-";
+          const editable = !!(currentTurn && s.status === "abierta");
+          const isOpen = ticketsState.openDetailId === s.id;
+          const items = (s.items || []).map(it=>{
+            const pid = String(it.productId || "");
+            const p = prodMap.get(pid);
+            const name = it.name || (p ? p.name : pid || "item");
+            const qty = Number(it.qty || 0);
+            return `
+              <div class="historyMeta" style="display:flex; align-items:center; gap:6px;">
+                <span>${qty} x ${name}</span>
+                ${editable ? `<button class="btn" type="button" data-line-qty="${s.id}|${it.lineId}|-1">-</button>
+                <button class="btn" type="button" data-line-qty="${s.id}|${it.lineId}|1">+</button>
+                <button class="btn" type="button" data-line-del="${s.id}|${it.lineId}">Eliminar</button>` : ""}
+              </div>
+            `;
+          }).join("");
+          const options = Array.from(prodMap.values()).slice(0, 400).map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+          return `
+            <div class="historyItem">
+              <div>
+                <div><strong>#${num}</strong> ? ${channel} ? ${method}</div>
+                <div class="historyMeta">${when}</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                  <button class="btn" type="button" data-ticket-detail="${s.id}">Detalle</button>
+                  <a class="btn" href="/print.html?id=${encodeURIComponent(s.id)}" target="_blank">Imprimir ticket</a>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div>${money(s.total || 0)}</div>
+              </div>
+            </div>
+            <div class="stepBlock ticketItemsLarge" id="ticketDetail-${s.id}" style="display:${isOpen ? "" : "none"}; margin-top:8px;">
+              <div class="stepHead">
+                <div class="stepBadge">Ticket</div>
+                <div class="stepTitle">Detalle</div>
+                <div class="stepHint">${s.id || ""} ? ${editable ? "Editable" : "Solo lectura"}</div>
+              </div>
+              ${items || "<div class='historyMeta'>Sin items</div>"}
+              ${editable ? `
+                <div class="ticketItemControls">
+                  <select data-add-product="${s.id}" class="input">
+                    <option value="">Agregar producto?</option>
+                    ${options}
+                  </select>
+                  <input data-add-qty="${s.id}" class="input" type="number" inputmode="numeric" min="1" value="1"/>
+                  <button class="btn" type="button" data-add-item="${s.id}">Agregar</button>
+                </div>
+              ` : ""}
+            </div>
+          `;
+        }).join("");
+      }
+      document.getElementById("ticketsPageInfo").textContent = `P?gina ${page} / ${pages} ? ${total} tickets`;
+      document.getElementById("btnTicketsPrev").disabled = page <= 1;
+      document.getElementById("btnTicketsNext").disabled = page >= pages;
+    }
+
+    document.getElementById("btnBackArqueo").addEventListener("click", ()=>{
+      document.getElementById("arqueoTicketsPage").style.display = "none";
+      document.getElementById("historyList").style.display = "";
+    });
+    document.getElementById("btnTicketsPrev").addEventListener("click", ()=>{
+      ticketsState.page = Math.max(1, ticketsState.page - 1);
+      renderTicketsPage();
+    });
+    document.getElementById("btnTicketsNext").addEventListener("click", ()=>{
+      ticketsState.page = ticketsState.page + 1;
+      renderTicketsPage();
+    });
+
+    const arqueoTicketsList = document.getElementById("arqueoTicketsList");
+    if(arqueoTicketsList){
+      arqueoTicketsList.addEventListener("click", (e)=>{
+        const tid = e.target && e.target.getAttribute && e.target.getAttribute("data-ticket-detail");
+        if(!tid) return;
+        const detail = document.getElementById(`ticketDetail-${tid}`);
+        if(detail){
+          const willOpen = (detail.style.display === "none" || !detail.style.display);
+          detail.style.display = willOpen ? "" : "none";
+          ticketsState.openDetailId = willOpen ? tid : null;
+        }
+      });
+    }
+
+    if(arqueoTicketsList){
+      arqueoTicketsList.addEventListener("click", (e)=>{
+        const q = e.target && e.target.getAttribute && e.target.getAttribute("data-line-qty");
+        if(q){
+          const [ticketId, lineId, delta] = q.split("|");
+          if(sendAction) sendAction("ticket:lineQty", { ticketId, lineId, delta: Number(delta || 0) });
+          return;
+        }
+        const d = e.target && e.target.getAttribute && e.target.getAttribute("data-line-del");
+        if(d){
+          const [ticketId, lineId] = d.split("|");
+          if(sendAction) sendAction("ticket:removeLine", { ticketId, lineId });
+          return;
+        }
+        const add = e.target && e.target.getAttribute && e.target.getAttribute("data-add-item");
+        if(add){
+          const ticketId = add;
+          const prodSel = document.querySelector(`[data-add-product="${ticketId}"]`);
+          const qtyInp = document.querySelector(`[data-add-qty="${ticketId}"]`);
+          const productId = prodSel ? String(prodSel.value || "") : "";
+          const qty = qtyInp ? Number(qtyInp.value || 1) : 1;
+          if(!productId) return;
+          if(sendAction) sendAction("ticket:addItem", { ticketId, productId, delta: qty });
+        }
+      });
+    }
+
+    const historyList = document.getElementById("historyList");
+    if(historyList){
+      historyList.addEventListener("click", (e)=>{
+        const tid = e.target && e.target.getAttribute && e.target.getAttribute("data-ticket-detail");
+        if(tid){
+          const detail = document.getElementById(`ticketDetail-${tid}`);
+          if(detail) detail.style.display = (detail.style.display === "none" || !detail.style.display) ? "" : "none";
+          return;
+        }
+        const aid = e.target && e.target.getAttribute && e.target.getAttribute("data-arch-detail");
+        if(aid){
+          const detail = document.getElementById(`archDetail-${aid}`);
+          if(detail){
+            const isOpen = detail.style.display !== "none";
+            const willOpen = !isOpen;
+            detail.style.display = willOpen ? "" : "none";
+            if(e.target && e.target.textContent !== undefined){
+              e.target.textContent = willOpen ? "Cerrar detalles" : "Detalles";
+              e.target.classList.toggle("primary", willOpen);
+            }
+          }
+          return;
+        }
+        const at = e.target && e.target.getAttribute && e.target.getAttribute("data-arch-tickets");
+        if(at){
+          openTicketsPage(at);
+        }
+      });
+    }
+
+    const movLists = [
+      document.getElementById("movementsListSmall"),
+      document.getElementById("movementsListBig"),
+    ].filter(Boolean);
+    movLists.forEach(list=>{
+      list.addEventListener("click", (e)=>{
+        const id = e.target && e.target.getAttribute && e.target.getAttribute("data-mov-extra");
+        if(!id) return;
+        const el = document.getElementById(`movExtra-${id}`);
+        if(el){
+          el.style.display = (el.style.display === "none" || !el.style.display) ? "" : "none";
+          e.target.textContent = (el.style.display === "none" || !el.style.display) ? "Detalles" : "Ocultar";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

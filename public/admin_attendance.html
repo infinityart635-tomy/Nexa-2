@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Presentismo</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    body.statsFull .wrap{max-width:100%; padding-left:18px; padding-right:18px}
+    .board{margin-top:12px; border-radius:24px; border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.25); padding:16px}
+    .boardHeader{display:flex; align-items:flex-end; justify-content:space-between; gap:10px}
+    .boardTitle{font-size:16px; letter-spacing:.22em; text-transform:uppercase; font-weight:800}
+    .boardSub{color:var(--muted); font-size:12px; margin-top:6px}
+    .controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px}
+    .controls .btn.active{color:var(--neo-accent); box-shadow: inset 3px 3px 8px var(--neo-low), inset -3px -3px 8px var(--neo-hi)}
+    .kpis{display:grid; gap:10px; grid-template-columns:repeat(3,1fr); margin-top:12px}
+    .kpiBox{border:1px solid rgba(255,215,90,.22); border-radius:14px; padding:10px; background:rgba(0,0,0,.22)}
+    .kpiVal{font-weight:900; font-size:18px}
+    .kpiLbl{font-size:12px; color:var(--muted); margin-top:4px}
+    table{width:100%; border-collapse:collapse; font-size:13px; margin-top:12px}
+    th,td{padding:8px 8px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; vertical-align:top}
+    th{color:var(--muted); font-weight:700}
+    .right{text-align:right}
+    .miniNote{font-size:12px; color:var(--muted); margin-top:8px}
+  </style>
+</head>
+<body class="statsFull">
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>Presentismo</h1>
+          <p>Listado completo ? filtros por fecha y nombre</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding:18px 0 40px;">
+    <section class="board">
+      <div class="boardHeader">
+        <div>
+          <div class="boardTitle">Listado completo</div>
+          <div class="boardSub" id="rangeLabel">-</div>
+        </div>
+        <div>
+          <button class="btn" id="btnBack" type="button">Volver</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="pDay" type="button">Dia especifico</button>
+        <input class="input" id="dayPick" type="date" style="width:auto; padding:10px 10px"/>
+        <button class="btn" id="p24" type="button">Ultimas 24 horas</button>
+        <button class="btn" id="pWeek" type="button">Semana</button>
+        <button class="btn" id="pMonth" type="button">Mes</button>
+        <button class="btn" id="pAll" type="button">Desde siempre</button>
+        <div style="flex:1"></div>
+        <label class="mini muted">Desde</label>
+        <input class="input" id="from" type="date" style="width:auto; padding:10px 10px"/>
+        <label class="mini muted">Hasta</label>
+        <input class="input" id="to" type="date" style="width:auto; padding:10px 10px"/>
+        <button class="btn" id="pApply" type="button">Aplicar</button>
+        <input id="attSearch" class="input" placeholder="Buscar nombre" style="max-width:220px"/>
+      </div>
+
+      <div class="kpis">
+        <div class="kpiBox">
+          <div class="kpiVal" id="attInCount">-</div>
+          <div class="kpiLbl">Entradas</div>
+        </div>
+        <div class="kpiBox">
+          <div class="kpiVal" id="attOutCount">-</div>
+          <div class="kpiLbl">Salidas</div>
+        </div>
+        <div class="kpiBox">
+          <div class="kpiVal" id="attActiveCount">-</div>
+          <div class="kpiLbl">En turno</div>
+        </div>
+      </div>
+
+      <div class="miniNote" id="attNote">-</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Empleado</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody id="attTableBody">
+          <tr><td colspan="4" class="muted">-</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState } = window.RestoApp || {};
+    const  = window.$ || ((id)=>document.getElementById(id));
+    window.$ = ;
+    if(connect) connect("admin", "Admin");
+
+    function ymd(d){
+      const x = d || new Date();
+      return x.toISOString().slice(0,10);
+    }
+    function addDays(iso, n){
+      const x = new Date(iso + "T00:00:00");
+      x.setDate(x.getDate() + n);
+      return ymd(x);
+    }
+    function startOfWeekISO(iso){
+      const x = new Date(iso + "T00:00:00");
+      const day = (x.getDay() + 6) % 7;
+      x.setDate(x.getDate() - day);
+      return ymd(x);
+    }
+    function startOfMonth(iso){
+      const x = new Date(iso + "T00:00:00");
+      x.setDate(1);
+      return ymd(x);
+    }
+    function setPresetActive(id){
+      ["pDay","p24","pWeek","pMonth","pAll"].forEach(pid=>{
+        const el = (pid);
+        if(el) el.classList.toggle("active", pid === id);
+      });
+    }
+    function setDates(from, to){
+      if(("from")) ("from").value = from || "";
+      if(("to")) ("to").value = to || "";
+      renderAttendance(window.__db || null, getRange());
+    }
+    function getRange(){
+      const from = (("from") && ("from").value) || "";
+      const to = (("to") && ("to").value) || "";
+      const preset = window.__preset || "range";
+      return { from, to, preset };
+    }
+
+    function presetDay(){
+      setPresetActive("pDay");
+      window.__preset = "day";
+      const d = (("dayPick") && ("dayPick").value) || ymd(new Date());
+      setDates(d, d);
+    }
+    function preset24(){
+      setPresetActive("p24");
+      window.__preset = "24";
+      const today = ymd(new Date());
+      setDates(addDays(today, -1), today);
+    }
+    function presetWeek(){
+      setPresetActive("pWeek");
+      window.__preset = "week";
+      const today = ymd(new Date());
+      setDates(startOfWeekISO(today), today);
+    }
+    function presetMonth(){
+      setPresetActive("pMonth");
+      window.__preset = "month";
+      const today = ymd(new Date());
+      setDates(startOfMonth(today), today);
+    }
+    function presetAll(){
+      setPresetActive("pAll");
+      window.__preset = "all";
+      if(("from")) ("from").value = "";
+      if(("to")) ("to").value = "";
+      renderAttendance(window.__db || null, getRange());
+    }
+
+    function renderAttendance(db, range){
+      const label = ("rangeLabel");
+      const note = ("attNote");
+      const body = ("attTableBody");
+      const inEl = ("attInCount");
+      const outEl = ("attOutCount");
+      const activeEl = ("attActiveCount");
+      const q = (("attSearch") && ("attSearch").value || "").trim().toLowerCase();
+      if(!label || !note || !body || !inEl || !outEl || !activeEl) return;
+      if(!db){
+        label.textContent = "-";
+        note.textContent = "-";
+        body.innerHTML = <tr><td colspan="4" class="muted">-</td></tr>;
+        inEl.textContent = "-";
+        outEl.textContent = "-";
+        activeEl.textContent = "-";
+        return;
+      }
+      const fromKey = (range && range.from) || "";
+      const toKey = (range && range.to) || "";
+      const attAll = (db.attendance || []).filter(a => {
+        const dk = String(a.dateKey || "");
+        if(!dk) return false;
+        if(fromKey && dk < fromKey) return false;
+        if(toKey && dk > toKey) return false;
+        return true;
+      });
+      const empById = new Map(((db.people && db.people.employees) || []).map(e=>[e.id,e]));
+      const lastByEmp = new Map();
+      for(const a of attAll){
+        if(!lastByEmp.has(a.employeeId)) lastByEmp.set(a.employeeId, a);
+      }
+      inEl.textContent = String(attAll.filter(a => a.type === "in").length);
+      outEl.textContent = String(attAll.filter(a => a.type === "out").length);
+      activeEl.textContent = String(Array.from(lastByEmp.values()).filter(a => a.type === "in").length);
+
+      const rangeLabel = (range && range.preset === "all") ? "Desde siempre" : ((fromKey && toKey) ? (fromKey + " - " + toKey) : "Rango abierto");
+      label.textContent = "Rango: " + rangeLabel;
+
+      let listSource = attAll;
+      if(q){
+        listSource = listSource.filter(a=>{
+          const emp = empById.get(a.employeeId);
+          const name = (emp && (emp.name || emp.id)) || (a.employeeId || "");
+          return String(name).toLowerCase().includes(q);
+        });
+      }
+
+      const maxRows = 5000;
+      let trimmed = false;
+      if(listSource.length > maxRows){
+        listSource = listSource.slice(0, maxRows);
+        trimmed = true;
+      }
+      note.textContent = trimmed ? Mostrando las primeras  marcas. Usa filtros para acotar. : Total de marcas: ;
+
+      const rows = listSource.map(a=>{
+        const emp = empById.get(a.employeeId);
+        const name = emp ? (emp.name || emp.id) : (a.employeeId || "Mozo");
+        const dateKey = a.dateKey || "-";
+        const hh = new Date(a.at || Date.now()).toLocaleTimeString("es-AR", {hour:"2-digit", minute:"2-digit"});
+        const kind = (a.type === "in") ? "Entrada" : "Salida";
+        return <tr><td></td><td></td><td></td><td></td></tr>;
+      }).join("");
+      body.innerHTML = rows || <tr><td colspan="4" class="muted">Sin marcas</td></tr>;
+    }
+
+    if(("pDay")) ("pDay").addEventListener("click", presetDay);
+    if(("dayPick")) ("dayPick").addEventListener("change", presetDay);
+    if(("p24")) ("p24").addEventListener("click", preset24);
+    if(("pWeek")) ("pWeek").addEventListener("click", presetWeek);
+    if(("pMonth")) ("pMonth").addEventListener("click", presetMonth);
+    if(("pAll")) ("pAll").addEventListener("click", presetAll);
+    if(("pApply")) ("pApply").addEventListener("click", ()=>{
+      setPresetActive("");
+      window.__preset = "range";
+      renderAttendance(window.__db || null, getRange());
+    });
+    if(("attSearch")) ("attSearch").addEventListener("input", ()=>{
+      renderAttendance(window.__db || null, getRange());
+    });
+    if(("btnBack")) ("btnBack").addEventListener("click", ()=>{ window.location.href = "/admin_stats.html"; });
+
+    if(onState){
+      onState((db)=>{
+        window.__db = db;
+        renderAttendance(db, getRange());
+      });
+    } else {
+      renderAttendance(null, getRange());
+    }
+
+    presetMonth();
+  </script>
+</body>
+</html>
+

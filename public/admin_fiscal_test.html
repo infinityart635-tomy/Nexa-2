@@ -1,0 +1,1109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Fiscal</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Fiscal</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="row" style="margin-bottom:10px; gap:8px; flex-wrap:wrap;">
+      <button class="btn viewTab active" type="button" data-view-tab="profile">Perfil del emisor</button>
+      <button class="btn viewTab" type="button" data-view-tab="recon">Conciliacion</button>
+      <button class="btn viewTab" type="button" data-view-tab="exports">Exportaciones</button>
+    </div>
+
+    <div data-view-panel="profile">
+      <section class="card">
+        <div style="font-weight:900; letter-spacing:.18em; text-transform:uppercase;">Perfil del emisor</div>
+        <p class="hint" style="margin-top:8px;">Datos minimos para emitir. Se carga una sola vez.</p>
+        <div class="badge2" style="margin-top:8px; display:inline-flex; align-items:center; gap:6px;">
+          <strong>IMPORTANTE:</strong> Este sistema NO emite comprobantes fiscales. Sirve para control, conciliacion y reportes.
+        </div>
+
+        <div class="row" style="margin-top:10px; flex-wrap:wrap;">
+          <div style="min-width:220px; flex:1;">
+            <div class="small">CUIT</div>
+            <input id="fCuit" class="input" placeholder="20-00000000-0"/>
+          </div>
+          <div style="min-width:240px; flex:1;">
+            <div class="small">Razon social / Nombre</div>
+            <input id="fRazon" class="input" placeholder="Mi Empresa S.A."/>
+          </div>
+          <div style="min-width:240px; flex:1;">
+            <div class="small">Domicilio comercial</div>
+            <input id="fDom" class="input" placeholder="Calle 123, Ciudad"/>
+          </div>
+          <div style="min-width:240px; flex:1;">
+            <div class="small">Regimen simple</div>
+            <select id="fRegimen" class="input">
+              <option value="Monotributo">Monotributo</option>
+              <option value="Responsable Inscripto">Responsable Inscripto</option>
+              <option value="Exento">Exento</option>
+            </select>
+          </div>
+          <div style="min-width:220px;">
+            <div class="small">Punto de venta (opcional)</div>
+            <input id="fPos" class="input" placeholder="0001"/>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px; justify-content:flex-end;">
+          <button id="btnSave" class="btn primary" type="button">Guardar configuracion</button>
+        </div>
+      </section>
+    </div>
+
+    <div data-view-panel="recon" style="display:none;">
+      <section class="panel">
+        <div class="panelHead">
+          <div>
+            <h2>Conciliacion de ventas</h2>
+            <p class="hint">Relaciona ventas con el comprobante fiscal emitido en otro sistema.</p>
+          </div>
+          <div class="badge2">Ventas <strong id="reconCount">-</strong></div>
+        </div>
+        <div class="panelBody">
+          <div class="badge2" style="display:inline-flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <strong>Pasos:</strong>
+            <span>1) Elegi fecha o rango</span>
+            <span>2) Marca emitidos/anulados</span>
+            <span>3) Exporta</span>
+          </div>
+          <div class="row" style="flex-wrap:wrap;">
+            <div style="min-width:160px;">
+              <div class="small">Fecha</div>
+              <input id="reconDate" class="input" type="date"/>
+            </div>
+            <div style="min-width:160px;">
+              <div class="small">Desde</div>
+              <input id="reconFrom" class="input" type="date"/>
+            </div>
+            <div style="min-width:160px;">
+              <div class="small">Hasta</div>
+              <input id="reconTo" class="input" type="date"/>
+            </div>
+            <div style="min-width:220px;">
+              <div class="small">Turno</div>
+              <select id="reconTurn" class="input">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div style="min-width:180px;">
+              <div class="small">Estado fiscal</div>
+              <select id="reconStatus" class="input">
+                <option value="all">Todos</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="emitido">Emitido</option>
+                <option value="anulado">Anulado</option>
+              </select>
+            </div>
+            <div style="flex:1; min-width:220px;">
+              <div class="small">Buscar</div>
+              <input id="reconSearch" class="input" placeholder="Mesa, pedido, CAE o nro"/>
+            </div>
+          </div>
+          <div class="mini" id="turnLimitNote" style="margin-top:8px;"></div>
+          <div class="mini" id="reconGuardNote" style="margin-top:4px;"></div>
+          <div class="row" id="reconDayChips" style="margin-top:8px; gap:6px; flex-wrap:wrap;"></div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelBody" id="reconList"></div>
+      </section>
+    </div>
+
+    <div data-view-panel="exports" style="display:none;">
+      <section class="panel">
+        <div class="panelHead">
+          <div>
+            <h2>Exportaciones</h2>
+            <p class="hint">CSV para contador y control interno.</p>
+          </div>
+        </div>
+        <div class="panelBody">
+          <div class="badge2" style="display:inline-flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <strong>Pasos:</strong>
+            <span>1) Elegi fecha o rango</span>
+            <span>2) Exporta</span>
+          </div>
+          <div class="row" style="margin-bottom:8px; flex-wrap:wrap;">
+            <button id="expQuickToday" class="btn" type="button">Hoy</button>
+            <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
+            <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
+            <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
+            <button id="expQuickClear" class="btn" type="button">Limpiar</button>
+          </div>
+          <div class="row" id="expDayChips" style="margin-bottom:8px; gap:6px; flex-wrap:wrap;"></div>
+          <div class="row" style="flex-wrap:wrap;">
+            <div style="min-width:160px;">
+              <div class="small">Fecha</div>
+              <input id="expDate" class="input" type="date"/>
+            </div>
+            <div style="min-width:160px;">
+              <div class="small">Desde</div>
+              <input id="expFrom" class="input" type="date"/>
+            </div>
+            <div style="min-width:160px;">
+              <div class="small">Hasta</div>
+              <input id="expTo" class="input" type="date"/>
+            </div>
+          </div>
+          <div class="row" style="margin-top:12px; flex-wrap:wrap;">
+            <button id="btnExpSales" class="btn" type="button">Exportar ventas</button>
+            <button id="btnExpPay" class="btn" type="button">Exportar por medio de pago</button>
+            <button id="btnExpBonif" class="btn" type="button">Exportar bonificaciones</button>
+            <button id="btnExpAnnul" class="btn" type="button">Exportar anulaciones</button>
+            <button id="btnExpClose" class="btn" type="button">Exportar cierre caja/turno</button>
+            <button id="btnExpPending" class="btn" type="button">Exportar pendientes de emitir</button>
+          </div>
+          <div class="mini" id="expSummary" style="margin-top:8px;"></div>
+          <div class="mini" id="expGuardNote" style="margin-top:8px;"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modalOverlay" id="emitModal" style="display:none;">
+    <div class="modal" style="width:min(720px, 100%);">
+      <div class="modalHeader">
+        <h3 id="emitTitle">Marcar emitido</h3>
+        <button class="btn" type="button" id="btnEmitClose">Cerrar</button>
+      </div>
+      <div class="hr"></div>
+
+      <div class="row" style="flex-wrap:wrap;">
+        <div style="min-width:180px; flex:1;">
+          <div class="small">Tipo</div>
+          <select id="eTipo" class="input">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="CF">CF</option>
+            <option value="NC">NC</option>
+            <option value="ND">ND</option>
+          </select>
+        </div>
+        <div style="min-width:160px; flex:1;">
+          <div class="small">PtoVta</div>
+          <input id="ePos" class="input" placeholder="0001"/>
+        </div>
+        <div style="min-width:180px; flex:1;">
+          <div class="small">Nro</div>
+          <input id="eNro" class="input" placeholder="00000001"/>
+        </div>
+        <div style="min-width:220px; flex:1;">
+          <div class="small">CAE (opcional)</div>
+          <input id="eCae" class="input" placeholder="61123000000000"/>
+        </div>
+      </div>
+
+      <div class="modalFooter">
+        <button id="btnEmitSave" class="btn primary" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="attachInput" type="file" accept="application/pdf,image/*" style="display:none;"/>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, toast, money } = window.RestoApp || {};
+    const $ = (id)=>document.getElementById(id);
+    if (connect) connect("admin", "Fiscal");
+
+    let currentFiscal = {};
+    let currentDb = null;
+    let currentSaleId = null;
+    let pendingAttachSaleId = null;
+
+    function ymdLocal(d){
+      const dt = d ? new Date(d) : new Date();
+      const yyyy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, "0");
+      const dd = String(dt.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function dateKeyFromTs(ts){
+      if (!ts) return "";
+      try{ return ymdLocal(new Date(ts)); }catch{ return ""; }
+    }
+
+    function fmtDateTime(ts){
+      if (!ts) return "-";
+      try{
+        return new Date(ts).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
+      }catch{
+        return String(ts);
+      }
+    }
+
+    function fmtMoney(v, cur){
+      if (money) return money(v || 0, cur || "ARS");
+      return String(Number(v || 0));
+    }
+
+    function getReconRange(){
+      const from = ($("reconFrom").value || "").trim();
+      const to = ($("reconTo").value || "").trim();
+      if (from || to) return { from, to };
+      const single = ($("reconDate").value || "").trim();
+      if (single) return { from: single, to: single };
+      return { from: "", to: "" };
+    }
+
+    function shortDocType(v){
+      const up = String(v || "").toUpperCase();
+      if (up === "FACTURA_A") return "A";
+      if (up === "FACTURA_B") return "B";
+      if (up === "FACTURA_C") return "C";
+      if (up === "NOTA_CREDITO") return "NC";
+      if (up === "NOTA_DEBITO") return "ND";
+      return String(v || "");
+    }
+
+    function fullDocType(v){
+      const up = String(v || "").toUpperCase();
+      if (up === "A") return "FACTURA_A";
+      if (up === "B") return "FACTURA_B";
+      if (up === "C") return "FACTURA_C";
+      if (up === "CF") return "FACTURA_C";
+      if (up === "NC") return "NOTA_CREDITO";
+      if (up === "ND") return "NOTA_DEBITO";
+      return up;
+    }
+
+    function toCsv(rows, headers){
+      const out = [];
+      const esc = (v)=>{
+        const s = String(v ?? "");
+        if (/["\n,;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
+      if (headers && headers.length) out.push(headers.map(esc).join(","));
+      rows.forEach(r=>{ out.push(r.map(esc).join(",")); });
+      return out.join("\n");
+    }
+
+    function downloadCsv(filename, content){
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 500);
+    }
+
+    function getExportRange(){
+      const from = ($("expFrom").value || "").trim();
+      const to = ($("expTo").value || "").trim();
+      if (from || to) return { from, to };
+      const single = ($("expDate").value || "").trim();
+      if (single) return { from: single, to: single };
+      return { from: "", to: "" };
+    }
+
+    function addDays(dateKey, days){
+      if (!dateKey) return "";
+      const d = new Date(dateKey + "T00:00:00");
+      if (Number.isNaN(d.getTime())) return "";
+      d.setDate(d.getDate() + days);
+      return ymdLocal(d);
+    }
+
+    function salesDateStats(db){
+      const map = new Map();
+      const sales = Array.isArray(db && db.sales) ? db.sales : [];
+      sales.forEach(s=>{
+        const k = String(s.dateKey || "");
+        if (!k) return;
+        map.set(k, (map.get(k) || 0) + 1);
+      });
+      return map;
+    }
+
+    function renderDateChips(db, targetId, onPick){
+      const wrap = $(targetId);
+      if (!wrap || !db) return;
+      const stats = salesDateStats(db);
+      const keys = Array.from(stats.keys()).sort((a,b)=>String(b).localeCompare(String(a))).slice(0, 14);
+      if (!keys.length) { wrap.innerHTML = ""; return; }
+      const first = keys[keys.length - 1];
+      const last = keys[0];
+      const chips = keys.map(k=>{
+        const count = stats.get(k) || 0;
+        return `<button class="btn" type="button" data-date="${k}" title="Ventas: ${count}">${k} (${count})</button>`;
+      }).join("");
+      wrap.innerHTML = `<div class="mini" style="opacity:.8;">Dias con ventas:</div>${chips}<button class="btn" type="button" data-range="all">Todas con ventas</button>`;
+      wrap.querySelectorAll("[data-date]").forEach(btn=>{
+        btn.addEventListener("click", ()=>onPick(btn.getAttribute("data-date")));
+      });
+      const allBtn = wrap.querySelector("[data-range='all']");
+      if (allBtn) allBtn.addEventListener("click", ()=>onPick({ from: first, to: last }));
+    }
+
+    function getLatestClosedDateKey(db){
+      const closures = Array.isArray(db && db.dayClosures) ? db.dayClosures.slice() : [];
+      if (closures.length) {
+        closures.sort((a,b)=>String(b.dateKey||"").localeCompare(String(a.dateKey||"")));
+        return String(closures[0].dateKey || "");
+      }
+      const sales = Array.isArray(db && db.sales) ? db.sales : [];
+      if (!sales.length) return "";
+      let best = sales[0];
+      for (const s of sales) { if (s && Number(s.at||0) > Number(best.at||0)) best = s; }
+      return String(best.dateKey || ymdLocal(best.at));
+    }
+
+    function filterSalesByRange(db, range){
+      let sales = Array.isArray(db && db.sales) ? db.sales.slice() : [];
+      if (range.from || range.to) {
+        sales = sales.filter(s=>{
+          if (!s) return false;
+          const k = String(s.dateKey || "");
+          if (range.from && k < range.from) return false;
+          if (range.to && k > range.to) return false;
+          return true;
+        });
+      }
+      return sales;
+    }
+
+    function ensureExportRange(){
+      const range = getExportRange();
+      if (!range.from && !range.to) {
+        if (toast) toast("Elegi fecha o rango para exportar");
+        return null;
+      }
+      return range;
+    }
+
+    function exportSummary(db, range){
+      const summary = $("expSummary");
+      if (!summary || !db) return;
+      if (!range.from && !range.to) { summary.textContent = ""; return; }
+      const sales = filterSalesByRange(db, range);
+      const docBySaleId = {};
+      (db.fiscalDocs || []).forEach(d=>{ if (d && d.saleId) docBySaleId[String(d.saleId)] = d; });
+      let pending = 0;
+      sales.forEach(s=>{
+        const doc = docBySaleId[String(s.id || "")];
+        const st = String((doc && doc.status) || "pendiente").toLowerCase();
+        if (st === "pendiente") pending += 1;
+      });
+      summary.textContent = `Ventas en rango: ${sales.length} · Pendientes: ${pending}`;
+    }
+
+    function updateExportGuard(){
+      const range = getExportRange();
+      const has = !!(range.from || range.to);
+      const ids = ["btnExpSales","btnExpPay","btnExpBonif","btnExpAnnul","btnExpClose","btnExpPending"];
+      ids.forEach(id=>{
+        const btn = $(id);
+        if (btn) btn.disabled = !has;
+      });
+      const note = $("expGuardNote");
+      if (note) note.textContent = has ? "Exportar no cambia estados fiscales. Primero concilia." : "Elegi fecha o rango para habilitar exportaciones.";
+      exportSummary(currentDb, range);
+    }
+
+    function calcTicketTotal(ticket){
+      if (!ticket) return 0;
+      const items = Array.isArray(ticket.items) ? ticket.items : [];
+      let subtotal = 0;
+      items.forEach(it=>{
+        const unit = Number(it.unitPrice || 0);
+        const qty = Number(it.qty || 0);
+        if (!Number.isFinite(unit) || !Number.isFinite(qty) || qty <= 0) return;
+        const lineSubtotal = unit * qty;
+        const d = it.discount;
+        let lineDiscount = 0;
+        if (d && typeof d === "object") {
+          const type = String(d.type || "").toLowerCase();
+          const raw = Number(d.value || 0);
+          if (Number.isFinite(raw) && raw > 0) {
+            if (type === "percent") lineDiscount = Math.min(lineSubtotal, lineSubtotal * (Math.min(100, raw) / 100));
+            if (type === "amount") lineDiscount = Math.min(lineSubtotal, raw);
+          }
+        }
+        subtotal += Math.max(0, lineSubtotal - lineDiscount);
+      });
+      const d = ticket.discount;
+      let discountAmount = 0;
+      if (d && typeof d === "object") {
+        const type = String(d.type || "").toLowerCase();
+        const raw = Number(d.value || 0);
+        if (Number.isFinite(raw) && raw > 0) {
+          if (type === "percent") discountAmount = subtotal * (Math.min(100, raw) / 100);
+          if (type === "amount") discountAmount = Math.min(subtotal, raw);
+        }
+      }
+      return Math.max(0, subtotal - discountAmount);
+    }
+
+    function fillForm(f){
+      const fiscal = f || {};
+      currentFiscal = fiscal;
+      const c = fiscal.company || {};
+      $("fCuit").value = c.cuit || "";
+      $("fRazon").value = c.razonSocial || "";
+      $("fDom").value = c.domicilio || "";
+      $("fRegimen").value = c.ivaCondicion || "Monotributo";
+      $("fPos").value = fiscal.pos || "";
+    }
+
+    function collectForm(){
+      const fiscal = {
+        pos: $("fPos").value,
+        company: {
+          cuit: $("fCuit").value,
+          razonSocial: $("fRazon").value,
+          domicilio: $("fDom").value,
+          ivaCondicion: $("fRegimen").value
+        }
+      };
+
+      if (currentFiscal.enabled !== undefined) fiscal.enabled = !!currentFiscal.enabled;
+      if (currentFiscal.provider !== undefined) fiscal.provider = currentFiscal.provider;
+      if (currentFiscal.environment !== undefined) fiscal.environment = currentFiscal.environment;
+      return { fiscal };
+    }
+
+    function setActiveView(key){
+      document.querySelectorAll("[data-view-panel]").forEach(el=>{
+        el.style.display = (el.getAttribute("data-view-panel") === key) ? "" : "none";
+      });
+      document.querySelectorAll("[data-view-tab]").forEach(btn=>{
+        btn.classList.toggle("active", btn.getAttribute("data-view-tab") === key);
+      });
+    }
+
+    document.querySelectorAll("[data-view-tab]").forEach(btn=>{
+      btn.addEventListener("click", ()=>setActiveView(btn.getAttribute("data-view-tab")));
+    });
+
+    $("btnSave").addEventListener("click", ()=>{
+      if (!sendAction) return;
+      sendAction("settings:update", collectForm());
+      if (toast) toast("Configuracion guardada");
+    });
+
+    function renderTurns(db){
+      const select = $("reconTurn");
+      if (!select || !db) return;
+      const range = getReconRange();
+      const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+      let list = turns.filter(Boolean);
+      if (range.from || range.to) {
+        list = list.filter(t=>{
+          const k = String(t.dateKey || "");
+          if (range.from && k < range.from) return false;
+          if (range.to && k > range.to) return false;
+          return true;
+        });
+        const note = $("turnLimitNote");
+        if (note) note.textContent = "";
+      } else {
+        list.sort((a,b)=>Number(b.openedAt||0) - Number(a.openedAt||0));
+        const total = list.length;
+        list = list.slice(0, 50);
+        const note = $("turnLimitNote");
+        if (note) note.textContent = total > 50 ? "Mostrando ultimos 50 turnos. Usa rango para ver mas." : "";
+      }
+      const prev = select.value;
+      select.innerHTML = '<option value="">Todos</option>' + list.map(t=>{
+        const from = t.openedAt ? new Date(t.openedAt).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "--:--";
+        const to = t.closedAt ? new Date(t.closedAt).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "abierto";
+        const day = t.dateKey || "";
+        const label = (range.from || range.to) ? `${day} ?? ${t.shift || "turno"} ?? ${from} - ${to}` : `${day} ?? ${t.shift || "turno"} ?? ${from} - ${to}`;
+        return `<option value="${String(t.id||"")}">${label}</option>`;
+      }).join("");
+      if (prev) select.value = prev;
+    }
+
+    function getSelectedTurn(db){
+      const id = ($("reconTurn").value || "").trim();
+      if (!id) return null;
+      const turns = (db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+      return turns.find(t=>t && String(t.id||"") === id) || null;
+    }
+
+    function buildSummaryForSale(sale){
+      const cur = (currentDb && currentDb.settings && currentDb.settings.currency) || "ARS";
+      const lines = [];
+      const dt = fmtDateTime(sale.at);
+      lines.push(`Venta ${sale.id || ""}`.trim());
+      lines.push(`Fecha: ${dt}`);
+      lines.push(`Mesa: ${sale.tableId || "-"}`);
+      lines.push(`Total: ${fmtMoney(sale.total || 0, cur)}`);
+      lines.push(`Medio: ${sale.paymentMethod || "-"}`);
+      lines.push("");
+      lines.push("Items:");
+      (sale.items || []).forEach(it=>{
+        const qty = Number(it.qty || 0);
+        const name = String(it.name || it.productId || "").trim();
+        const unit = Number(it.unitPrice || 0);
+        const total = qty * unit;
+        lines.push(`- ${qty} x ${name} = ${fmtMoney(total, cur)}`);
+      });
+      return lines.join("\n");
+    }
+
+    function renderRecon(db){
+      if (!db) return;
+      currentDb = db;
+      const docBySaleId = {};
+      (db.fiscalDocs || []).forEach(d=>{
+        if (d && d.saleId) docBySaleId[String(d.saleId)] = d;
+      });
+      renderDateChips(db, "reconDayChips", (val)=>{
+        if (typeof val === "string") {
+          $("reconDate").value = val;
+          $("reconFrom").value = "";
+          $("reconTo").value = "";
+        } else if (val && val.from && val.to) {
+          $("reconDate").value = "";
+          $("reconFrom").value = val.from;
+          $("reconTo").value = val.to;
+        }
+        renderRecon(currentDb);
+      });
+      renderTurns(db);
+      const range = getReconRange();
+      const hasRange = !!(range.from || range.to);
+      const guard = $("reconGuardNote");
+      if (!hasRange) {
+        if (guard) guard.textContent = "Elegi fecha o rango para ver ventas y evitar errores. Emitido aqui no emite, solo confirma.";
+        $("reconList").innerHTML = '<div class="small">Selecciona fecha o rango.</div>';
+        $("reconCount").textContent = "0";
+        return;
+      }
+      if (guard) guard.textContent = "Emitido aqui no emite, solo confirma. Exportar no cambia estados. Anular no revierte ventas.";
+      const statusFilter = ($("reconStatus").value || "all").trim().toLowerCase();
+      const search = ($("reconSearch").value || "").trim().toLowerCase();
+      const turn = getSelectedTurn(db);
+      const cur = (db.settings && db.settings.currency) || "ARS";
+
+      let sales = Array.isArray(db.sales) ? db.sales.slice() : [];
+      if (range.from || range.to) {
+        sales = sales.filter(s=>{
+          if (!s) return false;
+          const k = String(s.dateKey || "");
+          if (range.from && k < range.from) return false;
+          if (range.to && k > range.to) return false;
+          return true;
+        });
+      }
+      if (turn) {
+        const from = Number(turn.openedAt || 0);
+        const to = Number(turn.closedAt || Date.now());
+        sales = sales.filter(s=>{
+          const at = Number(s.at || 0);
+          return at >= from && at <= to;
+        });
+      }
+
+      sales.sort((a,b)=>Number(b.at||0) - Number(a.at||0));
+
+      const rows = [];
+      sales.forEach(sale=>{
+        if (!sale) return;
+        const doc = docBySaleId[String(sale.id || "")] || null;
+        const status = String((doc && doc.status) || "pendiente").toLowerCase();
+        if (statusFilter !== "all" && status !== statusFilter) return;
+        const pos = doc ? String(doc.pos || "") : "";
+        const number = doc ? String(doc.number || "") : "";
+        const refNum = (pos || number) ? `${String(pos||"").padStart(4,"0")}-${String(number||"").padStart(8,"0")}` : "-";
+        const searchHay = [
+          sale.tableId, sale.ticketId, sale.id, sale.paymentMethod,
+          doc ? doc.docType : "", pos, number, doc ? doc.cae : ""
+        ].join(" ").toLowerCase();
+        if (search && !searchHay.includes(search)) return;
+
+        const actionButtons = (() => {
+          if (status === "pendiente") {
+            return `
+              <button class="btn" type="button" data-emit="${String(sale.id||"")}">Confirmar emitido (ya emitido afuera)</button>
+              <button class="btn" type="button" data-annul="${String(sale.id||"")}">Marcar anulado (solo fiscal)</button>
+            `;
+          }
+          return `
+            <button class="btn" type="button" data-edit="${String(sale.id||"")}">Editar fiscal</button>
+            <button class="btn" type="button" data-reset="${String(sale.id||"")}">Volver a pendiente</button>
+          `;
+        })();
+
+        rows.push(`
+          <div class="card" style="margin:0 0 10px 0;">
+            <div class="row" style="align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <div style="min-width:220px;">
+                <div style="font-weight:900;">${fmtDateTime(sale.at)}</div>
+                <div class="small">Mesa ${sale.tableId || "-"} ?? Pedido ${sale.ticketId || sale.id || "-"}</div>
+              </div>
+              <div class="row" style="gap:12px; align-items:center; flex-wrap:wrap;">
+                <div>
+                  <div class="small">Total</div>
+                  <div style="font-weight:900;">${fmtMoney(sale.total || 0, cur)}</div>
+                </div>
+                <div>
+                  <div class="small">Medio</div>
+                  <div class="small">${sale.paymentMethod || "-"}</div>
+                </div>
+                <div>
+                  <div class="small">Fiscal</div>
+                  <div class="badge2" style="${statusStyle(status)}">${statusLabel(status)}</div>
+                </div>
+                <div>
+                  <div class="small">Ref</div>
+                  <div class="small">${doc ? (shortDocType(doc.docType) || "-") : "-"} ?? ${refNum}${doc && doc.cae ? ` ?? CAE ${doc.cae}` : ""}</div>
+                </div>
+              </div>
+              <div class="row" style="gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                ${actionButtons}
+                <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar comprobante</button>
+                <button class="btn" type="button" data-copy="${String(sale.id||"")}">Copiar resumen</button>
+              </div>
+            </div>
+          </div>
+        `);
+      });
+
+      $("reconList").innerHTML = rows.join("") || '<div class="small">Sin ventas para mostrar.</div>';
+      $("reconCount").textContent = String(rows.length);
+    }
+
+    function openEmitModal(saleId){
+      currentSaleId = String(saleId || "");
+      const doc = (currentDb && currentDb.fiscalDocs || []).find(d=>d && String(d.saleId||"") === currentSaleId) || null;
+      const posDefault = (currentDb && currentDb.settings && currentDb.settings.fiscal && currentDb.settings.fiscal.pos) || "0001";
+      $("eTipo").value = doc && doc.docType ? shortDocType(doc.docType) : "C";
+      $("ePos").value = doc && doc.pos ? String(doc.pos) : String(posDefault || "");
+      $("eNro").value = doc && doc.number ? String(doc.number) : "";
+      $("eCae").value = doc && doc.cae ? String(doc.cae) : "";
+      $("emitTitle").textContent = `Confirmar emitido (ya emitido afuera) - ${currentSaleId}`;
+      $("emitModal").style.display = "flex";
+    }
+
+    function closeEmitModal(){
+      $("emitModal").style.display = "none";
+      currentSaleId = null;
+    }
+
+    $("btnEmitClose").addEventListener("click", closeEmitModal);
+    $("emitModal").addEventListener("click", (e)=>{ if (e.target.id === "emitModal") closeEmitModal(); });
+
+    function saleShortInfo(sale){
+      if (!sale) return "";
+      return `Venta ${sale.id || ""} ?? ${fmtDateTime(sale.at)} ?? Mesa ${sale.tableId || "-"} ?? Total ${fmtMoney(sale.total || 0, (currentDb && currentDb.settings && currentDb.settings.currency) || "ARS")}`;
+    }
+
+    $("btnEmitSave").addEventListener("click", ()=>{
+      if (!currentSaleId || !sendAction) return closeEmitModal();
+      const tipo = String($("eTipo").value || "").trim();
+      const pos = String($("ePos").value || "").trim();
+      const nro = String($("eNro").value || "").trim();
+      const cae = String($("eCae").value || "").trim();
+      if (!tipo) return toast ? toast("Selecciona tipo") : null;
+      if (!/^\d{1,4}$/.test(pos)) return toast ? toast("PtoVta invalido") : null;
+      if (!/^\d{1,9}$/.test(nro)) return toast ? toast("Nro invalido") : null;
+      if (cae && !/^\d{6,20}$/.test(cae)) return toast ? toast("CAE invalido") : null;
+      const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === currentSaleId) || null;
+      const ok = confirm(`Marcar como emitido?\n${saleShortInfo(sale)}`);
+      if (!ok) return;
+      const patch = {
+        status: "emitido",
+        docType: fullDocType(tipo),
+        pos,
+        number: nro,
+        cae
+      };
+      sendAction("fiscal:markSale", { saleId: currentSaleId, patch, includeAll: true });
+      if (toast) toast("Actualizado");
+      closeEmitModal();
+    });
+
+    $("attachInput").addEventListener("change", (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if (!file || !pendingAttachSaleId || !sendAction) return;
+      if (file.size > 1500000) {
+        if (toast) toast("Archivo muy grande (max 1.5MB)");
+        e.target.value = "";
+        pendingAttachSaleId = null;
+        return;
+      }
+      if (!/^(application\/pdf|image\/)/.test(file.type || "")) {
+        if (toast) toast("Formato no permitido");
+        e.target.value = "";
+        pendingAttachSaleId = null;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const attachment = { name: file.name, type: file.type, data: String(reader.result || "") };
+        sendAction("fiscal:markSale", { saleId: pendingAttachSaleId, patch: { attachment }, includeAll: true });
+        if (toast) toast("Adjunto guardado");
+        pendingAttachSaleId = null;
+        e.target.value = "";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $("reconList").addEventListener("click", (e)=>{
+      const t = e.target;
+      if (!t || !t.getAttribute) return;
+      const emitId = t.getAttribute("data-emit");
+      if (emitId) return openEmitModal(emitId);
+      const editId = t.getAttribute("data-edit");
+      if (editId) return openEmitModal(editId);
+      const annulId = t.getAttribute("data-annul");
+      if (annulId && sendAction) {
+        const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === String(annulId));
+        const ok = confirm(`Marcar como anulado? (solo fiscal)\n${saleShortInfo(sale)}`);
+        if (!ok) return;
+        sendAction("fiscal:markSale", { saleId: annulId, patch: { status: "anulado" }, includeAll: true });
+        if (toast) toast("Marcado como anulado");
+        return;
+      }
+      const resetId = t.getAttribute("data-reset");
+      if (resetId && sendAction) {
+        const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === String(resetId));
+        const ok = confirm(`Volver a pendiente?\n${saleShortInfo(sale)}`);
+        if (!ok) return;
+        sendAction("fiscal:markSale", { saleId: resetId, patch: { status: "pendiente" }, includeAll: true });
+        if (toast) toast("Estado reiniciado");
+        return;
+      }
+      const attachId = t.getAttribute("data-attach");
+      if (attachId) {
+        pendingAttachSaleId = attachId;
+        $("attachInput").click();
+        return;
+      }
+      const copyId = t.getAttribute("data-copy");
+      if (copyId) {
+        const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === String(copyId));
+        if (!sale) return;
+        const text = buildSummaryForSale(sale);
+        navigator.clipboard?.writeText(text).then(()=>{ if (toast) toast("Resumen copiado"); });
+      }
+    });
+
+    $("reconDate").addEventListener("change", ()=>{
+      if ($("reconDate").value) { $("reconFrom").value = ""; $("reconTo").value = ""; }
+      renderRecon(currentDb);
+    });
+    $("reconFrom").addEventListener("change", ()=>{
+      if ($("reconFrom").value || $("reconTo").value) $("reconDate").value = "";
+      renderRecon(currentDb);
+    });
+    $("reconTo").addEventListener("change", ()=>{
+      if ($("reconFrom").value || $("reconTo").value) $("reconDate").value = "";
+      renderRecon(currentDb);
+    });
+    ["reconTurn","reconStatus","reconSearch"].forEach(id=>{
+      $(id).addEventListener("change", ()=>renderRecon(currentDb));
+    });
+    $("reconSearch").addEventListener("input", ()=>renderRecon(currentDb));
+    $("reconDate").value = "";
+    $("reconFrom").value = "";
+    $("reconTo").value = "";
+    $("expDate").value = "";
+    $("expFrom").value = "";
+    $("expTo").value = "";
+    $("expDate").addEventListener("change", ()=>{
+      if ($("expDate").value) { $("expFrom").value = ""; $("expTo").value = ""; }
+      updateExportGuard();
+    });
+    $("expFrom").addEventListener("change", ()=>{
+      if ($("expFrom").value || $("expTo").value) $("expDate").value = "";
+      updateExportGuard();
+    });
+    $("expTo").addEventListener("change", ()=>{
+      if ($("expFrom").value || $("expTo").value) $("expDate").value = "";
+      updateExportGuard();
+    });
+
+    $("expQuickToday").addEventListener("click", ()=>{
+      $("expDate").value = ymdLocal();
+      $("expFrom").value = "";
+      $("expTo").value = "";
+      updateExportGuard();
+    });
+    $("expQuickYesterday").addEventListener("click", ()=>{
+      $("expDate").value = addDays(ymdLocal(), -1);
+      $("expFrom").value = "";
+      $("expTo").value = "";
+      updateExportGuard();
+    });
+    $("expQuickLastClose").addEventListener("click", ()=>{
+      const key = getLatestClosedDateKey(currentDb);
+      $("expDate").value = key || ymdLocal();
+      $("expFrom").value = "";
+      $("expTo").value = "";
+      updateExportGuard();
+    });
+    $("expQuickLast7").addEventListener("click", ()=>{
+      const today = ymdLocal();
+      $("expDate").value = "";
+      $("expFrom").value = addDays(today, -6);
+      $("expTo").value = today;
+      updateExportGuard();
+    });
+    $("expQuickClear").addEventListener("click", ()=>{
+      $("expDate").value = "";
+      $("expFrom").value = "";
+      $("expTo").value = "";
+      updateExportGuard();
+    });
+    updateExportGuard();
+
+    function exportSales(){
+      if (!currentDb) return;
+      const range = ensureExportRange();
+      if (!range) return;
+      const sales = filterSalesByRange(currentDb, range);
+      const docBySaleId = {};
+      (currentDb.fiscalDocs || []).forEach(d=>{
+        if (d && d.saleId) docBySaleId[String(d.saleId)] = d;
+      });
+      const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
+      const rows = sales.map(s=>{
+        const doc = docBySaleId[String(s.id || "")] || null;
+        const pos = doc ? String(doc.pos || "") : "";
+        const number = doc ? String(doc.number || "") : "";
+        return [
+          s.dateKey || "",
+          fmtDateTime(s.at),
+          s.tableId || "",
+          s.ticketId || s.id || "",
+          fmtMoney(s.total || 0, cur),
+          s.paymentMethod || "",
+          doc ? (doc.status || "pendiente") : "pendiente",
+          doc ? shortDocType(doc.docType) : "",
+          pos,
+          number,
+          doc ? (doc.cae || "") : ""
+        ];
+      });
+      const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Total","Medio","Estado fiscal","Tipo","PtoVta","Nro","CAE"]);
+      downloadCsv(`ventas_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+    }
+
+    function exportByPayment(){
+      if (!currentDb) return;
+      const range = ensureExportRange();
+      if (!range) return;
+      const sales = filterSalesByRange(currentDb, range);
+      const map = new Map();
+      sales.forEach(s=>{
+        const key = String(s.paymentMethod || "otro");
+        const cur = map.get(key) || { count: 0, total: 0 };
+        cur.count += 1;
+        cur.total += Number(s.total || 0);
+        map.set(key, cur);
+      });
+      const curCode = (currentDb.settings && currentDb.settings.currency) || "ARS";
+      const rows = Array.from(map.entries()).map(([k, v])=>[k, v.count, fmtMoney(v.total, curCode)]);
+      const csv = toCsv(rows, ["Medio","Cantidad","Total"]);
+      downloadCsv(`por_medio_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+    }
+
+    function exportBonifications(){
+      if (!currentDb) return;
+      const range = ensureExportRange();
+      if (!range) return;
+      const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
+      const rows = [];
+      const sales = filterSalesByRange(currentDb, range);
+      sales.forEach(s=>{
+        const hasDiscount = !!(s.discountAmount || (s.discount && (s.discount.value || s.discount.type)) || (s.lineDiscounts || []).some(ld=>ld && ld.discount));
+        if (!hasDiscount) return;
+        rows.push([
+          s.dateKey || "",
+          fmtDateTime(s.at),
+          s.ticketId || s.id || "",
+          s.tableId || "",
+          fmtMoney(s.total || 0, cur),
+          Number(s.discountAmount || 0),
+          s.paymentMethod || ""
+        ]);
+      });
+      const csv = toCsv(rows, ["Fecha","Hora","Pedido","Mesa","Total","Descuento","Medio"]);
+      downloadCsv(`bonificaciones_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+    }
+
+    function exportAnnulled(){
+      if (!currentDb) return;
+      const range = ensureExportRange();
+      if (!range) return;
+      const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
+      const rows = [];
+      const tickets = Array.isArray(currentDb.tickets) ? currentDb.tickets : [];
+      tickets.forEach(t=>{
+        if (!t || t.status !== "anulada") return;
+        const k = dateKeyFromTs(t.canceledAt || t.updatedAt || t.createdAt);
+        if (range.from && k < range.from) return;
+        if (range.to && k > range.to) return;
+        const total = calcTicketTotal(t);
+        rows.push([
+          k,
+          fmtDateTime(t.canceledAt || t.updatedAt || t.createdAt),
+          t.id || "",
+          t.tableId || "",
+          fmtMoney(total || 0, cur),
+          "",
+          ""
+        ]);
+      });
+      const csv = toCsv(rows, ["Fecha","Hora","Pedido","Mesa","Total","Descuento","Medio"]);
+      downloadCsv(`anulaciones_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+    }
+
+    function exportClosures(){
+      if (!currentDb) return;
+      const range = ensureExportRange();
+      if (!range) return;
+      const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
+      const turns = (currentDb.cash && Array.isArray(currentDb.cash.turns)) ? currentDb.cash.turns : [];
+      const rows = [];
+      turns.forEach(t=>{
+        if (!t) return;
+        const k = String(t.dateKey || "");
+        if (range.from && k < range.from) return;
+        if (range.to && k > range.to) return;
+        const entries = t.entries || {};
+        const exits = t.exits || {};
+        const transfersIn = Array.isArray(entries.transfersIn) ? entries.transfersIn : [];
+        const transfersOut = Array.isArray(exits.transfersOut) ? exits.transfersOut : [];
+        const nonCash = Array.isArray(t.nonCash) ? t.nonCash : [];
+        const sumNumber = (v)=>{ const n = Number(v); return Number.isFinite(n) ? n : 0; };
+        const transfersInTotal = transfersIn.reduce((a,x)=>a + sumNumber(x.amount), 0);
+        const transfersOutTotal = transfersOut.reduce((a,x)=>a + sumNumber(x.amount), 0);
+        const nonCashTotal = nonCash.reduce((a,x)=>a + sumNumber(x.amount), 0);
+        const totalEntries = sumNumber(entries.billingZ) + sumNumber(entries.billingB) + sumNumber(entries.aportes) + nonCashTotal + transfersInTotal - sumNumber(entries.anulados);
+        const totalExits =
+          (Array.isArray(exits.providers)? exits.providers.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+          (Array.isArray(exits.expenses)? exits.expenses.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+          (Array.isArray(exits.withdrawals)? exits.withdrawals.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+          (Array.isArray(exits.extraPay)? exits.extraPay.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+          (Array.isArray(exits.advances)? exits.advances.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+          (Array.isArray(exits.others)? exits.others.reduce((a,x)=>a + sumNumber(x.amount),0):0) +
+          transfersOutTotal;
+        const saldoContable = sumNumber(t.openingTotal) + totalEntries - totalExits;
+        const saldoFisico = sumNumber(t.closingTotal);
+        const diferencia = Number.isFinite(saldoFisico) ? (saldoFisico - saldoContable) : "";
+        rows.push([
+          k,
+          t.shift || "",
+          t.cashier || "",
+          fmtDateTime(t.openedAt),
+          fmtDateTime(t.closedAt),
+          fmtMoney(t.openingTotal || 0, cur),
+          fmtMoney(t.closingTotal || 0, cur),
+          fmtMoney(totalEntries, cur),
+          fmtMoney(totalExits, cur),
+          fmtMoney(nonCashTotal, cur),
+          fmtMoney(diferencia || 0, cur)
+        ]);
+      });
+      const csv = toCsv(rows, ["Fecha","Turno","Cajero","Apertura","Cierre","Apertura efectivo","Cierre efectivo","Entradas","Salidas","No efectivo","Diferencia"]);
+      downloadCsv(`cierres_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+    }
+
+    function exportPending(){
+      if (!currentDb) return;
+      const range = ensureExportRange();
+      if (!range) return;
+      const sales = filterSalesByRange(currentDb, range);
+      const docBySaleId = {};
+      (currentDb.fiscalDocs || []).forEach(d=>{
+        if (d && d.saleId) docBySaleId[String(d.saleId)] = d;
+      });
+      const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
+      const rows = sales.filter(s=>{
+        const doc = docBySaleId[String(s.id || "")];
+        return !doc || String(doc.status || "pendiente") === "pendiente";
+      }).map(s=>{
+        return [
+          s.dateKey || "",
+          fmtDateTime(s.at),
+          s.tableId || "",
+          s.ticketId || s.id || "",
+          fmtMoney(s.total || 0, cur),
+          s.paymentMethod || "",
+        ];
+      });
+      const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Total","Medio"]);
+      downloadCsv(`pendientes_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+    }
+
+    $("btnExpSales").addEventListener("click", exportSales);
+    $("btnExpPay").addEventListener("click", exportByPayment);
+    $("btnExpBonif").addEventListener("click", exportBonifications);
+    $("btnExpAnnul").addEventListener("click", exportAnnulled);
+    $("btnExpClose").addEventListener("click", exportClosures);
+    $("btnExpPending").addEventListener("click", exportPending);
+
+    if (onState) onState((db)=>{
+      fillForm((db.settings || {}).fiscal || {});
+      renderRecon(db);
+      renderDateChips(db, "expDayChips", (val)=>{
+        if (typeof val === "string") {
+          $("expDate").value = val;
+          $("expFrom").value = "";
+          $("expTo").value = "";
+        } else if (val && val.from && val.to) {
+          $("expDate").value = "";
+          $("expFrom").value = val.from;
+          $("expTo").value = val.to;
+        }
+        updateExportGuard();
+      });
+      updateExportGuard();
+    });
+  </script>
+</body>
+</html>

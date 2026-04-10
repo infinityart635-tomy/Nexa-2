@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#ffffff"/>
+  <title>Imprimir</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    :root{ --ticket-w: 80mm; }
+    body{background:#fff; color:#000}
+    .ticket{
+      width: var(--ticket-w);
+      max-width: var(--ticket-w);
+      margin: 0 auto;
+      padding: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .line{display:flex; justify-content:space-between; gap:10px;}
+    .muted{opacity:.75}
+    .h{font-weight:900; font-size:16px; text-align:center;}
+    .sub{text-align:center; margin-top:2px}
+    .section{margin-top:10px}
+    .kitchenTitle{font-size:18px; letter-spacing:.12em; text-transform:uppercase}
+    .itemBlock{margin-top:8px}
+    .mods{margin-left:18px; font-size:12px; opacity:.85}
+    @page{ size: var(--ticket-w) auto; margin: 6mm; }
+    @media print{
+      body{margin:0;}
+      .ticket{padding: 6mm;}
+      .noPrint{display:none !important;}
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket">
+    <div class="noPrint" style="display:flex; gap:10px; justify-content:space-between; align-items:center;">
+      <a class="btn" href="/mozo.html">Volver</a>
+      <button class="btn primary" id="btnPrint" type="button">Imprimir</button>
+    </div>
+
+    <div class="hr noPrint"></div>
+
+    <div id="content" class="printMono">Cargando…</div>
+
+    <div class="hr"></div>
+    <div class="muted" id="foot"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const ticketId = params.get("id");
+    const day = params.get("day");
+    const periodId = params.get("period");
+    const from = params.get("from");
+    const to = params.get("to");
+    const kitchen = params.get("kitchen") === "1";
+    const sector = params.get("sector"); // opcional
+    const $ = (id)=>document.getElementById(id);
+
+    $("btnPrint").addEventListener("click", ()=>window.print());
+
+    function esc(s){ return String(s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+    function money(n){
+      const v = Number(n||0);
+      try{ return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(v); }
+      catch{ return "$"+Math.round(v); }
+    }
+
+    function sectorName(settings, id){
+      const secs = (((settings||{}).kitchen||{}).sectors || [{id:"general",name:"General",enabled:true}]);
+      const s = secs.find(x=>String(x.id)===String(id));
+      return s ? (s.name || s.id) : String(id||"general");
+    }
+
+    function autoPrintSoon(){ setTimeout(()=>window.print(), 350); }
+
+    function applyTicketWidth(settings){
+      const wmm = settings && settings.printing && settings.printing.ticketWidthMm ? Number(settings.printing.ticketWidthMm) : 80;
+      const root = document.documentElement;
+      if(root) root.style.setProperty("--ticket-w", (wmm === 58 ? "58mm" : "80mm"));
+    }
+
+    if(periodId){
+      fetch("/api/periodClosure?id="+encodeURIComponent(periodId)).then(r=>r.json()).then(rep=>{
+        applyTicketWidth(rep.settings || {});
+        const report = rep.report || {};
+        const totals = report.totals || {};
+        const fmt = (n)=>money(n||0);
+        const byPay = totals.byPayment || {};
+        const byChan = totals.byChannel || {};
+        const byFis = totals.byFiscal || {};
+        const adj = Array.isArray(rep.adjustments) ? rep.adjustments : [];
+        const adjSum = adj.reduce((a,x)=> a + ((x.type==="in") ? Number(x.amount||0) : -Number(x.amount||0)), 0);
+
+        const payLines = Object.keys(byPay).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byPay[k]))}</span></div>`).join("");
+        const chanLines = Object.keys(byChan).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byChan[k]))}</span></div>`).join("");
+        const fisLines = Object.keys(byFis).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byFis[k]))}</span></div>`).join("");
+        const adjLines = adj.map(a=>`<div class="line"><span>${esc(a.note||a.type||"Ajuste")}</span><span>${esc(fmt((a.type==="in"?1:-1)*Number(a.amount||0)))}</span></div>`).join("");
+
+        $("content").innerHTML = `
+          <div class="h">Cierre de período</div>
+          <div class="sub muted">${esc(rep.label || "")}</div>
+          <div class="sub muted">${esc(rep.fromKey || "")} → ${esc(rep.toKey || "")}</div>
+          <div class="hr"></div>
+          <div class="section">
+            <div class="line"><span>Ventas</span><span>${esc(totals.salesCount||0)}</span></div>
+            <div class="line"><span>Total</span><span>${esc(fmt(totals.total||0))}</span></div>
+          </div>
+          <div class="hr"></div>
+          <div class="section">
+            <div style="font-weight:800;">Por canal</div>
+            ${chanLines || '<div class="muted">—</div>'}
+          </div>
+          <div class="section">
+            <div style="font-weight:800;">Por método de pago</div>
+            ${payLines || '<div class="muted">—</div>'}
+          </div>
+          <div class="section">
+            <div style="font-weight:800;">Fiscal / Modo interno</div>
+            ${fisLines || '<div class="muted">—</div>'}
+          </div>
+          ${adj.length ? `
+            <div class="hr"></div>
+            <div class="section">
+              <div style="font-weight:800;">Ajustes</div>
+              ${adjLines}
+              <div class="line" style="font-weight:900;"><span>Total ajustado</span><span>${esc(fmt((totals.total||0) + adjSum))}</span></div>
+            </div>
+          ` : ``}
+        `;
+        $("foot").textContent = "";
+        autoPrintSoon();
+      }).catch(()=>{
+        $("content").textContent = "No se pudo cargar el cierre.";
+      });
+    } else if(from && to){
+      fetch("/api/stats?preset=range&from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to)).then(r=>r.json()).then(rep=>{
+        applyTicketWidth(rep.settings || {});
+        const totals = rep.totals || {};
+        const fmt = (n)=>money(n||0);
+        const byPay = totals.byPayment || {};
+        const byChan = totals.byChannel || {};
+        const byFis = totals.byFiscal || {};
+
+        const payLines = Object.keys(byPay).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byPay[k]))}</span></div>`).join("");
+        const chanLines = Object.keys(byChan).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byChan[k]))}</span></div>`).join("");
+        const fisLines = Object.keys(byFis).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byFis[k]))}</span></div>`).join("");
+
+        $("content").innerHTML = `
+          <div class="h">Reporte período</div>
+          <div class="sub muted">${esc(rep.fromKey || "")} → ${esc(rep.toKey || "")}</div>
+          <div class="hr"></div>
+          <div class="section">
+            <div class="line"><span>Ventas</span><span>${esc(totals.salesCount||0)}</span></div>
+            <div class="line"><span>Total</span><span>${esc(fmt(totals.total||0))}</span></div>
+          </div>
+          <div class="hr"></div>
+          <div class="section">
+            <div style="font-weight:800;">Por canal</div>
+            ${chanLines || '<div class="muted">—</div>'}
+          </div>
+          <div class="section">
+            <div style="font-weight:800;">Por método de pago</div>
+            ${payLines || '<div class="muted">—</div>'}
+          </div>
+          <div class="section">
+            <div style="font-weight:800;">Fiscal / Modo interno</div>
+            ${fisLines || '<div class="muted">—</div>'}
+          </div>
+        `;
+        $("foot").textContent = "";
+        autoPrintSoon();
+      }).catch(()=>{
+        $("content").textContent = "No se pudo cargar el reporte.";
+      });
+    } else if(day){
+      fetch("/api/dayReport?date="+encodeURIComponent(day)).then(r=>r.json()).then(rep=>{
+        applyTicketWidth(rep.settings || {});
+        const fmt = (n)=>money(n||0);
+        const totals = rep.totals || {};
+        const byPay = totals.byPayment || {};
+        const byChan = totals.byChannel || {};
+        const byFis = totals.byFiscal || {};
+        const cash = rep.cash || {};
+
+        const payLines = Object.keys(byPay).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byPay[k]))}</span></div>`).join("");
+        const chanLines = Object.keys(byChan).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byChan[k]))}</span></div>`).join("");
+        const fisLines = Object.keys(byFis).map(k=>`<div class="line"><span>${esc(k)}</span><span>${esc(fmt(byFis[k]))}</span></div>`).join("");
+
+        const top = (rep.topProducts||[]).map(p=>`<div class="line"><span>${esc(p.qty+"x "+p.name)}</span><span>${esc(fmt(p.total))}</span></div>`).join("");
+
+        const closingCash = (cash.closingCash === null || cash.closingCash === undefined) ? "—" : fmt(cash.closingCash);
+        const diff = (cash.difference === null || cash.difference === undefined) ? "—" : fmt(cash.difference);
+
+        $("content").innerHTML = `
+          <div class="h">Reporte diario</div>
+          <div class="sub muted">${esc(rep.dateKey)}</div>
+
+          <div class="hr"></div>
+
+          <div class="section">
+            <div class="line"><span>Ventas</span><span>${esc(totals.salesCount||0)}</span></div>
+            <div class="line"><span>Total</span><span>${esc(fmt(totals.total||0))}</span></div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section">
+            <div style="font-weight:800;">Por canal</div>
+            ${chanLines || '<div class="muted">—</div>'}
+          </div>
+
+          <div class="section">
+            <div style="font-weight:800;">Por método de pago</div>
+            ${payLines || '<div class="muted">—</div>'}
+          </div>
+
+          <div class="section">
+            <div style="font-weight:800;">Fiscal / Modo interno</div>
+            ${fisLines || '<div class="muted">—</div>'}
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section">
+            <div class="line"><span>Efectivo esperado</span><span>${esc(fmt(cash.expectedCash||0))}</span></div>
+            <div class="line"><span>Efectivo contado</span><span>${esc(closingCash)}</span></div>
+            <div class="line"><span>Diferencia</span><span>${esc(diff)}</span></div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section">
+            <div style="font-weight:800;">Top productos</div>
+            ${top || '<div class="muted">—</div>'}
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="muted">Abiertos: ${esc((rep.open && rep.open.tickets) || 0)} tickets · ${esc((rep.open && rep.open.tables) || 0)} mesas</div>
+        `;
+        $("foot").textContent = "";
+        autoPrintSoon();
+      }).catch(()=>{
+        $("content").textContent = "No se pudo cargar el reporte del día.";
+      });
+    } else if(ticketId){
+      fetch("/api/ticket?id="+encodeURIComponent(ticketId)).then(r=>r.json()).then(data=>{
+        const t = data.ticket;
+        const settings = data.settings || {};
+        const baseName = settings.restaurantName || "NEXA";
+        const displayName = settings.ownerDisplayName ? `${baseName} - ${settings.ownerDisplayName}` : baseName;
+        applyTicketWidth(settings);
+        const date = new Date().toLocaleString("es-AR");
+        const label = (t.channel === "salon" ? ("Mesa " + (t.tableId||"").replace("T","")) : (t.channel === "mostrador" ? "Mostrador" : "Delivery"));
+        const mozo = String(t.createdBy || "Mozo");
+        const shortId = String(t.id || "").split("-")[0].toUpperCase();
+        const ticketMeta = `${label} Â· ${mozo} Â· #${shortId}`;
+
+        let items = (t.items||[]);
+
+        if(kitchen){
+          // por sector (opcional)
+          if(sector) items = items.filter(it => String(it.sectorId||"general") === String(sector));
+        }
+
+        const subtotal = items.reduce((a,it)=>{
+          const unit = Number(it.unitPrice||0);
+          const qty = Number(it.qty||0);
+          if(!isFinite(unit) || !isFinite(qty) || qty<=0) return a;
+          const lineSubtotal = unit * qty;
+          const d = it.discount || null;
+          let lineDiscount = 0;
+          if(d && typeof d === "object"){
+            const type = String(d.type||"").toLowerCase();
+            const raw = Number(d.value||0);
+            if(Number.isFinite(raw) && raw > 0){
+              if(type === "percent") lineDiscount = Math.min(lineSubtotal, lineSubtotal * (Math.min(100, raw) / 100));
+              if(type === "amount") lineDiscount = Math.min(lineSubtotal, raw);
+            }
+          }
+          return a + Math.max(0, lineSubtotal - lineDiscount);
+        }, 0);
+        const d = t.discount || null;
+        let discountAmount = 0;
+        if(d && typeof d === "object"){
+          const type = String(d.type||"").toLowerCase();
+          const raw = Number(d.value||0);
+          if(Number.isFinite(raw) && raw > 0){
+            if(type === "percent"){
+              const pct = Math.min(100, Math.max(0, raw));
+              discountAmount = subtotal * (pct / 100);
+            } else if(type === "amount"){
+              discountAmount = raw;
+            }
+          }
+        }
+        discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
+        const total = Number.isFinite(Number(data.total)) ? Number(data.total) : Math.max(0, subtotal - discountAmount);
+
+        const itemsHtml = items.map(it=>{
+          const mods = (it.modifiers||[]).map(m=>{
+            const tag = (String(m.kind||"")==="remove") ? `Sin ${m.optionName}` : m.optionName;
+            const price = Number(m.price||0);
+            return price>0 ? `${tag} (+${money(price)})` : String(tag);
+          }).join(" · ");
+          return `
+            <div class="itemBlock">
+              <div class="line"><span>${esc(it.qty)}x ${esc(it.name)}</span>${kitchen ? "" : `<span>${esc(money((it.qty||0)*(it.unitPrice||0)))}</span>`}</div>
+              ${!kitchen && it.discount ? `<div class="line muted"><span>Desc. línea</span><span>${esc(it.discount.type)} ${esc(it.discount.value)}</span></div>` : ``}
+              ${mods ? `<div class="mods">${esc(mods)}</div>` : ``}
+            </div>
+          `;
+        }).join("");
+
+        const metaDelivery = (t.channel === "delivery") ? `
+          <div class="muted">Cliente: ${esc(t.customerName||"—")} · ${esc(t.customerPhone||"")}</div>
+          <div class="muted">Dirección: ${esc(t.customerAddress||"—")}</div>
+        ` : ``;
+
+        const head = kitchen ? `
+          <div class="h kitchenTitle">COMANDA COCINA</div>
+          <div class="sub muted">${esc(ticketMeta)} · ${esc(date)}</div>
+          <div class="sub muted">${sector?`Sector: ${esc(sectorName(settings, sector))}`:""}</div>
+        ` : `
+          <div class="h">${esc(displayName)}</div>
+          <div class="sub muted">${esc(ticketMeta)} · ${esc(date)}</div>
+          
+        `;
+
+        $("content").innerHTML = `
+          ${head}
+          <div class="hr"></div>
+          ${metaDelivery}
+          ${itemsHtml || '<div class="muted">Sin items</div>'}
+          ${kitchen ? `` : `
+            <div class="hr"></div>
+            <div class="line"><span>SUBTOTAL</span><span>${esc(money(subtotal))}</span></div>
+            ${discountAmount > 0 ? `<div class="line"><span>DESCUENTO</span><span>-${esc(money(discountAmount))}</span></div>` : ``}
+            <div class="line" style="font-weight:900;"><span>TOTAL</span><span>${esc(money(total))}</span></div>
+          `}
+          ${String(t.notes||"").trim() ? `<div class="hr"></div><div class="muted">Notas: ${esc(t.notes)}</div>` : ``}
+          <div class="muted" style="margin-top:8px;">Cocina: ${esc(t.kitchenStatus||"")}</div>
+        `;
+        $("foot").textContent = settings.footerText || "";
+        autoPrintSoon();
+      }).catch(()=>{
+        $("content").textContent = "No se pudo cargar el ticket.";
+      });
+    } else {
+      $("content").innerHTML = '<div class="muted">Falta parámetro <code>?id=</code> o <code>?day=YYYY-MM-DD</code></div>';
+    }
+  </script>
+</body>
+</html>
+

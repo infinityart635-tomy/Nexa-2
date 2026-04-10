@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA ? Compras & Proveedores</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Compras & proveedores ? stock ? cuenta corriente</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="row" style="align-items:flex-end;">
+        <div style="flex:1">
+          <div class="small">Nuevo proveedor</div>
+          <div class="row" style="margin-top:8px;">
+            <input id="sName" class="input" placeholder="Nombre" style="flex:1; min-width:180px"/>
+            <input id="sPhone" class="input" placeholder="Tel?fono (opcional)" style="flex:1; min-width:160px"/>
+            <input id="sNote" class="input" placeholder="Nota" style="flex:2; min-width:200px"/>
+            <button id="btnAddSup" class="btn primary" type="button">Agregar</button>
+          </div>
+        </div>
+        <div class="badge2">Estado <strong id="wsStatus">?</strong></div>
+      </div>
+      <div class="mini" style="margin-top:10px;">Las compras aumentan stock y suman deuda al proveedor (cuenta corriente).</div>
+    </section>
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Compra</h2>
+          <p class="hint">Cargar una compra (ingredientes)</p>
+        </div>
+      </div>
+      <div class="panelBody">
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <div class="small">Proveedor</div>
+            <select id="supSel" class="input"></select>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <div class="small">Ingrediente</div>
+            <select id="ingSel" class="input"></select>
+          </div>
+          <div style="width:140px">
+            <div class="small">Cantidad</div>
+            <input id="qty" class="input" type="number" inputmode="decimal" placeholder="0"/>
+          </div>
+          <div style="width:160px">
+            <div class="small">Costo/u</div>
+            <input id="unitCost" class="input" type="number" inputmode="decimal" placeholder="0"/>
+          </div>
+          <button id="btnAddItem" class="btn" type="button">A?adir</button>
+        </div>
+
+        <div class="hr"></div>
+        <div id="cart" class="small">?</div>
+
+        <div class="row" style="margin-top:10px;">
+          <input id="pNote" class="input" placeholder="Nota (opcional)" style="flex:2"/>
+          <button id="btnCreate" class="btn primary" type="button" style="flex:1">Crear compra</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>Cuenta corriente proveedores</h2>
+          <p class="hint">Saldos y pagos</p>
+        </div>
+      </div>
+      <div class="panelBody" id="accounts">?</div>
+    </section>
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="panelHead">
+        <div>
+          <h2>?ltimas compras</h2>
+          <p class="hint">Historial</p>
+        </div>
+      </div>
+      <div class="panelBody" id="purchases">?</div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+    const $ = (id)=>document.getElementById(id);
+    connect("admin", "Admin");
+
+    let DB=null;
+    let cart=[];
+
+    function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+
+    function renderSelectors(){
+      const sups = (DB.people && DB.people.suppliers) ? DB.people.suppliers.filter(s=>s.active!==false) : [];
+      $("supSel").innerHTML = sups.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("") || '<option value="">(sin proveedor)</option>';
+
+      const ings = (DB.inventory && DB.inventory.ingredients) ? DB.inventory.ingredients : [];
+      $("ingSel").innerHTML = ings.map(i=>`<option value="${esc(i.id)}">${esc(i.name)} (${esc(i.unit||"u")})</option>`).join("");
+    }
+
+    function renderCart(){
+      if(!cart.length){ $("cart").textContent = "?"; return; }
+      const total = cart.reduce((a,it)=>a + it.qty*it.unitCost, 0);
+      $("cart").innerHTML = cart.map((it, idx)=>{
+        return `<div style="display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--line);">
+          <div>${esc(it.ingredientId)} ? ${esc(it.qty)} ? ${esc(it.unitCost)}</div>
+          <button class="btn" type="button" data-rm="${idx}">Quitar</button>
+        </div>`;
+      }).join("") + `<div style="margin-top:8px; font-weight:900;">Total estimado: ${esc(money(total))}</div>`;
+
+      document.querySelectorAll("[data-rm]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const i = Number(b.getAttribute("data-rm"));
+          cart.splice(i,1);
+          renderCart();
+        });
+      });
+    }
+
+    $("btnAddSup").addEventListener("click", ()=>{
+      const name = ($("sName").value||"").trim();
+      if(!name) return toast("Pon un nombre");
+      sendAction("people:addSupplier", { name, phone: ($("sPhone").value||"").trim(), note: ($("sNote").value||"").trim() });
+      $("sName").value=""; $("sPhone").value=""; $("sNote").value="";
+      toast("Proveedor agregado");
+    });
+
+    $("btnAddItem").addEventListener("click", ()=>{
+      const ingredientId = $("ingSel").value;
+      const qty = num($("qty").value);
+      const unitCost = num($("unitCost").value);
+      if(!ingredientId || qty<=0) return toast("Cantidad inv?lida");
+      cart.push({ ingredientId, qty, unitCost });
+      $("qty").value=""; $("unitCost").value="";
+      renderCart();
+    });
+
+    $("btnCreate").addEventListener("click", ()=>{
+      if(!cart.length) return toast("No hay items");
+      sendAction("purchases:create", {
+        supplierId: $("supSel").value,
+        items: cart,
+        note: ($("pNote").value||"").trim()
+      });
+      cart = [];
+      $("pNote").value="";
+      renderCart();
+      toast("Compra creada");
+    });
+
+    function renderAccounts(){
+      const sups = (DB.people && DB.people.suppliers) ? DB.people.suppliers.filter(s=>s.active!==false) : [];
+      const accs = (DB.accounts && DB.accounts.suppliers) ? DB.accounts.suppliers : [];
+      const mapSup = new Map(sups.map(s=>[s.id,s]));
+      $("accounts").innerHTML = accs.filter(a=>mapSup.has(a.personId)).slice(0,50).map(a=>{
+        const s = mapSup.get(a.personId);
+        const bal = Number(a.balance||0);
+        return `
+          <div class="card" style="margin:0 0 10px 0;">
+            <div class="row" style="align-items:center;">
+              <div style="flex:1">
+                <div style="font-weight:900;">${esc(s.name)}</div>
+                <div class="small">Saldo: <strong>${esc(money(bal))}</strong></div>
+              </div>
+              <input class="input" data-pay="${esc(s.id)}" type="number" inputmode="decimal" placeholder="Pago" style="width:160px"/>
+              <button class="btn" data-paybtn="${esc(s.id)}" type="button">Registrar pago</button>
+            </div>
+          </div>
+        `;
+      }).join("") || "?";
+
+      document.querySelectorAll("[data-paybtn]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const sid = btn.getAttribute("data-paybtn");
+          const inp = document.querySelector(`[data-pay="${CSS.escape(sid)}"]`);
+          const amt = num(inp.value);
+          if(amt<=0) return toast("Importe inv?lido");
+          sendAction("accounts:supplierPayment", { supplierId: sid, amount: amt, note: "Pago" });
+          inp.value="";
+          toast("Pago registrado");
+        });
+      });
+    }
+
+    function renderPurchases(){
+      const sups = (DB.people && DB.people.suppliers) ? DB.people.suppliers : [];
+      const smap = new Map(sups.map(s=>[s.id,s]));
+      const purchases = (DB.purchases||[]).slice(0,25);
+      $("purchases").innerHTML = purchases.map(p=>{
+        const s = smap.get(p.supplierId);
+        const title = (s ? s.name : "(sin proveedor)") + " ? " + money(p.total||0);
+        const items = (p.items||[]).slice(0,10).map(it=>`<div class="small">${esc(it.ingredientId)} ? ${esc(it.qty)} ? ${esc(it.unitCost)}</div>`).join("");
+        return `<div class="card" style="margin:0 0 10px 0;">
+          <div style="font-weight:900;">${esc(title)}</div>
+          <div class="small">${esc(new Date(p.at).toLocaleString("es-AR"))} ? ${esc(p.note||"")}</div>
+          <div style="margin-top:6px;">${items}</div>
+        </div>`;
+      }).join("") || "?";
+    }
+
+    onState((db, ok)=>{
+      $("wsStatus").textContent = ok ? "conectado" : "offline";
+      DB=db;
+      if(!DB) return;
+      renderSelectors();
+      renderCart();
+      renderAccounts();
+      renderPurchases();
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

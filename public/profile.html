@@ -1,0 +1,1565 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Perfil</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    body[data-restaurant-active="0"] .restaurantOnlyNav{display:none !important;}
+    body[data-restaurant-active="1"] .accountOnlyNav{display:none !important;}
+    .profileGrid{
+      display:grid;
+      gap:18px;
+      grid-template-columns:minmax(300px,380px) minmax(0,1fr);
+      width:100%;
+      height:100%;
+      min-height:0;
+      overflow:hidden;
+      align-items:stretch;
+    }
+    main.wrap.profileGrid{
+      max-width:none;
+      width:100%;
+      padding:
+        clamp(14px, 2vw, 22px)
+        clamp(18px, 2.4vw, 34px)
+        clamp(18px, 2vw, 26px);
+    }
+    @media (max-width: 1020px){ .profileGrid{grid-template-columns:minmax(0,1fr); overflow:auto;} }
+    .profileGrid > aside,
+    .profileGrid > section{min-height:0;}
+    .stack{display:grid; gap:12px;}
+    .summaryCard,
+    .groupCard{
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:
+        linear-gradient(180deg, rgba(24,26,32,.98), rgba(12,14,18,.98)),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      box-shadow:0 18px 40px rgba(0,0,0,.24);
+      position:relative;
+      overflow:hidden;
+    }
+    .summaryCard::before,
+    .groupCard::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto;
+      height:3px;
+      background:linear-gradient(90deg, rgba(120,240,190,.72), rgba(120,220,255,.36));
+    }
+    .summaryCard{
+      padding:14px;
+      position:sticky;
+      top:0;
+      height:100%;
+      min-height:0;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    @media (max-width: 1020px){ .summaryCard{position:static; height:auto; overflow:visible;} }
+    .groupCard{
+      padding:14px;
+      display:grid;
+      gap:14px;
+      align-content:start;
+      min-height:0;
+    }
+    .eyebrow{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);}
+    .title{margin:4px 0 0; font-size:24px; line-height:1.08; font-weight:900;}
+    .groupTitle{margin:4px 0 0; font-size:22px; line-height:1.08; font-weight:900;}
+    .sub{margin-top:6px; color:var(--muted); line-height:1.4;}
+    .metaList{display:grid; gap:8px; margin-top:14px;}
+    .metaBox{border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:10px; background:rgba(255,255,255,.02);}
+    .metaLabel{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);}
+    .metaValue{margin-top:6px; font-weight:800; line-height:1.4;}
+    .buttonRow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+    .navButtonGrid{
+      display:grid;
+      gap:8px;
+      margin-top:14px;
+    }
+    .sectionHead{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;}
+    .sectionHead h2{margin:0; font-size:20px;}
+    .sectionHead p{display:none;}
+    .groupHead{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;}
+    .msgBox{display:none; margin-top:10px; padding:9px 11px; border-radius:8px; border:1px solid rgba(255,255,255,.08); line-height:1.4;}
+    .msgBox.show{display:block;}
+    .msgBox.error{border-color:rgba(255,110,110,.34); background:rgba(120,28,28,.18); color:#ffd7d7;}
+    .msgBox.success{border-color:rgba(120,240,190,.34); background:rgba(18,86,52,.18); color:#d9ffe9;}
+    .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:12px;}
+    @media (max-width: 720px){ .formGrid{grid-template-columns:minmax(0,1fr);} }
+    .field{display:flex; flex-direction:column; gap:6px;}
+    .field.full{grid-column:1 / -1;}
+    .profileGrid .small{
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(241,241,244,.64);
+    }
+    .profileGrid .input{
+      border-radius:8px;
+      padding:12px 13px;
+      background:rgba(0,0,0,.22);
+      border-color:rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .profileGrid select.input{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right:42px;
+      color:var(--text);
+      background:
+        linear-gradient(45deg, transparent 50%, rgba(241,241,244,.72) 50%),
+        linear-gradient(135deg, rgba(241,241,244,.72) 50%, transparent 50%),
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.22));
+      background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px),
+        0 0;
+      background-size:6px 6px, 6px 6px, 100% 100%;
+      background-repeat:no-repeat;
+    }
+    .profileGrid select.input option{
+      color:var(--text);
+      background:#161a1e;
+    }
+    .profileGrid .input:focus{
+      border-color:rgba(120,240,190,.45);
+      box-shadow: 0 0 0 3px rgba(120,240,190,.10), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .fieldHint{font-size:12px; color:var(--muted); line-height:1.38;}
+    .list{display:grid; gap:10px; margin-top:12px;}
+    .scrollList{
+      max-height:320px;
+      overflow:auto;
+      padding-right:2px;
+      align-content:start;
+    }
+    .itemCard{border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:12px; background:rgba(255,255,255,.02);}
+    .ownedCommerceCard{
+      border-color:rgba(120,240,190,.34);
+      border-radius:18px;
+      padding:16px;
+      background:
+        radial-gradient(circle at top left, rgba(120,240,190,.16), transparent 36%),
+        radial-gradient(circle at bottom right, rgba(120,220,255,.10), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+      box-shadow:0 18px 36px rgba(0,0,0,.22);
+    }
+    .ownedCommerceHeader{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:12px;
+    }
+    .ownedCommerceAvatar{
+      width:62px;
+      height:62px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      font-size:28px;
+      font-weight:900;
+      color:#effff8;
+      border:1px solid rgba(120,240,190,.34);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(120,240,190,.28), transparent 52%),
+        linear-gradient(135deg, rgba(120,240,190,.16), rgba(120,220,255,.14));
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .ownedCommerceEyebrow{
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(120,240,190,.82);
+      margin-bottom:6px;
+    }
+    .ownedCommerceTitle{
+      font-size:18px;
+      line-height:1.15;
+      font-weight:900;
+    }
+    .ownedCommerceMeta{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .ownedCommerceStat{
+      display:grid;
+      gap:4px;
+      padding:11px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:12px;
+    }
+    .ownedCommerceStat strong{
+      font-size:18px;
+      color:#f4fffa;
+    }
+    .ownedCommerceActions{
+      margin-top:12px;
+      display:flex;
+      justify-content:flex-start;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .ownedCommerceCard .btn.primary{
+      min-width:220px;
+      padding:12px 16px;
+      font-size:12px;
+    }
+    .restaurantDeleteBtn{
+      border-color:rgba(255,110,110,.24) !important;
+      color:#ffd8d8;
+      background:rgba(120,24,24,.12) !important;
+    }
+    .deleteModal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(5,8,12,.56);
+      backdrop-filter:blur(8px);
+      z-index:120;
+    }
+    .deleteModal.open{
+      display:flex;
+    }
+    .deleteModalCard{
+      width:min(560px, 100%);
+      border-radius:20px;
+      border:1px solid rgba(255,110,110,.24);
+      background:
+        radial-gradient(circle at top right, rgba(255,110,110,.12), transparent 34%),
+        linear-gradient(180deg, rgba(26,18,20,.98), rgba(18,12,14,.98));
+      box-shadow:0 28px 60px rgba(0,0,0,.34);
+      padding:22px;
+      display:grid;
+      gap:14px;
+    }
+    .deleteModalTitle{
+      font-size:24px;
+      line-height:1.08;
+      font-weight:900;
+    }
+    .deleteModalActions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .trashPanelGrid{
+      display:grid;
+      gap:12px;
+    }
+    .trashCard{
+      border:1px solid rgba(255,110,110,.18);
+      border-radius:14px;
+      padding:14px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:8px;
+    }
+    @media (max-width: 860px){
+      .ownedCommerceHeader{
+        grid-template-columns:auto minmax(0,1fr);
+      }
+      .ownedCommerceMeta{
+        grid-template-columns:1fr;
+      }
+    }
+    .itemTop{display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap;}
+    .itemTitle{font-size:16px; font-weight:800; line-height:1.22;}
+    .itemSub{margin-top:4px; color:var(--muted); line-height:1.35; font-size:13px;}
+    .itemMeta{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+    .tag{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03); font-size:12px;}
+    .tag.ok{border-color:rgba(120,240,190,.35); background:rgba(120,240,190,.10); color:#d9ffe9;}
+    .tag.warn{border-color:rgba(255,200,120,.35); background:rgba(255,200,120,.10); color:#ffe8c7;}
+    .emptyState{margin-top:12px; padding:12px; border:1px dashed rgba(255,255,255,.14); border-radius:8px; color:var(--muted); font-size:13px;}
+    .searchRow{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; margin-top:12px;}
+    @media (max-width: 720px){ .searchRow{grid-template-columns:minmax(0,1fr);} }
+    .profileGrid .btn{
+      border-radius:8px;
+      padding:10px 14px;
+      font-size:11px;
+    }
+    .profileGrid .btn.primary{
+      border-color:rgba(120,240,190,.42);
+      background:linear-gradient(180deg, rgba(120,240,190,.18), rgba(120,240,190,.08));
+      color:#ecfff6;
+    }
+    .profileGrid .btn.danger{
+      border-color:rgba(255,110,110,.36);
+      background:linear-gradient(180deg, rgba(255,110,110,.16), rgba(255,110,110,.06));
+      color:#ffe3e3;
+    }
+    .profileGrid .btn.danger:hover{
+      background:linear-gradient(180deg, rgba(255,110,110,.22), rgba(255,110,110,.09));
+    }
+    .profileNavBtn{
+      justify-content:space-between;
+      width:100%;
+      text-align:left;
+      font-size:12px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      background:rgba(255,255,255,.03);
+    }
+    .navBtnText{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .iconOnlyBtn{
+      justify-content:center;
+      width:46px;
+      height:46px;
+      min-width:46px;
+      min-height:46px;
+      gap:0;
+      padding:0;
+      position:relative;
+      border-radius:12px;
+    }
+    .iconOnlyBtn .trashIcon{
+      font-size:24px;
+      line-height:1;
+    }
+    .navBadge{
+      min-width:20px;
+      height:20px;
+      padding:0 6px;
+      border-radius:999px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-size:10px;
+      font-weight:800;
+      border:1px solid rgba(255,210,90,.48);
+      background:#f7c948;
+      color:#231800;
+      position:absolute;
+      top:-6px;
+      right:-6px;
+      box-shadow:0 10px 18px rgba(0,0,0,.22);
+    }
+    .navBadge.show{
+      display:inline-flex;
+    }
+    .profileNavBtn.dangerish{
+      border-color:rgba(255,110,110,.22);
+      background:linear-gradient(180deg, rgba(255,110,110,.07), rgba(255,110,110,.02));
+    }
+    .profileNavBtn.active{
+      border-color:rgba(120,220,255,.36);
+      background:linear-gradient(180deg, rgba(120,220,255,.16), rgba(120,220,255,.06));
+      color:#f2fbff;
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
+    }
+    .profileNavBtn.emphasis{
+      border-color:rgba(120,240,190,.34);
+      background:
+        radial-gradient(circle at 12% 50%, rgba(120,240,190,.16), transparent 40%),
+        linear-gradient(180deg, rgba(120,240,190,.12), rgba(120,240,190,.05));
+      color:#ecfff6;
+    }
+    .profileNavBtn.emphasis.active{
+      border-color:rgba(120,240,190,.5);
+      background:
+        radial-gradient(circle at 12% 50%, rgba(120,240,190,.22), transparent 42%),
+        linear-gradient(180deg, rgba(120,240,190,.22), rgba(120,220,255,.08));
+      box-shadow:0 14px 30px rgba(0,0,0,.22);
+    }
+    .groupGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      min-width:0;
+    }
+    .subSection{
+      min-width:0;
+      display:grid;
+      gap:12px;
+      align-content:start;
+    }
+    .subSection.wide{grid-column:1 / -1;}
+    .commerceLayout{
+      display:grid;
+      gap:18px;
+      min-width:0;
+      align-items:start;
+    }
+    .commerceTop{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      min-width:0;
+    }
+    .commerceBottom{
+      display:grid;
+      gap:16px;
+      min-width:0;
+    }
+    .commerceSearchRow{
+      display:grid;
+      grid-template-columns:minmax(240px, 1.1fr) minmax(0, .9fr);
+      gap:16px;
+      align-items:start;
+    }
+    .subSectionHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .subSectionTitle{
+      margin:0;
+      font-size:16px;
+      line-height:1.2;
+      font-weight:800;
+    }
+    .subSection .msgBox,
+    .subSection .list,
+    .subSection .searchRow,
+    .groupCard > .msgBox,
+    .groupCard > .formGrid{
+      margin-top:0;
+    }
+    .accountOnlyNav .pill{
+      cursor:default;
+      pointer-events:none;
+      opacity:.92;
+    }
+    .mainStack{
+      display:block;
+      overflow:auto;
+      min-height:0;
+      padding-right:2px;
+    }
+    .summaryTop{
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+    .summaryBottom{
+      margin-top:auto;
+      display:grid;
+      gap:10px;
+      align-content:end;
+      padding-top:6px;
+    }
+    .profilePanel{
+      display:none;
+    }
+    .profilePanel.active{
+      display:grid;
+      gap:18px;
+      align-content:start;
+    }
+    .backRow{
+      display:flex;
+      justify-content:flex-start;
+    }
+    .backBtn{min-width:120px;}
+    .createLaunchCard{
+      border:1px dashed rgba(120,240,190,.28);
+      border-radius:16px;
+      padding:18px;
+      background:
+        radial-gradient(circle at top left, rgba(120,240,190,.12), transparent 38%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      display:grid;
+      gap:12px;
+      align-content:start;
+    }
+    .createWizard{
+      display:grid;
+      gap:18px;
+      align-content:start;
+    }
+    .wizardSteps{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+    .wizardStep{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(255,255,255,.025);
+      display:grid;
+      gap:6px;
+    }
+    .wizardStep.active{
+      border-color:rgba(120,240,190,.34);
+      background:
+        radial-gradient(circle at top left, rgba(120,240,190,.12), transparent 48%),
+        rgba(255,255,255,.03);
+    }
+    .wizardStepNum{
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      font-size:11px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+    }
+    .wizardStep.active .wizardStepNum{
+      border-color:rgba(120,240,190,.34);
+      background:rgba(120,240,190,.14);
+      color:#ecfff6;
+    }
+    .wizardStepTitle{
+      font-size:14px;
+      font-weight:800;
+    }
+    .wizardStepText{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .wizardInfoGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .wizardInfoCard{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:14px;
+      background:rgba(255,255,255,.025);
+      display:grid;
+      gap:8px;
+    }
+    .wizardInfoCard strong{
+      font-size:14px;
+    }
+    .wizardInfoCard span{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+    .wizardReview{
+      border:1px solid rgba(120,220,255,.18);
+      border-radius:16px;
+      padding:16px;
+      background:
+        radial-gradient(circle at top right, rgba(120,220,255,.10), transparent 34%),
+        rgba(255,255,255,.02);
+      display:grid;
+      gap:12px;
+    }
+    .wizardReviewName{
+      font-size:24px;
+      font-weight:900;
+      line-height:1.1;
+    }
+    .branchPanelGrid{
+      display:grid;
+      gap:18px;
+    }
+    .branchOptionList{
+      display:grid;
+      gap:10px;
+    }
+    .branchOption{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:14px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      background:rgba(255,255,255,.025);
+    }
+    .branchOptionTitle{
+      font-size:16px;
+      font-weight:800;
+    }
+    .branchCreateModal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(5,8,12,.52);
+      backdrop-filter:blur(8px);
+      z-index:120;
+    }
+    .branchCreateModal.open{
+      display:flex;
+    }
+    .branchCreateCard{
+      width:min(560px, 100%);
+      display:grid;
+      gap:12px;
+      padding:22px;
+      border:1px solid rgba(120,220,255,.24);
+      border-radius:20px;
+      background:
+        radial-gradient(circle at top right, rgba(120,220,255,.10), transparent 34%),
+        linear-gradient(180deg, rgba(18,22,28,.98), rgba(12,14,18,.98));
+      box-shadow:0 28px 60px rgba(0,0,0,.34);
+    }
+    .passwordStep{display:none; gap:12px; align-content:start;}
+    .passwordStep.active{display:grid;}
+    .profileSection.accountCard{min-height:0;}
+    .profileSection.gestionCard{min-height:0;}
+    @media (min-width: 1240px){
+      .profilePanel.restaurantsPanel{
+        grid-template-columns:minmax(0,1fr);
+        align-items:start;
+      }
+    }
+    @media (min-width: 1320px){
+      .formGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+      .field.full{grid-column:1 / -1;}
+    }
+    @media (max-width: 1180px){
+      .groupGrid{grid-template-columns:1fr;}
+      .subSection.wide{grid-column:auto;}
+      .commerceTop,
+      .commerceSearchRow,
+      .wizardInfoGrid,
+      .wizardSteps{grid-template-columns:1fr;}
+    }
+    @media (max-height: 860px){
+      .title{font-size:22px;}
+      .groupTitle{font-size:20px;}
+      .summaryCard,.groupCard{padding:12px;}
+      .metaList,.list,.buttonRow,.mainStack,.groupGrid{gap:10px;}
+    }
+  </style>
+</head>
+<body data-restaurant-active="0">
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Perfil</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup accountOnlyNav">
+          <div class="navLabel">Cuenta</div>
+          <span class="pill">Perfil</span>
+        </div>
+        <div class="navGroup restaurantOnlyNav">
+          <div class="navLabel">Operacion</div>
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+        </div>
+        <div class="navGroup restaurantOnlyNav">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+        </div>
+        <div class="navGroup restaurantOnlyNav">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_stats.html">Estadisticas</a>
+        </div>
+        <div class="navGroup navProfile navPerfil restaurantOnlyNav">
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap fullWidth profileGrid">
+    <aside class="stack">
+      <section class="summaryCard">
+        <div class="summaryTop">
+          <div class="eyebrow">Cuenta</div>
+          <h1 class="title" id="userTitle">Cargando...</h1>
+          <div class="sub" id="userSub">Cargando...</div>
+
+          <div class="navButtonGrid">
+            <button id="btnViewAccount" class="btn profileNavBtn" type="button">Datos de la cuenta</button>
+            <button id="btnViewRestaurants" class="btn profileNavBtn emphasis active" type="button">Restaurantes</button>
+            <button id="btnViewTrash" class="btn profileNavBtn dangerish iconOnlyBtn" type="button" title="Papelera" aria-label="Papelera"><span class="trashIcon">🗑</span><span class="navBadge" id="trashCountBadge"></span></button>
+          </div>
+
+          <div class="msgBox" id="sideMsg"></div>
+        </div>
+
+        <div class="summaryBottom">
+          <div class="buttonRow">
+            <button id="btnLeaveRestaurant" class="btn danger" type="button">Salir del comercio</button>
+            <button id="btnLogout" class="btn danger" type="button">Cerrar sesion</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="stack mainStack">
+      <section class="profilePanel accountPanel" data-panel="account">
+        <section class="groupCard profileSection accountCard">
+          <div class="groupHead">
+            <div>
+              <div class="eyebrow">Cuenta</div>
+              <h2 class="groupTitle">Datos</h2>
+            </div>
+          </div>
+          <div class="msgBox" id="accountMsg"></div>
+          <div class="formGrid">
+            <div class="field full">
+              <label class="small" for="accountUsername">Nombre / usuario</label>
+              <input id="accountUsername" class="input" autocomplete="username" placeholder="Tu usuario"/>
+            </div>
+            <div class="field full">
+              <label class="small" for="accountEmail">Mail</label>
+              <input id="accountEmail" class="input" type="email" autocomplete="email" placeholder="mail@ejemplo.com"/>
+            </div>
+          </div>
+          <div class="buttonRow">
+            <button id="btnSaveAccount" class="btn primary" type="button">Guardar</button>
+            <button id="btnOpenPasswordPanel" class="btn" type="button">Cambiar contrasena</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="profilePanel passwordPanel" data-panel="password">
+        <section class="groupCard profileSection">
+          <div class="backRow">
+            <button id="btnBackFromPassword" class="btn backBtn" type="button">Volver</button>
+          </div>
+          <div class="groupHead">
+            <div>
+              <div class="eyebrow">Seguridad</div>
+              <h2 class="groupTitle">Cambiar contrasena</h2>
+            </div>
+          </div>
+          <div class="msgBox" id="passwordMsg"></div>
+          <div id="passwordVerifyStep" class="passwordStep active">
+            <div class="formGrid">
+              <div class="field full">
+                <label class="small" for="passwordRecoveryQuestion">Pregunta elegida</label>
+                <input id="passwordRecoveryQuestion" class="input" readonly/>
+              </div>
+              <div class="field full">
+                <label class="small" for="passwordRecoveryAnswer">Respuesta</label>
+                <input id="passwordRecoveryAnswer" class="input" autocomplete="off" placeholder="Escribe tu respuesta"/>
+              </div>
+            </div>
+            <div class="buttonRow">
+              <button id="btnVerifyPassword" class="btn primary" type="button">Verificar</button>
+            </div>
+          </div>
+          <div id="passwordChangeStep" class="passwordStep">
+            <div class="formGrid">
+              <div class="field">
+                <label class="small" for="passwordNew">Nueva contrasena</label>
+                <input id="passwordNew" class="input" type="password" autocomplete="new-password" placeholder="Nueva contrasena"/>
+              </div>
+              <div class="field">
+                <label class="small" for="passwordConfirm">Repetir contrasena</label>
+                <input id="passwordConfirm" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
+              </div>
+            </div>
+            <div class="buttonRow">
+              <button id="btnSavePassword" class="btn primary" type="button">Guardar contrasena</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="profilePanel restaurantsPanel active" data-panel="restaurants">
+        <section class="groupCard profileSection gestionCard">
+          <div class="groupHead">
+            <div>
+              <div class="eyebrow">Restaurantes</div>
+              <h2 class="groupTitle">Restaurantes</h2>
+            </div>
+          </div>
+          <div class="commerceLayout">
+            <div class="commerceTop">
+              <section class="subSection">
+                <div class="subSectionHead">
+                  <h3 class="subSectionTitle">Crear restaurante</h3>
+                </div>
+                <div class="createLaunchCard">
+                  <strong>Inicia un restaurante nuevo</strong>
+                  <span class="fieldHint">Te voy a llevar a una pantalla guiada para elegir el nombre, revisar lo que se crea y confirmar antes de guardar.</span>
+                  <div class="buttonRow">
+                    <button id="btnOpenCreateRestaurant" class="btn primary" type="button">Crear restaurante</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="subSection">
+                <div class="subSectionHead">
+                  <h3 class="subSectionTitle">Tus restaurantes</h3>
+                </div>
+                <div class="list scrollList" id="ownedRestaurants"></div>
+              </section>
+            </div>
+
+          </div>
+        </section>
+      </section>
+
+      <section class="profilePanel createRestaurantPanel" data-panel="createRestaurant">
+        <section class="groupCard profileSection">
+          <div class="backRow">
+            <button id="btnBackFromCreateRestaurant" class="btn backBtn" type="button">Volver</button>
+          </div>
+          <div class="groupHead">
+            <div>
+              <div class="eyebrow">Restaurantes</div>
+              <h2 class="groupTitle">Crear restaurante</h2>
+            </div>
+          </div>
+          <div class="msgBox" id="createMsg"></div>
+          <div class="createWizard">
+            <div class="wizardSteps">
+              <div class="wizardStep active">
+                <div class="wizardStepNum">1</div>
+                <div class="wizardStepTitle">Nombre</div>
+                <div class="wizardStepText">Elegí cómo se va a llamar tu restaurante dentro del sistema.</div>
+              </div>
+              <div class="wizardStep active">
+                <div class="wizardStepNum">2</div>
+                <div class="wizardStepTitle">Revisión</div>
+                <div class="wizardStepText">Confirmás el nombre y ves qué queda listo apenas lo creás.</div>
+              </div>
+              <div class="wizardStep active">
+                <div class="wizardStepNum">3</div>
+                <div class="wizardStepTitle">Siguiente etapa</div>
+                <div class="wizardStepText">Después podés entrar y completar carta, caja, fiscal y demás módulos.</div>
+              </div>
+            </div>
+
+            <div class="formGrid">
+              <div class="field full">
+                <label class="small" for="createRestaurantName">Nombre del restaurante</label>
+                <input id="createRestaurantName" class="input" placeholder="Ej: Maxirest Centro"/>
+                <div class="fieldHint">Usá un nombre claro. Si ya existe uno igual, el sistema no lo va a dejar crear.</div>
+              </div>
+            </div>
+
+            <div class="wizardReview">
+              <div class="eyebrow">Vista previa</div>
+              <div class="wizardReviewName" id="createRestaurantPreview">Tu restaurante</div>
+              <div class="wizardInfoGrid">
+                <div class="wizardInfoCard">
+                  <strong>Se crea ahora</strong>
+                  <span>Tu restaurante queda registrado a tu nombre y aparece en la lista de tus restaurantes.</span>
+                </div>
+                <div class="wizardInfoCard">
+                  <strong>Lo configuras después</strong>
+                  <span>Cuando quieras podés entrar para cargar productos, QR, caja, fiscal y permisos del equipo.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="buttonRow">
+              <button id="btnCreateRestaurant" class="btn primary" type="button">Confirmar creacion</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="profilePanel trashPanel" data-panel="trash">
+        <section class="groupCard profileSection">
+          <div class="groupHead">
+            <div>
+              <div class="eyebrow">Restaurantes</div>
+              <h2 class="groupTitle">Papelera</h2>
+            </div>
+          </div>
+          <div class="msgBox" id="trashMsg"></div>
+          <div class="trashPanelGrid" id="trashedRestaurants"></div>
+        </section>
+      </section>
+
+      <section class="profilePanel branchPanel" data-panel="branch">
+        <section class="groupCard profileSection">
+          <div class="backRow">
+            <button id="btnBackFromBranchPanel" class="btn backBtn" type="button">Volver</button>
+          </div>
+          <div class="groupHead">
+            <div>
+              <div class="eyebrow">Sucursal</div>
+              <h2 class="groupTitle" id="branchPanelTitle">Elegir sucursal</h2>
+            </div>
+            <div class="buttonRow">
+              <button id="btnOpenCreateBranchModal" class="btn primary" type="button">Crear sucursal</button>
+            </div>
+          </div>
+          <div class="msgBox" id="branchMsg"></div>
+          <div class="branchPanelGrid">
+            <section class="subSection">
+              <div class="subSectionHead">
+                <h3 class="subSectionTitle">Sucursales disponibles</h3>
+              </div>
+              <div class="branchOptionList" id="branchList"></div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <div id="deleteRestaurantModal" class="deleteModal" aria-hidden="true">
+      <div class="deleteModalCard">
+        <div class="eyebrow">Papelera</div>
+        <div class="deleteModalTitle">Enviar restaurante a papelera</div>
+        <div class="fieldHint">Escribe <strong id="deleteRestaurantNameLabel">el nombre del restaurante</strong> para confirmar. Se eliminara automaticamente en 3 dias si no lo restauras.</div>
+        <div class="msgBox" id="deleteRestaurantMsg"></div>
+        <div class="field">
+          <label class="small" for="deleteRestaurantConfirmInput">Confirmacion</label>
+          <input id="deleteRestaurantConfirmInput" class="input" placeholder="Nombre del restaurante"/>
+        </div>
+        <div class="deleteModalActions">
+          <button id="btnCancelDeleteRestaurant" class="btn" type="button">Cancelar</button>
+          <button id="btnConfirmDeleteRestaurant" class="btn danger" type="button">Mover a papelera</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="branchCreateModal" class="branchCreateModal" aria-hidden="true">
+      <div class="branchCreateCard">
+        <div class="eyebrow">Sucursal</div>
+        <div class="deleteModalTitle">Crear sucursal</div>
+        <div class="fieldHint">Escribe el nombre de la sucursal para <strong id="branchRestaurantNameLabel">este restaurante</strong>.</div>
+        <div class="msgBox" id="branchCreateMsg"></div>
+        <div class="field">
+          <label class="small" for="branchName">Nombre de la sucursal</label>
+          <input id="branchName" class="input" placeholder="Nombre de la sucursal"/>
+        </div>
+        <div class="deleteModalActions">
+          <button id="btnCancelCreateBranchModal" class="btn" type="button">Cancelar</button>
+          <button id="btnCreateBranch" class="btn primary" type="button">Crear sucursal</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const params = new URLSearchParams(location.search);
+    const next = params.get("next") || sessionStorage.getItem("nexa_next") || "";
+    const state = {
+      me: null,
+      profile: null,
+      passwordVerified: false,
+      deleteRestaurantId: "",
+      trashedRestaurants: [],
+      branchRestaurantId: "",
+      branchRestaurantRole: "",
+      branchRestaurantName: "",
+      branches: [],
+    };
+    if (next) sessionStorage.setItem("nexa_next", next);
+
+    function loginUrl() {
+      return next ? `/login.html?next=${encodeURIComponent(next)}` : "/login.html";
+    }
+
+    function defaultPathForRole(role) {
+      const nextPath = String(next || "");
+      if (role === "mozo") {
+        return nextPath && nextPath.toLowerCase().startsWith("/mozo") ? nextPath : "/mozo.html";
+      }
+      return nextPath || "/salon_pc.html";
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function restaurantEmojiSeed(value) {
+      const emojis = ["🍽️", "🍕", "🍔", "🍣", "🍜", "🌮", "🥩", "🍝", "🍗", "🥘", "🍤", "🥪"];
+      const text = String(value || "");
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) hash = ((hash * 31) + text.charCodeAt(i)) >>> 0;
+      return emojis[hash % emojis.length];
+    }
+
+    function roleText(role, restaurantRole, restaurantName) {
+      if (!role || role === "account") return "Cuenta";
+      const label = role === "admin" ? "Restaurante" : "Mozo";
+      return restaurantName ? `${label} en ${restaurantName}` : label;
+    }
+
+    function message(elId, text, kind) {
+      const el = $(elId);
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = "msgBox" + (text ? " show" : "") + (kind ? ` ${kind}` : "");
+    }
+
+    function renderPasswordSteps() {
+      $("passwordVerifyStep").classList.toggle("active", !state.passwordVerified);
+      $("passwordChangeStep").classList.toggle("active", !!state.passwordVerified);
+    }
+
+    function resetPasswordFlow() {
+      state.passwordVerified = false;
+      $("passwordRecoveryAnswer").value = "";
+      $("passwordNew").value = "";
+      $("passwordConfirm").value = "";
+      renderPasswordSteps();
+    }
+
+    function updateCreateRestaurantPreview() {
+      const value = ($("createRestaurantName") && $("createRestaurantName").value || "").trim();
+      $("createRestaurantPreview").textContent = value || "Tu restaurante";
+    }
+
+    function renderBranchList() {
+      const box = $("branchList");
+      const items = state.branches || [];
+      if (!items.length) {
+        box.innerHTML = '<div class="emptyState">Todavia no hay sucursales. Crea la primera para entrar.</div>';
+        return;
+      }
+      box.innerHTML = items.map((item) => `
+        <div class="branchOption">
+          <div>
+            <div class="branchOptionTitle">${escapeHtml(item.name || "Sucursal")}</div>
+            <div class="itemSub">Restaurante: ${escapeHtml(state.branchRestaurantName || "Restaurante")}</div>
+          </div>
+          <button class="btn primary" type="button" onclick="selectBranchAndContinue('${escapeHtml(item.id)}')">Entrar</button>
+        </div>
+      `).join("");
+    }
+
+    async function openBranchPanel(restaurantId, role, restaurantName) {
+      state.branchRestaurantId = String(restaurantId || "");
+      state.branchRestaurantRole = String(role || "admin");
+      state.branchRestaurantName = String(restaurantName || "Restaurante");
+      $("branchPanelTitle").textContent = `Sucursal de ${state.branchRestaurantName}`;
+      message("branchMsg", "", "");
+      const data = await api(`/api/restaurants/branches?restaurantId=${encodeURIComponent(state.branchRestaurantId)}`);
+      state.branches = data.branches || [];
+      renderBranchList();
+      setMainPanel("branch");
+    }
+
+    function openCreateBranchModal() {
+      $("branchRestaurantNameLabel").textContent = state.branchRestaurantName || "este restaurante";
+      $("branchName").value = "";
+      message("branchCreateMsg", "", "");
+      $("branchCreateModal").classList.add("open");
+      $("branchCreateModal").setAttribute("aria-hidden", "false");
+      $("branchName").focus();
+    }
+
+    function closeCreateBranchModal() {
+      $("branchCreateModal").classList.remove("open");
+      $("branchCreateModal").setAttribute("aria-hidden", "true");
+      $("branchName").value = "";
+      message("branchCreateMsg", "", "");
+    }
+
+    function toggleRestaurantDelete(restaurantId) {
+      if (state.deleteRestaurantId === restaurantId) {
+        closeDeleteRestaurantModal();
+        return;
+      }
+      const items = ((state.profile && state.profile.ownedRestaurants) || []);
+      const restaurant = items.find((item) => String(item.id || "") === String(restaurantId || ""));
+      state.deleteRestaurantId = String(restaurantId || "");
+      $("deleteRestaurantNameLabel").textContent = restaurant && restaurant.name ? restaurant.name : "el nombre del restaurante";
+      $("deleteRestaurantConfirmInput").value = "";
+      message("deleteRestaurantMsg", "", "");
+      $("deleteRestaurantModal").classList.add("open");
+      $("deleteRestaurantModal").setAttribute("aria-hidden", "false");
+      $("deleteRestaurantConfirmInput").focus();
+    }
+
+    function closeDeleteRestaurantModal() {
+      state.deleteRestaurantId = "";
+      $("deleteRestaurantModal").classList.remove("open");
+      $("deleteRestaurantModal").setAttribute("aria-hidden", "true");
+      $("deleteRestaurantConfirmInput").value = "";
+      message("deleteRestaurantMsg", "", "");
+    }
+
+    function setMainPanel(panelName) {
+      document.querySelectorAll(".profilePanel").forEach((panel) => {
+        panel.classList.toggle("active", panel.dataset.panel === panelName);
+      });
+      $("btnViewAccount").classList.toggle("active", panelName === "account");
+      $("btnViewRestaurants").classList.toggle("active", panelName === "restaurants" || panelName === "createRestaurant" || panelName === "branch");
+      $("btnViewTrash").classList.toggle("active", panelName === "trash");
+      message("passwordMsg", "", "");
+      if (panelName === "password") resetPasswordFlow();
+      if (panelName === "createRestaurant") {
+        updateCreateRestaurantPreview();
+        message("createMsg", "", "");
+      }
+    }
+
+    function errorText(error) {
+      if (error === "missing_restaurant_name") return "Escribe un nombre para el restaurante.";
+      if (error === "restaurant_name_taken") return "Ya existe un restaurante con ese nombre.";
+      if (error === "restaurant_not_found") return "No se encontro ese restaurante.";
+      if (error === "already_owner") return "Ese restaurante ya es tuyo.";
+      if (error === "already_member") return "Ya tienes acceso activo como mozo en ese restaurante.";
+      if (error === "request_pending") return "Ya hay una solicitud pendiente para ese restaurante.";
+      if (error === "request_not_found") return "No se encontro la solicitud.";
+      if (error === "invalid_request") return "La solicitud ya no esta pendiente.";
+      if (error === "forbidden") return "No tienes permiso para entrar con ese rol.";
+      if (error === "bad_role") return "Ese rol no es valido para entrar.";
+      if (error === "missing_name") return "Escribe tu nombre.";
+      if (error === "missing_username") return "Escribe un usuario.";
+      if (error === "missing_email") return "Escribe un mail.";
+      if (error === "missing_security_answer") return "Completa la respuesta de seguridad.";
+      if (error === "missing_branch_name") return "Escribe un nombre para la sucursal.";
+      if (error === "branch_name_taken") return "Ya existe una sucursal con ese nombre.";
+      if (error === "branch_not_found") return "No se encontro esa sucursal.";
+      if (error === "missing_restaurant_confirmation") return "Escribe el nombre del restaurante para confirmar.";
+      if (error === "restaurant_confirmation_mismatch") return "El nombre no coincide.";
+      if (error === "restaurant_already_trashed") return "Ese restaurante ya esta en la papelera.";
+      if (error === "restaurant_not_trashed") return "Ese restaurante no esta en la papelera.";
+      if (error === "weak_password") return "Usa una contrasena de al menos 4 caracteres.";
+      if (error === "invalid_current_password") return "La contrasena actual no coincide.";
+      if (error === "invalid_security_answer") return "La respuesta de seguridad no coincide.";
+      if (error === "recovery_not_configured") return "Primero configura una pregunta y respuesta de seguridad.";
+      if (error === "account_not_found") return "No se encontro la cuenta.";
+      if (error === "username_taken") return "Ese usuario ya esta en uso.";
+      if (error === "email_taken") return "Ese mail ya esta en uso.";
+      if (error === "nothing_to_update") return "No hay cambios para guardar.";
+      if (error === "unauthorized") return "Tu sesion no tiene permiso para esta accion.";
+      return error ? `Error: ${error}` : "No se pudo completar la accion.";
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, Object.assign({ cache: "no-store" }, options || {}));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const error = new Error(data && data.error ? data.error : "request_failed");
+        error.payload = data;
+        throw error;
+      }
+      return data;
+    }
+
+    function fillAccountForm() {
+      const user = state.profile && state.profile.user ? state.profile.user : {};
+      const securityQuestion = (state.profile && state.profile.securityQuestion) || "";
+      $("accountUsername").value = user.username || "";
+      $("accountEmail").value = user.email || "";
+      $("passwordRecoveryQuestion").value = securityQuestion || "No configurada";
+      resetPasswordFlow();
+    }
+
+    function renderSummary() {
+      const me = state.me || {};
+      const user = state.profile && state.profile.user ? state.profile.user : {};
+      const trashCount = (state.trashedRestaurants || []).length || 0;
+      document.body.setAttribute("data-restaurant-active", (me.restaurantId && (me.role === "admin" || me.role === "mozo")) ? "1" : "0");
+      $("userTitle").textContent = user.name || user.username || "Mi cuenta";
+      $("userSub").textContent = me.restaurantName
+        ? roleText(me.role, me.restaurantRole, me.restaurantName)
+        : "Cuenta";
+      $("trashCountBadge").textContent = trashCount ? String(trashCount) : "";
+      $("trashCountBadge").classList.toggle("show", trashCount > 0);
+    }
+
+    function renderOwnedRestaurants() {
+      const box = $("ownedRestaurants");
+      const ownedItems = ((state.profile && state.profile.ownedRestaurants) || []).map((item) => ({ ...item, viewRole: "owner" }));
+      const mozoItems = ((state.profile && state.profile.mozoRestaurants) || [])
+        .filter((item) => item && item.membership && item.membership.status === "active")
+        .map((item) => ({ ...item, viewRole: "mozo" }));
+      const items = [...ownedItems, ...mozoItems];
+      if (!items.length) {
+        box.innerHTML = '<div class="emptyState">Sin restaurantes.</div>';
+        return;
+      }
+      box.innerHTML = items.map((item) => {
+        const commerceName = escapeHtml(item.name || "Comercio");
+        const ownerName = escapeHtml(item.ownerName || state.profile.user.name || "");
+        const avatar = escapeHtml(restaurantEmojiSeed(item.name || ""));
+        const isOwner = item.viewRole === "owner";
+        const accessLabel = isOwner ? "Administrador" : "Mozo";
+        const actionRole = isOwner ? "admin" : "mozo";
+        return `
+          <div class="itemCard ownedCommerceCard">
+            <div class="ownedCommerceHeader">
+              <div class="ownedCommerceAvatar">${avatar}</div>
+              <div>
+                <div class="ownedCommerceEyebrow">${isOwner ? "Restaurante propio" : "Restaurante asignado"}</div>
+                <div class="ownedCommerceTitle">${commerceName}</div>
+                <div class="itemSub">Dueno: ${ownerName}</div>
+              </div>
+              <div class="itemMeta">
+                <span class="tag ok">${accessLabel}</span>
+              </div>
+            </div>
+
+            <div class="ownedCommerceMeta">
+              <div class="ownedCommerceStat">
+                <span>Tipo</span>
+                <strong>${isOwner ? "Propio" : "Equipo"}</strong>
+              </div>
+              <div class="ownedCommerceStat">
+                <span>Acceso</span>
+                <strong>${accessLabel}</strong>
+              </div>
+            </div>
+
+            <div class="ownedCommerceActions">
+              <button class="btn primary" type="button" onclick="enterRestaurant('${escapeHtml(item.id)}','${actionRole}')">${isOwner ? "Entrar como restaurante" : "Entrar como mozo"}</button>
+              ${isOwner ? `<button class="btn restaurantDeleteBtn" type="button" onclick="toggleRestaurantDelete('${escapeHtml(item.id)}')">Eliminar</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTrashedRestaurants() {
+      const box = $("trashedRestaurants");
+      const items = state.trashedRestaurants || [];
+      $("trashCountBadge").textContent = items.length ? String(items.length) : "";
+      $("trashCountBadge").classList.toggle("show", items.length > 0);
+      if (!items.length) {
+        box.innerHTML = '<div class="emptyState">La papelera esta vacia.</div>';
+        return;
+      }
+      box.innerHTML = items.map((item) => `
+        <div class="trashCard">
+          <div class="itemTitle">${escapeHtml(item.name || "Restaurante")}</div>
+          <div class="itemSub">En papelera. Se eliminara automaticamente en 3 dias desde que se envio aqui.</div>
+          <div class="itemSub">Fecha limite: ${new Date((Number(item.trashedAt || 0) + (3 * 24 * 60 * 60 * 1000))).toLocaleString("es-AR")}</div>
+          <div class="buttonRow">
+            <button class="btn" type="button" onclick="restoreRestaurant('${escapeHtml(item.id)}')">Restaurar</button>
+            <button class="btn danger" type="button" onclick="deleteRestaurantPermanent('${escapeHtml(item.id)}')">Eliminar definitivamente</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function refreshProfile() {
+      try {
+        const [me, profile] = await Promise.all([
+          api("/api/auth/me"),
+          api("/api/auth/profile")
+        ]);
+        if (!me || !me.authenticated) {
+          location.replace(loginUrl());
+          return;
+        }
+        state.me = me;
+        state.profile = profile;
+        state.trashedRestaurants = profile.trashedRestaurants || [];
+        renderSummary();
+        fillAccountForm();
+        renderOwnedRestaurants();
+        renderTrashedRestaurants();
+      } catch (error) {
+        if (error.message === "unauthorized") {
+          location.replace(loginUrl());
+          return;
+        }
+        message("sideMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function saveAccount() {
+      const username = ($("accountUsername").value || "").trim();
+      const payload = {
+        name: username,
+        username,
+        email: ($("accountEmail").value || "").trim(),
+      };
+      const currentUser = state.profile && state.profile.user ? state.profile.user : {};
+      if (!payload.username) return message("accountMsg", "Escribe un usuario.", "error");
+      if (!payload.email) return message("accountMsg", "Escribe un mail.", "error");
+      const nothingChanged =
+        payload.username === (currentUser.username || "") &&
+        payload.name === (currentUser.name || "") &&
+        payload.email === (currentUser.email || "");
+      if (nothingChanged) return message("accountMsg", "No hay cambios para guardar.", "error");
+      try {
+        await api("/api/auth/setPassword", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        message("accountMsg", "Datos guardados.", "success");
+        await refreshProfile();
+      } catch (error) {
+        message("accountMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function verifyPasswordSecurity() {
+      const profile = state.profile || {};
+      const question = String(profile.securityQuestion || "");
+      const securityAnswer = ($("passwordRecoveryAnswer").value || "").trim();
+      if (!question) return message("passwordMsg", "Primero configura una pregunta de seguridad en Datos de la cuenta.", "error");
+      if (!securityAnswer) return message("passwordMsg", "Escribe la respuesta de seguridad.", "error");
+      try {
+        await api("/api/auth/verifySecurity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ securityAnswer })
+        });
+        state.passwordVerified = true;
+        renderPasswordSteps();
+        message("passwordMsg", "Verificacion correcta. Ahora puedes elegir la nueva contrasena.", "success");
+      } catch (error) {
+        state.passwordVerified = false;
+        renderPasswordSteps();
+        message("passwordMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function savePassword() {
+      const profile = state.profile || {};
+      const user = profile.user || {};
+      const question = String(profile.securityQuestion || "");
+      const newPassword = $("passwordNew").value || "";
+      const confirmPassword = $("passwordConfirm").value || "";
+      if (!question) return message("passwordMsg", "Primero configura una pregunta de seguridad en Datos de la cuenta.", "error");
+      if (!state.passwordVerified) return message("passwordMsg", "Primero verifica la respuesta de seguridad.", "error");
+      if (!newPassword || newPassword.length < 4) return message("passwordMsg", "Usa una contrasena de al menos 4 caracteres.", "error");
+      if (newPassword !== confirmPassword) return message("passwordMsg", "Las contrasenas no coinciden.", "error");
+      try {
+        await api("/api/auth/recover", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            identifier: user.username || user.email || "",
+            securityAnswer: $("passwordRecoveryAnswer").value || "",
+            newPassword
+          })
+        });
+        message("passwordMsg", "Contrasena actualizada.", "success");
+        resetPasswordFlow();
+      } catch (error) {
+        message("passwordMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function createRestaurant() {
+      const name = ($("createRestaurantName").value || "").trim();
+      if (!name) return message("createMsg", "Escribe un nombre para el restaurante.", "error");
+      try {
+        const data = await api("/api/restaurants/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name })
+        });
+        message("createMsg", "Restaurante creado.", "success");
+        $("createRestaurantName").value = "";
+        updateCreateRestaurantPreview();
+        await refreshProfile();
+        setMainPanel("restaurants");
+      } catch (error) {
+        message("createMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function trashRestaurant(restaurantId) {
+      const confirmName = ($("deleteRestaurantConfirmInput").value || "").trim();
+      try {
+        const data = await api("/api/restaurants/trash", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId, confirmName })
+        });
+        closeDeleteRestaurantModal();
+        if (state.profile) state.profile.ownedRestaurants = data.ownedRestaurants || [];
+        state.trashedRestaurants = data.trashedRestaurants || [];
+        message("sideMsg", "Restaurante enviado a la papelera.", "success");
+        renderOwnedRestaurants();
+        renderTrashedRestaurants();
+        renderSummary();
+      } catch (error) {
+        message("deleteRestaurantMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function restoreRestaurant(restaurantId) {
+      try {
+        const data = await api("/api/restaurants/restore", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId })
+        });
+        if (state.profile) state.profile.ownedRestaurants = data.ownedRestaurants || [];
+        state.trashedRestaurants = data.trashedRestaurants || [];
+        message("trashMsg", "Restaurante restaurado.", "success");
+        renderOwnedRestaurants();
+        renderTrashedRestaurants();
+        renderSummary();
+      } catch (error) {
+        message("trashMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function deleteRestaurantPermanent(restaurantId) {
+      try {
+        const data = await api("/api/restaurants/deletePermanent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId })
+        });
+        if (state.profile) state.profile.ownedRestaurants = data.ownedRestaurants || [];
+        state.trashedRestaurants = data.trashedRestaurants || [];
+        message("trashMsg", "Restaurante eliminado definitivamente.", "success");
+        renderOwnedRestaurants();
+        renderTrashedRestaurants();
+        renderSummary();
+      } catch (error) {
+        message("trashMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function decideRequest(requestId, approve) {
+      try {
+        await api("/api/restaurants/requestDecision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId, approve })
+        });
+        message("sideMsg", approve ? "Solicitud aceptada." : "Solicitud rechazada.", "success");
+        await refreshProfile();
+      } catch (error) {
+        message("sideMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function enterRestaurant(restaurantId, role) {
+      try {
+        const data = await api("/api/restaurants/enter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId, role })
+        });
+        if (!data.branchId) {
+          await openBranchPanel(restaurantId, role, data.restaurantName || "");
+          return;
+        }
+        location.href = defaultPathForRole(data.role);
+      } catch (error) {
+        message("sideMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function createBranch() {
+      const name = ($("branchName").value || "").trim();
+      if (!state.branchRestaurantId) return message("branchCreateMsg", "Primero elige un restaurante.", "error");
+      if (!name) return message("branchCreateMsg", "Escribe un nombre para la sucursal.", "error");
+      try {
+        const data = await api("/api/restaurants/branches/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId: state.branchRestaurantId, name })
+        });
+        state.branches = data.branches || [];
+        renderBranchList();
+        closeCreateBranchModal();
+        message("branchMsg", "Sucursal creada. Ahora selecciona esa sucursal para entrar.", "success");
+      } catch (error) {
+        message("branchCreateMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function selectBranchAndContinue(branchId) {
+      try {
+        await api("/api/restaurants/branches/select", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId: state.branchRestaurantId, branchId })
+        });
+        location.href = defaultPathForRole(state.branchRestaurantRole || "admin");
+      } catch (error) {
+        message("branchMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function leaveRestaurant() {
+      try {
+        await api("/api/restaurants/leave", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+        message("sideMsg", "Volviste a tu perfil personal.", "success");
+        await refreshProfile();
+      } catch (error) {
+        message("sideMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function logout() {
+      try {
+        await api("/api/auth/logout");
+      } catch (error) {}
+      location.replace(loginUrl());
+    }
+
+    $("btnSaveAccount").addEventListener("click", saveAccount);
+    $("btnOpenCreateRestaurant").addEventListener("click", () => setMainPanel("createRestaurant"));
+    $("btnBackFromCreateRestaurant").addEventListener("click", () => setMainPanel("restaurants"));
+    $("btnCreateRestaurant").addEventListener("click", createRestaurant);
+    $("btnBackFromBranchPanel").addEventListener("click", () => setMainPanel("restaurants"));
+    $("btnOpenCreateBranchModal").addEventListener("click", openCreateBranchModal);
+    $("btnCancelCreateBranchModal").addEventListener("click", closeCreateBranchModal);
+    $("btnCreateBranch").addEventListener("click", createBranch);
+    $("btnCancelDeleteRestaurant").addEventListener("click", closeDeleteRestaurantModal);
+    $("btnConfirmDeleteRestaurant").addEventListener("click", () => trashRestaurant(state.deleteRestaurantId));
+    $("btnLogout").addEventListener("click", logout);
+    $("btnLeaveRestaurant").addEventListener("click", leaveRestaurant);
+    $("btnViewAccount").addEventListener("click", () => setMainPanel("account"));
+    $("btnViewRestaurants").addEventListener("click", () => setMainPanel("restaurants"));
+    $("btnViewTrash").addEventListener("click", () => setMainPanel("trash"));
+    $("btnOpenPasswordPanel").addEventListener("click", () => setMainPanel("password"));
+    $("btnBackFromPassword").addEventListener("click", () => setMainPanel("account"));
+    $("btnVerifyPassword").addEventListener("click", verifyPasswordSecurity);
+    $("btnSavePassword").addEventListener("click", savePassword);
+    $("createRestaurantName").addEventListener("input", updateCreateRestaurantPreview);
+    $("deleteRestaurantModal").addEventListener("click", (event) => {
+      if (event.target === $("deleteRestaurantModal")) closeDeleteRestaurantModal();
+    });
+    $("branchCreateModal").addEventListener("click", (event) => {
+      if (event.target === $("branchCreateModal")) closeCreateBranchModal();
+    });
+
+    window.enterRestaurant = enterRestaurant;
+    window.toggleRestaurantDelete = toggleRestaurantDelete;
+    window.trashRestaurant = trashRestaurant;
+    window.restoreRestaurant = restoreRestaurant;
+    window.deleteRestaurantPermanent = deleteRestaurantPermanent;
+    window.selectBranchAndContinue = selectBranchAndContinue;
+    window.decideRequest = decideRequest;
+
+    refreshProfile();
+  </script>
+</body>
+</html>

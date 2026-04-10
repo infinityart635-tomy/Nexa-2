@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Inventario</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body class="inventoryPage">
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1>NEXA</h1>
+          <p>Inventario - alta/edicion/baja</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+          
+          
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap inventoryWrap">
+    <div class="inventoryHeader">
+      <div>
+        <div class="inventoryTitle">Inventario</div>
+        <div class="small">Productos, precios y stock</div>
+      </div>
+      <div class="inventoryMeta">
+        <div class="badge2">Estado <strong id="wsStatus">...</strong></div>
+        <div class="badge2">Productos <strong id="count">0</strong></div>
+      </div>
+    </div>
+
+    <div class="inventoryLayout">
+      <aside class="panel inventorySidebar inventorySidebarLeft">
+        <div class="panelHead">
+          <div>
+            <h2>Altas</h2>
+            <p class="hint">Categorias y productos</p>
+          </div>
+        </div>
+        <div class="panelBody">
+          <details class="inventoryNew" open>
+            <summary class="inventoryNewTitle">NUEVO PRODUCTO</summary>
+            <div class="inventoryNewBody">
+              <div class="inventoryNewGrid">
+                <input id="newName" class="input span-2" placeholder="Nombre"/>
+                <select id="newCat" class="input"></select>
+                <input id="newPrice" class="input" type="number" inputmode="numeric" placeholder="Precio"/>
+                <input id="newCost" class="input" type="number" inputmode="numeric" placeholder="Coste"/>
+                <input id="newDesc" class="input span-2" placeholder="Descripcion"/>
+                <input id="newTax" class="input" type="number" inputmode="decimal" placeholder="IVA %"/>
+                <input id="newStock" class="input" type="number" inputmode="numeric" placeholder="Stock"/>
+                <label class="badge2" style="display:flex; align-items:center; gap:8px;">
+                  <input id="newShowStock" type="checkbox"/> Mostrar stock
+                </label>
+                <div class="inventoryImageRow span-2">
+                  <label class="inventoryImageDrop" id="newImgDrop" for="newImgFile">
+                    <span class="inventoryImagePreview" id="newImgPreview"></span>
+                    <span>Agregar imagen</span>
+                    <span class="small">Arrastrar o seleccionar archivo</span>
+                  </label>
+                  <input id="newImgFile" class="inventoryImageInput" type="file" accept="image/*"/>
+                </div>
+                <input id="newImgData" type="hidden"/>
+                <button id="btnAdd" class="btn primary span-2" type="button">Agregar</button>
+              </div>
+              <div class="mini" style="margin-top:8px;">Tip: los cambios se reflejan al instante.</div>
+            </div>
+          </details>
+          <div class="hr"></div>
+          <div class="inventoryField">
+            <h3 style="margin:0; text-align:center; text-transform:uppercase; font-size:14px; letter-spacing:.22em; font-weight:800;">EDICION DE CATEGORIAS</h3>
+            <div class="row" style="align-items:center; gap:8px;">
+              <input id="catName" class="input" placeholder="Nombre" style="flex:1; min-width:140px"/>
+              <input id="catColor" class="input" type="color" value="#5fb0ff" title="Color" style="width:64px; padding:0; height:40px"/>
+              <button id="btnCatAdd" class="btn" type="button">Agregar</button>
+            </div>
+            <div id="catList" class="mini" style="margin-top:8px;"></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="inventoryMain">
+        <div class="panel">
+          <div class="panelHead">
+            <div>
+              <h2>Inventario</h2>
+              <p class="hint">Editar y guardar por producto</p>
+            </div>
+          </div>
+          <div class="panelBody" id="list"></div>
+        </div>
+      </section>
+
+      <aside class="panel inventorySidebar inventorySidebarRight">
+        <div class="panelHead">
+          <div>
+            <h2>Filtros</h2>
+            <p class="hint">Buscar y ordenar</p>
+          </div>
+        </div>
+        <div class="panelBody">
+          <div class="inventoryField">
+            <div class="small">Buscar</div>
+            <input id="q" class="input" placeholder="Ej: milanesa, coca" autocomplete="off"/>
+          </div>
+          <div class="inventoryField">
+            <div class="small">Estado</div>
+            <div class="chips inventoryChips">
+              <button class="chip active" data-filter="all">Todas</button>
+              <button class="chip" data-filter="active">Activos</button>
+              <button class="chip" data-filter="inactive">Inactivos</button>
+            </div>
+          </div>
+          <div class="inventoryField">
+            <div class="small">Orden</div>
+            <select id="sortBy" class="input">
+              <option value="category">Categoria</option>
+              <option value="name">Nombre</option>
+              <option value="price">Precio</option>
+            </select>
+          </div>
+          <div class="hr"></div>
+          <div class="inventoryStats">
+            <div class="badge2">Total <strong id="countTotal">0</strong></div>
+            <div class="badge2">Activos <strong id="countActive">0</strong></div>
+            <div class="badge2">Inactivos <strong id="countInactive">0</strong></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  
+    <!-- Modal: Receta por producto -->
+  <div class="modalOverlay" id="recipeModal" style="display:none;">
+    <div class="modal" style="width:min(960px, 100%);">
+      <div class="modalHeader">
+        <h3 id="recipeTitle">Receta</h3>
+        <button class="btn" type="button" id="btnRecipeClose">Cerrar</button>
+      </div>
+      <div class="mini muted" style="margin-top:6px;">Opcional: si no cargas nada, no descuenta stock.</div>
+      <div class="hr"></div>
+      <div id="recipeRows"></div>
+      <div class="modalFooter">
+        <button id="btnRecipeSave" class="btn primary" type="button">Guardar receta</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Modal: Modificadores (editor simple) -->
+  <div class="modalOverlay" id="modsModal" style="display:none;">
+    <div class="modal" style="width:min(960px, 100%);">
+      <div class="modalHeader">
+        <h3 id="modsTitle">Modificadores</h3>
+        <button class="btn" type="button" id="btnModsClose">Cerrar</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row" style="align-items:flex-end;">
+        <div style="flex:1">
+          <div class="small">Grupo</div>
+          <select id="modGroupSel" class="input"></select>
+        </div>
+        <button id="btnGroupAdd" class="btn" type="button">+ Grupo</button>
+        <button id="btnGroupDel" class="btn" type="button">Eliminar grupo</button>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <input id="modGroupName" class="input" placeholder="Nombre del grupo" style="flex:2; min-width:200px"/>
+        <select id="modGroupMode" class="input" style="flex:1; min-width:140px">
+          <option value="single">Single</option>
+          <option value="multi">Multi</option>
+        </select>
+        <label class="badge2" style="display:flex; align-items:center; gap:8px;">
+          <input id="modGroupReq" type="checkbox"/> Requerido
+        </label>
+        <input id="modGroupMin" class="input" type="number" inputmode="numeric" placeholder="Min" style="flex:0.6; min-width:90px"/>
+        <input id="modGroupMax" class="input" type="number" inputmode="numeric" placeholder="Max" style="flex:0.6; min-width:90px"/>
+        <input id="modGroupKind" class="input" placeholder="Kind (size/remove/extra)" style="flex:1; min-width:160px"/>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row" style="align-items:flex-end;">
+        <div style="flex:1">
+          <div class="small">Opciones</div>
+          <select id="modOptSel" class="input"></select>
+        </div>
+        <button id="btnOptAdd" class="btn" type="button">+ Opci?n</button>
+        <button id="btnOptDel" class="btn" type="button">Eliminar opci?n</button>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <input id="modOptId" class="input" placeholder="ID opci?n" style="flex:1; min-width:140px"/>
+        <input id="modOptName" class="input" placeholder="Nombre" style="flex:2; min-width:200px"/>
+        <input id="modOptPrice" class="input" type="number" inputmode="numeric" placeholder="Precio" style="flex:0.7; min-width:120px"/>
+        <input id="modOptCost" class="input" type="number" inputmode="numeric" placeholder="Coste" style="flex:0.7; min-width:120px"/>
+        <input id="modOptMult" class="input" type="number" inputmode="decimal" placeholder="Multiplicador" style="flex:0.8; min-width:140px"/>
+        <input id="modOptKind" class="input" placeholder="Kind" style="flex:1; min-width:140px"/>
+        <label class="badge2" style="display:flex; align-items:center; gap:8px;">
+          <input id="modOptDefault" type="checkbox"/> Default
+        </label>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <input id="modOptAddProducts" class="input" placeholder="AddProducts (ej: papas:1, bebida:1)" style="flex:2; min-width:240px"/>
+        <input id="modOptNote" class="input" placeholder="Nota interna" style="flex:2; min-width:240px"/>
+      </div>
+
+      <div class="modalFooter">
+        <button id="btnModsSave" class="btn primary" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+<script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+    const $ = (id)=>document.getElementById(id);
+    const LS = "resto_v5_admin_name";
+    connect("admin", localStorage.getItem(LS) || "Admin");
+    let statusFilter = "all";
+    let sortBy = "category";
+
+    function setStatusFilter(val){
+      statusFilter = val || "all";
+      document.querySelectorAll(".inventoryChips .chip").forEach(ch=>{
+        ch.classList.toggle("active", ch.dataset.filter === statusFilter);
+      });
+      render(window.__db || null, true);
+    }
+
+    function valNum(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+    function calcProductStock(db, productId){
+      if(!db || !db.inventory) return null;
+      const rec = (db.inventory.recipes && db.inventory.recipes[productId]) ? db.inventory.recipes[productId] : null;
+      if(!Array.isArray(rec) || rec.length === 0) return null;
+      const ingIndex = new Map((db.inventory.ingredients || []).map(i=>[i.id, i]));
+      let minUnits = null;
+      for(const r of rec){
+        const ing = ingIndex.get(r.ingredientId);
+        const qty = Number(r.qty || 0);
+        if(!ing || !Number.isFinite(qty) || qty <= 0) continue;
+        const onHand = Number(ing.onHand || 0);
+        const units = Math.floor(onHand / qty);
+        if(minUnits === null || units < minUnits) minUnits = units;
+      }
+      return minUnits === null ? null : Math.max(0, minUnits);
+    }
+    function hexToRgba(hex, alpha){
+      const h = String(hex || "").trim().replace("#", "");
+      if(h.length === 3){
+        const r = parseInt(h[0]+h[0], 16);
+        const g = parseInt(h[1]+h[1], 16);
+        const b = parseInt(h[2]+h[2], 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      if(h.length === 6){
+        const r = parseInt(h.slice(0,2), 16);
+        const g = parseInt(h.slice(2,4), 16);
+        const b = parseInt(h.slice(4,6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      return "";
+    }
+    function slugifyLite(s){
+      return String(s||"").trim().toLowerCase()
+        .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "categoria";
+    }
+    function normalizeCategoryTitle(t){
+      const raw = String(t||"").trim();
+      if(!raw) return "Otros";
+      const k = raw.toLowerCase()
+        .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+      if(k === "general" || k === "otros" || k === "otras" || k === "sin categoria") return "Otros";
+      return raw;
+    }
+    function categoryTone(name){
+      let h = 0;
+      const s = String(name || "");
+      for(let i=0;i<s.length;i++){ h = ((h<<5) - h) + s.charCodeAt(i); h |= 0; }
+      return Math.abs(h) % 6;
+    }
+    function toneStyle(name){
+      const t = categoryTone(name);
+      if(t === 1) return "background:rgba(80,140,255,.12); border-color:rgba(80,140,255,.45);";
+      if(t === 2) return "background:rgba(120,220,160,.12); border-color:rgba(120,220,160,.45);";
+      if(t === 3) return "background:rgba(255,200,120,.12); border-color:rgba(255,200,120,.45);";
+      if(t === 4) return "background:rgba(255,140,180,.10); border-color:rgba(255,140,180,.4);";
+      if(t === 5) return "background:rgba(180,160,255,.12); border-color:rgba(180,160,255,.45);";
+      return "background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.2);";
+    }
+    function toneColorHex(name){
+      const t = categoryTone(name);
+      if(t === 1) return "#508cff";
+      if(t === 2) return "#78dca0";
+      if(t === 3) return "#ffc878";
+      if(t === 4) return "#ff8cb4";
+      if(t === 5) return "#b4a0ff";
+      return "#cfd6dd";
+    }
+    function getMenuCategories(db){
+      const list = (db && db.settings && Array.isArray(db.settings.menuCategories)) ? db.settings.menuCategories : [];
+      const merged = new Map();
+      list.forEach((c, idx)=>{
+        if(!c) return;
+        const title = normalizeCategoryTitle(c.title || c.id || "");
+        const id = slugifyLite(title);
+        if(!id || !title) return;
+        const color = String(c.color || "").trim();
+        const existing = merged.get(id);
+        if(!existing){
+          merged.set(id, { id, title, color, order: Number(c.order || idx) });
+          return;
+        }
+        if(!existing.color && color) existing.color = color;
+      });
+      return Array.from(merged.values());
+    }
+    function getMenuCategoryMap(db){
+      const map = new Map();
+      getMenuCategories(db).forEach(c=>{
+        map.set(c.id, c);
+        map.set(c.title, c);
+      });
+      return map;
+    }
+    function getCategoryChoices(db){
+      const list = getMenuCategories(db);
+      const seen = new Set(list.map(c => c.title));
+      const out = list.slice().sort((a,b)=>a.order-b.order || a.title.localeCompare(b.title));
+      (db && db.products || []).forEach(p=>{
+        const title = normalizeCategoryTitle(p.categoryTitle || "");
+        if(title && !seen.has(title)){
+          seen.add(title);
+          out.push({ id: slugifyLite(title), title, color: "", order: out.length });
+        }
+      });
+      if(!seen.has("Otros")) out.push({ id: "otros", title: "Otros", color: "", order: out.length });
+      return out;
+    }
+    function buildCategoryOptions(currentTitle, list){
+      const cur = normalizeCategoryTitle(currentTitle || "Otros");
+      return list.map(c=>{
+        const sel = (c.title === cur) ? " selected" : "";
+        return `<option value="${esc(c.title)}"${sel}>${esc(c.title)}</option>`;
+      }).join("");
+    }
+    function saveMenuCategories(list){
+      sendAction("settings:update", { patch: { menuCategories: list } });
+      toast("Categorias guardadas");
+    }
+    function renderCategories(db){
+      const list = getCategoryChoices(db);
+      const map = getMenuCategoryMap(db);
+      const target = $("catList");
+      if(target){
+        target.innerHTML = list.length ? list.map(c=>{
+          const existing = map.get(c.id) || map.get(c.title) || null;
+          const color = existing ? String(existing.color || "").trim() : "";
+          const fallbackColor = toneColorHex(c.title);
+          const colorValue = color || fallbackColor;
+          const bg = color ? hexToRgba(color, 0.18) : hexToRgba(fallbackColor, 0.18);
+          const border = color ? hexToRgba(color, 0.5) : hexToRgba(fallbackColor, 0.5);
+          const badgeStyle = `background:${bg}; border-color:${border};`;
+          return `
+            <div class="inventoryCatRow">
+              <span class="badge2 inventoryCatBadge" style="${badgeStyle}">
+                ${esc(c.title)}
+              </span>
+              <input class="input inventoryCatColor" type="color" value="${esc(colorValue)}" title="Color" data-cat-color="${esc(c.id)}" data-cat-title="${esc(c.title)}"/>
+              <button class="btn inventoryCatDelete" type="button" data-cat-del="${esc(c.id)}">Eliminar</button>
+            </div>
+          `;
+        }).join("") : '<div class="small">Sin categorias.</div>';
+      }
+      document.querySelectorAll("[data-cat-color]").forEach(input=>{
+        input.addEventListener("change", ()=>{
+          const id = input.getAttribute("data-cat-color");
+          const title = input.getAttribute("data-cat-title") || "";
+          const color = String(input.value || "").trim();
+          const base = getMenuCategories(window.__db || {});
+          const filtered = base.filter(c => c.id !== id);
+          filtered.push({ id, title, color });
+          const ordered = filtered.map((c, i)=>({ ...c, order: i }));
+          saveMenuCategories(ordered);
+        });
+      });
+      document.querySelectorAll("[data-cat-del]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-cat-del");
+          const next = getMenuCategories(window.__db || {}).filter(c => c.id !== id)
+            .map((c, i)=>({ ...c, order: i }));
+          saveMenuCategories(next);
+        });
+      });
+    }
+    function applyImageFile(file, productId){
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        const url = String(reader.result || "");
+        if(productId){
+          const input = document.querySelector(`[data-f="imageData"][data-id="${CSS.escape(productId)}"]`);
+          if(input) input.value = url;
+          const thumb = document.querySelector(`[data-thumb="${CSS.escape(productId)}"]`);
+          if(thumb){
+            thumb.style.backgroundImage = `url('${url}')`;
+            thumb.classList.remove("placeholder");
+            thumb.textContent = "";
+          }
+          const preview = document.querySelector(`[data-img-preview="${CSS.escape(productId)}"]`);
+          if(preview) preview.style.backgroundImage = `url('${url}')`;
+          const drop = document.querySelector(`[data-img-drop="${CSS.escape(productId)}"]`);
+          if(drop) drop.classList.add("hasPreview");
+        } else {
+          const newImg = $("newImgData");
+          if(newImg) newImg.value = url;
+          const preview = $("newImgPreview");
+          if(preview) preview.style.backgroundImage = `url('${url}')`;
+          const drop = $("newImgDrop");
+          if(drop) drop.classList.add("hasPreview");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function render(db, ok){
+      $("wsStatus").textContent = ok ? "conectado" : "offline";
+      if(!db){ $("list").innerHTML = '<div class="small">Cargando...</div>'; return; }
+      const q = ($("q").value||"").trim().toLowerCase();
+      const sectors = ((db.settings&&db.settings.kitchen&&db.settings.kitchen.sectors)||[{id:"general",name:"General",enabled:true}]).filter(s=>s && s.enabled!==false);
+      const itemsAll = (db.products||[]);
+      const totalCount = itemsAll.length;
+      const activeCount = itemsAll.filter(p=>p.active !== false).length;
+      const inactiveCount = totalCount - activeCount;
+      $("countTotal").textContent = totalCount;
+      $("countActive").textContent = activeCount;
+      $("countInactive").textContent = inactiveCount;
+      renderCategories(db);
+      const categoryChoices = getCategoryChoices(db);
+      const newCat = $("newCat");
+      if(newCat) newCat.innerHTML = buildCategoryOptions("Otros", categoryChoices);
+
+      let filtered = itemsAll.slice();
+      if(statusFilter === "active") filtered = filtered.filter(p=>p.active !== false);
+      if(statusFilter === "inactive") filtered = filtered.filter(p=>p.active === false);
+      if(q){
+        filtered = filtered.filter(p => (p.name||"").toLowerCase().includes(q) || (p.categoryTitle||"").toLowerCase().includes(q) || (p.id||"").toLowerCase().includes(q));
+      }
+
+      const sortVal = $("sortBy").value || "category";
+      sortBy = sortVal;
+      if(sortVal === "price"){
+        filtered.sort((a,b)=>Number(a.price||0) - Number(b.price||0) || String(a.name||"").localeCompare(String(b.name||"")));
+      } else if(sortVal === "name"){
+        filtered.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")) || String(a.categoryTitle||"").localeCompare(String(b.categoryTitle||"")));
+      } else {
+        filtered.sort((a,b)=>String(a.categoryTitle||"").localeCompare(String(b.categoryTitle||"")) || String(a.name||"").localeCompare(String(b.name||"")));
+      }
+
+      $("count").textContent = filtered.length;
+
+      $("list").innerHTML = filtered.map(p=>{
+        const inactive = (p.active === false);
+        const imageUrl = String(p.imageUrl || "").trim();
+        const initial = String(p.name || "P").trim().slice(0,1).toUpperCase();
+        const thumb = imageUrl
+          ? `<div class="inventoryThumb" data-thumb="${esc(p.id)}" style="background-image:url('${esc(imageUrl)}')"></div>`
+          : `<div class="inventoryThumb placeholder" data-thumb="${esc(p.id)}">${esc(initial)}</div>`;
+        const categoryOptions = buildCategoryOptions(p.categoryTitle || "Otros", categoryChoices);
+        const showStock = !!p.showStock;
+        const availableStock = calcProductStock(db, p.id);
+        const stockLine = showStock
+          ? `<div class="small">Stock: ${esc(p.stockMin||0)} | Hay: ${esc(availableStock === null ? "-" : availableStock)}</div>`
+          : "";
+        return `
+          <div class="card inventoryCard ${inactive ? "isInactive" : ""}">
+            <div class="inventoryRow">
+              ${thumb}
+              <div class="inventoryInfo">
+                <div class="inventoryName">${esc(p.name || "")}</div>
+                ${stockLine}
+              </div>
+              <div class="inventoryPrice">
+                <div class="small">Precio</div>
+                <div class="inventoryPriceValue">${esc(money(p.price || 0))}</div>
+              </div>
+            </div>
+            <div class="inventoryEdit" data-edit="${esc(p.id)}" style="display:none;">
+              <div class="row" style="align-items:center;">
+                <input class="input" data-f="idEdit" data-id="${esc(p.id)}" value="${esc(p.id)}" style="flex:1; min-width:160px" title="ID interno"/>
+                <input class="input" data-f="name" data-id="${esc(p.id)}" value="${esc(p.name)}" style="flex:2; min-width:220px"/>
+                <select class="input" data-f="categoryTitle" data-id="${esc(p.id)}" style="flex:1; min-width:170px">${categoryOptions}</select>
+                <input class="input" type="number" inputmode="numeric" data-f="price" data-id="${esc(p.id)}" value="${esc(p.price||0)}" style="flex:0.6; min-width:140px"/>
+                <input class="input" type="number" inputmode="numeric" data-f="prodCost" data-id="${esc(p.id)}" value="${esc(p.prodCost||0)}" style="flex:0.6; min-width:140px" placeholder="Coste"/>
+                <label class="badge2" style="display:flex; align-items:center; gap:8px;">
+                  <input type="checkbox" data-f="active" data-id="${esc(p.id)}" ${inactive?"":"checked"} />
+                  Activo
+                </label>
+                <label class="badge2" style="display:flex; align-items:center; gap:8px;">
+                  <input type="checkbox" data-f="showStock" data-id="${esc(p.id)}" ${showStock?"checked":""} />
+                  Mostrar stock
+                </label>
+              </div>
+              <div class="row" style="margin-top:10px;">
+                <input class="input" data-f="description" data-id="${esc(p.id)}" value="${esc(p.description||"")}" placeholder="Descripcion" style="flex:2; min-width:220px"/>
+                <input class="input" type="number" inputmode="decimal" data-f="taxRate" data-id="${esc(p.id)}" value="${esc(p.taxRate||0)}" placeholder="IVA %" style="flex:0.6; min-width:120px"/>
+                <input class="input" type="number" inputmode="numeric" data-f="stockMin" data-id="${esc(p.id)}" value="${esc(p.stockMin||0)}" placeholder="Stock" style="flex:0.6; min-width:120px"/>
+                <div class="inventoryImageRow" style="flex:1; min-width:200px">
+                  <label class="inventoryImageDrop compact" data-img-drop="${esc(p.id)}">
+                    <span class="inventoryImagePreview" data-img-preview="${esc(p.id)}"></span>
+                    <span>Agregar imagen</span>
+                    <span class="small">Arrastrar o seleccionar archivo</span>
+                  </label>
+                  <input id="img_${esc(p.id)}" class="inventoryImageInput" type="file" accept="image/*" data-img="${esc(p.id)}"/>
+                </div>
+                <input type="hidden" data-f="imageData" data-id="${esc(p.id)}" value=""/>
+              </div>
+              <div class="row" style="margin-top:10px;">
+                <div class="badge2" style="flex:1">ID <strong>${esc(p.id)}</strong></div>
+                <div class="badge2" style="flex:1">Precio <strong>${esc(money(p.price))}</strong></div>
+                <div class="badge2" style="flex:1">Coste <strong>${esc(money(p.prodCost||0))}</strong></div>
+                <button class="btn" type="button" data-recipe="${esc(p.id)}">Receta</button>
+                <button class="btn" type="button" data-mod="${esc(p.id)}">Modificadores</button>
+                <button class="btn primary" type="button" data-save="${esc(p.id)}">Guardar</button>
+                <button class="btn" type="button" data-del="${esc(p.id)}">Eliminar</button>
+              </div>
+            </div>
+            <div class="row" style="margin-top:10px; justify-content:flex-end;">
+              <button class="btn" type="button" data-toggle-edit="${esc(p.id)}">Modificar</button>
+            </div>
+          </div>
+        `;
+      }).join("") || '<div class="small">Sin productos.</div>';
+
+      document.querySelectorAll("[data-toggle-edit]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-toggle-edit");
+          const panel = document.querySelector(`[data-edit="${CSS.escape(id)}"]`);
+          if(!panel) return;
+          const open = panel.style.display !== "none";
+          panel.style.display = open ? "none" : "block";
+          btn.textContent = open ? "Modificar" : "Ocultar";
+        });
+      });
+
+      document.querySelectorAll("[data-mod]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-mod");
+          showModsModal(id);
+        });
+      });
+      document.querySelectorAll("[data-recipe]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-recipe");
+          renderRecipeModal(id);
+        });
+      });
+
+      document.querySelectorAll("[data-save]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-save");
+          const row = btn.closest(".card");
+          const get = (f)=>{
+            const el = row.querySelector(`[data-f="${f}"][data-id="${CSS.escape(id)}"]`);
+            return el;
+          };
+          const name = (get("name").value||"").trim();
+          const idEdit = (get("idEdit").value||"").trim();
+          const categoryTitle = normalizeCategoryTitle(get("categoryTitle").value||"Otros");
+          const price = valNum(get("price").value);
+          const prodCost = valNum(get("prodCost").value);
+          const active = !!get("active").checked;
+          const description = (get("description").value||"").trim();
+          const taxRate = valNum(get("taxRate").value);
+          const stockMin = valNum(get("stockMin").value);
+          const stockMax = 0;
+          const showStock = !!get("showStock").checked;
+          const imageData = (get("imageData").value||"").trim();
+          if(idEdit && idEdit !== id){
+            sendAction("products:renameId", { fromId: id, toId: idEdit });
+          }
+          const payload = { productId: (idEdit || id), name, categoryTitle, price, prodCost, active, description, taxRate, stockMin, stockMax, showStock, tags: [] };
+          if(imageData) payload.imageData = imageData;
+          sendAction("products:upsert", payload);
+          if(imageData){
+            const imgInput = get("imageData");
+            if(imgInput) imgInput.value = "";
+          }
+          toast("Guardado");
+          const panel = document.querySelector(`[data-edit="${CSS.escape(id)}"]`);
+          const toggle = document.querySelector(`[data-toggle-edit="${CSS.escape(id)}"]`);
+          if(panel) panel.style.display = "none";
+          if(toggle) toggle.textContent = "Modificar";
+        });
+      });
+
+      document.querySelectorAll("[data-del]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-del");
+          if(!confirm("Eliminar el producto del catalogo? Esta accion no se puede deshacer.")) return;
+          sendAction("products:delete", { productId: id });
+          toast("Eliminado");
+          const panel = document.querySelector(`[data-edit="${CSS.escape(id)}"]`);
+          const toggle = document.querySelector(`[data-toggle-edit="${CSS.escape(id)}"]`);
+          if(panel) panel.style.display = "none";
+          if(toggle) toggle.textContent = "Modificar";
+        });
+      });
+    document.querySelectorAll("[data-img]").forEach(input=>{
+      input.addEventListener("change", ()=>{
+        const id = input.getAttribute("data-img");
+        const file = input.files && input.files[0];
+        if(file) applyImageFile(file, id);
+      });
+    });
+      document.querySelectorAll("[data-img-drop]").forEach(drop=>{
+        const id = drop.getAttribute("data-img-drop");
+        const setDrag = (on)=>drop.classList.toggle("isDrag", on);
+        ["dragenter","dragover"].forEach(ev=>{
+          drop.addEventListener(ev, (e)=>{
+            e.preventDefault();
+            if(e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+            setDrag(true);
+          });
+        });
+        ["dragleave","dragend"].forEach(ev=>{
+          drop.addEventListener(ev, (e)=>{
+            e.preventDefault();
+            setDrag(false);
+          });
+        });
+        drop.addEventListener("drop", (e)=>{
+          e.preventDefault();
+          setDrag(false);
+          const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+          if(file) applyImageFile(file, id);
+        });
+        drop.addEventListener("click", ()=>{
+          const input = document.querySelector(`[data-img="${CSS.escape(id)}"]`);
+          if(input) input.click();
+        });
+      });
+    }
+
+    function addCategory(){
+      const name = normalizeCategoryTitle($("catName").value||"");
+      if(!name) return toast("Pon un nombre");
+      const color = ($("catColor").value||"").trim();
+      const id = slugifyLite(name);
+      const list = getMenuCategories(window.__db || {});
+      const filtered = list.filter(c => c.id !== id);
+      filtered.push({ id, title: name, color });
+      const ordered = filtered.map((c, i)=>({ ...c, order: i }));
+      saveMenuCategories(ordered);
+      $("catName").value = "";
+    }
+
+    document.querySelectorAll(".inventoryChips .chip").forEach(btn=>{
+      btn.addEventListener("click", ()=>setStatusFilter(btn.dataset.filter || "all"));
+    });
+    const sortSel = $("sortBy");
+    if(sortSel){
+      sortSel.value = sortBy;
+      sortSel.addEventListener("change", ()=>render(window.__db||null, true));
+    }
+
+    $("btnAdd").addEventListener("click", ()=>{
+      const name = ($("newName").value||"").trim();
+      const categoryTitle = normalizeCategoryTitle($("newCat").value||"Otros");
+      const price = valNum($("newPrice").value);
+      const prodCost = valNum($("newCost").value);
+      if(!name) return toast("Pon un nombre");
+      const description = ($("newDesc").value||"").trim();
+      const taxRate = valNum($("newTax").value);
+      const stockMin = valNum($("newStock").value);
+      const stockMax = 0;
+      const showStock = !!$("newShowStock").checked;
+      const imageData = ($("newImgData").value||"").trim();
+      const payload = { name, categoryTitle, price, prodCost, active:true, description, taxRate, stockMin, stockMax, showStock, tags: [] };
+      if(imageData) payload.imageData = imageData;
+      sendAction("products:upsert", payload);
+      $("newName").value = ""; $("newPrice").value = ""; $("newCost").value = "";
+      $("newDesc").value = ""; $("newTax").value = ""; $("newStock").value = "";
+      $("newShowStock").checked = false;
+      $("newImgData").value = "";
+      const newImgPreview = $("newImgPreview");
+      if(newImgPreview) newImgPreview.style.backgroundImage = "";
+      const newImgDrop = $("newImgDrop");
+      if(newImgDrop) newImgDrop.classList.remove("hasPreview");
+      const newImgFile = $("newImgFile");
+      if(newImgFile) newImgFile.value = "";
+      toast("Producto agregado");
+    });
+
+    const btnCatAdd = $("btnCatAdd");
+    if(btnCatAdd){
+      btnCatAdd.addEventListener("click", addCategory);
+    }
+
+    $("q").addEventListener("input", ()=>render(window.__db||null, true));
+    const newImgFile = $("newImgFile");
+    if(newImgFile){
+      newImgFile.addEventListener("change", ()=>{
+        const file = newImgFile.files && newImgFile.files[0];
+        if(file) applyImageFile(file, null);
+      });
+    }
+    const newImgDrop = $("newImgDrop");
+    if(newImgDrop){
+      const setDrag = (on)=>newImgDrop.classList.toggle("isDrag", on);
+      ["dragenter","dragover"].forEach(ev=>{
+        newImgDrop.addEventListener(ev, (e)=>{
+          e.preventDefault();
+          if(e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+          setDrag(true);
+        });
+      });
+      ["dragleave","dragend"].forEach(ev=>{
+        newImgDrop.addEventListener(ev, (e)=>{
+          e.preventDefault();
+          setDrag(false);
+        });
+      });
+      newImgDrop.addEventListener("drop", (e)=>{
+        e.preventDefault();
+        setDrag(false);
+        const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if(file) applyImageFile(file, null);
+      });
+    }
+
+    onState((db, ok)=>{ window.__db = db; render(db, ok); });
+// --- Recetas por producto (opcional) ---
+let __recipeProductId = null;
+function renderRecipeModal(productId){
+  const db = window.__db || {};
+  const p = getProductById(productId);
+  __recipeProductId = productId;
+  const title = p ? (p.name || p.id) : productId;
+  $("recipeTitle").textContent = "Receta ? " + title;
+  const ings = (db.inventory && db.inventory.ingredients) ? db.inventory.ingredients : [];
+  const rec = (db.inventory && db.inventory.recipes && db.inventory.recipes[productId]) ? db.inventory.recipes[productId] : [];
+  const map = new Map(rec.map(r=>[r.ingredientId, r.qty]));
+  $("recipeRows").innerHTML = ings.map(ing=>{
+    const v = map.get(ing.id) || "";
+    return `
+      <div class="row" style="align-items:center; margin:8px 0;">
+        <div style="flex:1; min-width:160px;">
+          <div style="font-weight:800;">${esc(ing.name)}</div>
+          <div class="small">ID: ${esc(ing.id)} ? unidad: ${esc(ing.unit||"u")}</div>
+        </div>
+        <input class="input" data-rec="${esc(ing.id)}" type="number" inputmode="decimal" placeholder="Cantidad" value="${esc(v)}" style="width:160px"/>
+      </div>
+    `;
+  }).join("") || '<div class="small">Sin ingredientes.</div>';
+  $("recipeModal").style.display = "flex";
+}
+function closeRecipeModal(){
+  $("recipeModal").style.display = "none";
+  __recipeProductId = null;
+}
+$("btnRecipeClose").addEventListener("click", closeRecipeModal);
+$("recipeModal").addEventListener("click", (e)=>{ if(e.target === $("recipeModal")) closeRecipeModal(); });
+$("btnRecipeSave").addEventListener("click", ()=>{
+  if(!__recipeProductId) return;
+  const rows = Array.from(document.querySelectorAll("#recipeRows [data-rec]")).map(inp=>{
+    return { ingredientId: inp.getAttribute("data-rec"), qty: valNum(inp.value) };
+  }).filter(x=>x.qty>0);
+  sendAction("inventory:setRecipe", { productId: __recipeProductId, recipe: rows });
+  toast("Receta guardada");
+  closeRecipeModal();
+});
+// --- Modificadores (editor simple) ---
+let __modsProductId = null;
+let __mods = [];
+let __groupIdx = 0;
+let __optIdx = 0;
+
+function deepClone(x){
+  try{ return JSON.parse(JSON.stringify(x || [])); }catch{ return []; }
+}
+
+function getProductById(id){
+  const db = window.__db || {};
+  return (db.products||[]).find(p=>p.id===id) || null;
+}
+
+function currentGroup(){ return __mods[__groupIdx] || null; }
+function currentOption(){ const g = currentGroup(); return g && g.options ? (g.options[__optIdx] || null) : null; }
+
+function fillGroupSel(){
+  const sel = $("modGroupSel");
+  const list = __mods.map((g,i)=>`<option value="${i}">${esc(g.name||g.id||("Grupo "+(i+1)))}</option>`).join("");
+  sel.innerHTML = list || '<option value="">Sin grupos</option>';
+  sel.value = __mods.length ? String(__groupIdx) : "";
+  sel.onchange = ()=>{ __groupIdx = Number(sel.value||0); __optIdx = 0; renderGroup(); renderOptions(); };
+}
+
+function renderGroup(){
+  const g = currentGroup();
+  $("modGroupName").value = g ? (g.name||"") : "";
+  $("modGroupMode").value = g ? (g.mode||"multi") : "multi";
+  $("modGroupReq").checked = g ? !!g.required : false;
+  $("modGroupMin").value = g ? String(g.min||0) : "";
+  $("modGroupMax").value = g ? String(g.max||0) : "";
+  $("modGroupKind").value = g ? (g.kind||"") : "";
+}
+
+function fillOptSel(){
+  const sel = $("modOptSel");
+  const g = currentGroup();
+  const list = (g && Array.isArray(g.options)) ? g.options.map((o,i)=>`<option value="${i}">${esc(o.name||o.id||("Opci?n "+(i+1)))}</option>`).join("") : "";
+  sel.innerHTML = list || '<option value="">Sin opciones</option>';
+  sel.value = list ? String(__optIdx) : "";
+  sel.onchange = ()=>{ __optIdx = Number(sel.value||0); renderOption(); };
+}
+
+function formatAddProducts(arr){
+  if(!Array.isArray(arr)) return "";
+  return arr.map(ap=>`${ap.productId}:${ap.qty||1}`).join(", ");
+}
+
+function parseAddProducts(str){
+  return String(str||"").split(",").map(s=>s.trim()).filter(Boolean).map(x=>{
+    const parts = x.split(":");
+    const pid = (parts[0]||"").trim();
+    const qty = Number((parts[1]||"1").trim());
+    return pid ? { productId: pid, qty: (Number.isFinite(qty)&&qty>0)?qty:1 } : null;
+  }).filter(Boolean);
+}
+
+function renderOption(){
+  const o = currentOption();
+  $("modOptId").value = o ? (o.id||"") : "";
+  $("modOptName").value = o ? (o.name||"") : "";
+  $("modOptPrice").value = o ? String(o.price||0) : "";
+  $("modOptCost").value = o ? String(o.cost||0) : "";
+  $("modOptMult").value = o && o.multiplier !== undefined ? String(o.multiplier) : "";
+  $("modOptKind").value = o ? (o.kind||"") : "";
+  $("modOptDefault").checked = o ? !!o.default : false;
+  $("modOptAddProducts").value = o ? formatAddProducts(o.addProducts) : "";
+  $("modOptNote").value = o ? (o.note||"") : "";
+}
+
+function renderOptions(){
+  fillOptSel();
+  renderOption();
+}
+
+function showModsModal(productId){
+  const p = getProductById(productId);
+  if(!p) return;
+  __modsProductId = p.id;
+  __mods = deepClone(p.modifiers || []);
+  __groupIdx = 0;
+  __optIdx = 0;
+  $("modsTitle").textContent = `Modificadores ? ${p.name}`;
+  fillGroupSel();
+  renderGroup();
+  renderOptions();
+  $("modsModal").style.display = "flex";
+}
+
+function hideModsModal(){
+  $("modsModal").style.display = "none";
+  __modsProductId = null;
+  __mods = [];
+}
+
+$("btnModsClose").addEventListener("click", hideModsModal);
+$("modsModal").addEventListener("click", (e)=>{ if(e.target.id==="modsModal") hideModsModal(); });
+
+$("btnGroupAdd").addEventListener("click", ()=>{
+  __mods.push({ id:"grupo_"+Date.now(), name:"Nuevo grupo", mode:"multi", required:false, min:0, max:5, kind:"", options:[] });
+  __groupIdx = __mods.length - 1;
+  __optIdx = 0;
+  fillGroupSel();
+  renderGroup();
+  renderOptions();
+});
+
+$("btnGroupDel").addEventListener("click", ()=>{
+  if(!__mods.length) return;
+  if(!confirm("?Eliminar grupo?") ) return;
+  __mods.splice(__groupIdx, 1);
+  __groupIdx = Math.max(0, __groupIdx - 1);
+  __optIdx = 0;
+  fillGroupSel();
+  renderGroup();
+  renderOptions();
+});
+
+$("btnOptAdd").addEventListener("click", ()=>{
+  const g = currentGroup();
+  if(!g) return toast("Crea un grupo primero");
+  if(!Array.isArray(g.options)) g.options = [];
+  g.options.push({ id:"opcion_"+Date.now(), name:"Nueva opci?n", price:0, cost:0, multiplier:1, default:false, kind:"", addProducts:[], note:"" });
+  __optIdx = g.options.length - 1;
+  fillOptSel();
+  renderOption();
+});
+
+$("btnOptDel").addEventListener("click", ()=>{
+  const g = currentGroup();
+  if(!g || !Array.isArray(g.options) || !g.options.length) return;
+  if(!confirm("?Eliminar opci?n?") ) return;
+  g.options.splice(__optIdx, 1);
+  __optIdx = Math.max(0, __optIdx - 1);
+  fillOptSel();
+  renderOption();
+});
+
+["modGroupName","modGroupMode","modGroupMin","modGroupMax","modGroupKind"].forEach(id=>{
+  $(id).addEventListener("input", ()=>{
+    const g = currentGroup();
+    if(!g) return;
+    g.name = $("modGroupName").value;
+    g.mode = $("modGroupMode").value;
+    g.min = Number($("modGroupMin").value||0);
+    g.max = Number($("modGroupMax").value||0);
+    g.kind = $("modGroupKind").value;
+    fillGroupSel();
+  });
+});
+$("modGroupReq").addEventListener("change", ()=>{ const g = currentGroup(); if(g) g.required = !!$("modGroupReq").checked; });
+
+["modOptId","modOptName","modOptPrice","modOptCost","modOptMult","modOptKind","modOptAddProducts","modOptNote"].forEach(id=>{
+  $(id).addEventListener("input", ()=>{
+    const o = currentOption();
+    if(!o) return;
+    o.id = $("modOptId").value.trim();
+    o.name = $("modOptName").value.trim();
+    o.price = Number($("modOptPrice").value||0);
+    o.cost = Number($("modOptCost").value||0);
+    const mult = $("modOptMult").value.trim();
+    o.multiplier = mult ? Number(mult) : undefined;
+    o.kind = $("modOptKind").value.trim();
+    o.addProducts = parseAddProducts($("modOptAddProducts").value);
+    o.note = $("modOptNote").value.trim();
+    fillOptSel();
+  });
+});
+$("modOptDefault").addEventListener("change", ()=>{ const o = currentOption(); if(o) o.default = !!$("modOptDefault").checked; });
+
+$("btnModsSave").addEventListener("click", ()=>{
+  if(!__modsProductId) return;
+  sendAction("products:setModifiers", { productId: __modsProductId, modifiers: __mods });
+  toast("Modificadores guardados");
+  hideModsModal();
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

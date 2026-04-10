@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#121212"/>
+  <title>NEXA - Inicio</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+      <div class="brand">
+        <div>
+          <h1 id="brandName">NEXA</h1>
+          <p>Inicio</p>
+        </div>
+      </div>
+      <nav class="megaNav">
+        <div class="navGroup">
+          <div class="navLabel">Operacion</div>
+          
+          <a class="pill" href="/mozo_prints.html">Mozo &#128424;</a>
+          <a class="pill" href="/cocina.html">Cocina</a>
+          <a class="pill" href="/salon_pc.html">Salon</a>
+</div>
+        <div class="navGroup">
+          <div class="navLabel">Catalogo</div>
+          <a class="pill" href="/menu.html">Carta</a>
+          <a class="pill" href="/admin_productos.html">Carta/Productos</a>
+          <a class="pill" href="/admin_proveedores.html">Compras</a>
+          <a class="pill" href="/admin_qr.html">QR Mesas</a>
+          
+          
+        </div>
+        <div class="navGroup">
+          <div class="navLabel">Gestion</div>
+          <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          
+        
+            <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
+        
+        <div class="navGroup navProfile navPerfil">
+          
+          <a class="pill icon" href="/profile.html" title="Usuarios" aria-label="Usuarios">&#128100;</a>
+          <a class="pill icon" href="/config.html" title="Ajustes" aria-label="Ajustes">&#9881;</a>
+                    
+          
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <section class="card">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Accesos</h2>
+            <p class="hint">Entradas principales</p>
+          </div>
+          <div class="badge2">Red <strong id="netStatus">.</strong></div>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="flex-wrap:wrap;">
+          <a class="btn primary" href="/salon_pc.html">Salon</a>
+          <a class="btn" href="/mozo.html">Mozo</a>
+          <a class="btn" href="/cocina.html">Cocina</a>
+          <a class="btn" href="/menu.html">Menu</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Operacion</h2>
+            <p class="hint">Flujo diario y visibilidad total</p>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="flex-wrap:wrap;">
+          <a class="btn primary" href="/salon_pc.html">Salon</a>
+          <a class="btn" href="/mozo.html">Mozo</a>
+          <a class="btn" href="/cocina.html">Cocina</a>
+          <a class="btn" href="/menu.html">Menu Cliente</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Catalogo</h2>
+            <p class="hint">Productos, carta, stock y recetas</p>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="flex-wrap:wrap;">
+          <a class="btn" href="/admin_productos.html">Productos</a>
+          <a class="btn" href="/menu.html">Menu Cliente</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Gestion</h2>
+            <p class="hint">Caja, fiscal y compras</p>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="flex-wrap:wrap;">
+          <a class="btn" href="/admin_caja_test.html">Caja/Cierre</a>
+          <a class="btn" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="btn" href="/admin_proveedores.html">Compras/Proveedores</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Control</h2>
+            <p class="hint">Estadisticas, backups y configuracion</p>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="flex-wrap:wrap;">
+          <a class="btn" href="/admin_stats.html">Estadisticas</a>
+          <a class="btn" href="/profile.html">Usuarios</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div>
+            <div class="small">URL recomendada (para el movil)</div>
+            <div style="font-weight:800; margin-top:6px;" id="bestUrl">.</div>
+            <div class="small" style="margin-top:8px;">Copia esta URL o escanea los QR.</div>
+          </div>
+          <div class="badge2"><strong>v9</strong> local</div>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <div class="card" style="flex:1 1 240px; min-width:220px">
+            <div style="font-weight:800">QR Menu cliente</div>
+            <div class="small">Solo lectura</div>
+            <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
+              <img id="qrMenu" alt="QR Menu" width="132" height="132" style="border-radius:14px; border:1px solid var(--line);"/>
+              <div class="small">Escanealo desde el movil para ver el menu.</div>
+            </div>
+          </div>
+          <div class="card" style="flex:1 1 240px; min-width:220px">
+            <div style="font-weight:800">QR Mozo</div>
+            <div class="small">Para tablets y moviles</div>
+            <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
+              <img id="qrMozo" alt="QR Mozo" width="132" height="132" style="border-radius:14px; border:1px solid var(--line);"/>
+              <div class="small">Los mozos pueden tomar pedidos desde tablets o moviles.</div>
+            </div>
+          </div>
+        </div>
+        <div class="small" style="margin-top:10px;">
+          Consejo: si un movil no abre, revisa el firewall de Windows y permite Node.js en red privada.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Resumen de hoy</h2>
+            <p class="hint">Ventas, mesas y caja (estimaciones)</p>
+          </div>
+          <div class="badge2">Fecha <strong id="todayKey">.</strong></div>
+        </div>
+        <div class="kpis" style="margin-top:12px;">
+          <div class="kpi">
+            <div class="label">Ventas (hoy)</div>
+            <div class="value" id="kpiSales">-</div>
+            <div class="sub" id="kpiSalesN">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Tickets abiertos</div>
+            <div class="value" id="kpiOpen">-</div>
+            <div class="sub" id="kpiKitchen">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Mesas ocupadas</div>
+            <div class="value" id="kpiTables">-</div>
+            <div class="sub" id="kpiReady">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Caja (movimientos)</div>
+            <div class="value" id="kpiCash">-</div>
+            <div class="sub" id="kpiCashOpen">-</div>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <a class="btn primary" href="/salon_pc.html" style="flex:1; text-align:center;">Ir a Salon</a>
+          <a class="btn" href="/cocina.html" style="flex:1; text-align:center;">Ir a Cocina</a>
+        </div>
+      </section>
+
+      <section class="card" id="cardDayClose">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Cierre del dia</h2>
+            <p class="hint">Arqueo, balance y reporte diario</p>
+          </div>
+          <div class="badge2" id="dayCloseStatus">-</div>
+        </div>
+        <div class="hr"></div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Ventas</div>
+            <div class="value" id="daySalesTotal">-</div>
+            <div class="sub" id="daySalesCount">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Efectivo esperado</div>
+            <div class="value" id="dayCashExpected">-</div>
+            <div class="sub" id="dayCashDiff">-</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Abiertos</div>
+            <div class="value" id="dayOpenTickets">-</div>
+            <div class="sub" id="dayOpenTables">-</div>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <input class="input" id="closingCash" type="number" inputmode="numeric" placeholder="Efectivo contado (ARS)" style="flex:1; min-width:220px"/>
+          <input class="input" id="closingNote" placeholder="Nota (opcional)" style="flex:2; min-width:220px"/>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="btnCloseDay" style="flex:1">Cerrar dia</button>
+          <button class="btn" id="btnPrintDay" style="flex:1">Imprimir reporte</button>
+          <button class="btn" id="btnDemoDay" style="flex:1">Simular dia</button>
+        </div>
+        <div class="small" style="margin-top:10px; line-height:1.4" id="dayBreakdown">-</div>
+      </section>
+
+      <section class="card" id="cardAttendance">
+        <div class="panelHead" style="padding:0; border:none;">
+          <div>
+            <h2>Presentismo</h2>
+            <p class="hint">Entrada/salida de mozos (hoy)</p>
+          </div>
+          <div class="badge2" id="attCount">-</div>
+        </div>
+        <div class="hr"></div>
+        <div id="attendanceList" class="small">-</div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
+
+    // Conecta al estado para KPIs
+    connect("admin", "Admin");
+
+    const btnCloseDay = document.getElementById("btnCloseDay");
+    const btnPrintDay = document.getElementById("btnPrintDay");
+    const btnDemoDay  = document.getElementById("btnDemoDay");
+
+    btnPrintDay.addEventListener("click", () => {
+      const today = (new Date()).toISOString().slice(0,10);
+      window.open(`/print.html?day=${encodeURIComponent(today)}`, "_blank");
+    });
+
+    btnDemoDay.addEventListener("click", () => {
+      sendAction("demo:generateSales", { count: 25 });
+      toast("Dia simulado: se agregaron ventas demo.");
+    });
+
+    btnCloseDay.addEventListener("click", () => {
+      const today = (new Date()).toISOString().slice(0,10);
+      const cash = Number(document.getElementById("closingCash").value || 0);
+      const note = String(document.getElementById("closingNote").value || "");
+      if (!Number.isFinite(cash)) return alert("Pone el efectivo contado.");
+      if (!confirm("Cerrar el dia? Se guardara el arqueo y el balance.")) return;
+      sendAction("day:close", { closingCash: cash, note, closedBy: "Admin" });
+      toast("Cierre del dia registrado.");
+      setTimeout(()=>window.open(`/print.html?day=${encodeURIComponent(today)}`, "_blank"), 250);
+    });
+
+    function fmt(n){ return money(n); }
+
+    function render(db, connected){
+      document.getElementById("brandName").textContent = (db && db.settings && db.settings.restaurantName) ? db.settings.restaurantName : "NEXA";
+      const today = (new Date()).toISOString().slice(0,10);
+      document.getElementById("todayKey").textContent = today;
+
+      const salesToday = (db.sales||[]).filter(s => s.dateKey === today);
+      const totalSales = salesToday.reduce((a,s)=>a+Number(s.total||0),0);
+      document.getElementById("kpiSales").textContent = fmt(totalSales);
+      document.getElementById("kpiSalesN").textContent = (salesToday.length||0) + " ventas";
+
+      const openTickets = (db.tickets||[]).filter(t => t.status === "abierta");
+      document.getElementById("kpiOpen").textContent = openTickets.length;
+      const kitchen = openTickets.filter(t => ["recibido","en_preparacion","listo"].includes(t.kitchenStatus));
+      document.getElementById("kpiKitchen").textContent = kitchen.length + " en cocina";
+
+      const busyTables = (db.tables||[]).filter(t => t.status === "ocupada" || t.status === "lista" || t.status === "borrador");
+      const readyTables = (db.tables||[]).filter(t => t.status === "lista");
+      document.getElementById("kpiTables").textContent = busyTables.length;
+      document.getElementById("kpiReady").textContent = readyTables.length + " listas";
+
+      const cashMov = (db.cash && db.cash.movements) ? db.cash.movements.filter(m => m.dateKey === today) : [];
+      const cashTotal = cashMov.reduce((a,m)=>a + (m.type==="in" ? Number(m.amount||0) : -Number(m.amount||0)), 0);
+      document.getElementById("kpiCash").textContent = fmt(cashTotal);
+      const openSes = (db.cash && db.cash.sessions) ? db.cash.sessions.find(s => s.dateKey === today && !s.closedAt) : null;
+      document.getElementById("kpiCashOpen").textContent = openSes ? "Caja abierta" : "Caja cerrada";
+
+      const closure = (db.dayClosures||[]).find(c => c.dateKey === today) || null;
+      const dayStatusEl = document.getElementById("dayCloseStatus");
+      dayStatusEl.textContent = closure ? "CERRADO" : "ABIERTO";
+      document.getElementById("daySalesTotal").textContent = fmt(totalSales);
+      document.getElementById("daySalesCount").textContent = (salesToday.length||0) + " ventas";
+
+      const expectedCash = cashMov.reduce((a,m)=>{
+        const amt = Number(m.amount||0);
+        if ((m.method||"") !== "efectivo") return a;
+        return a + (m.type==="in" ? amt : -amt);
+      },0);
+      document.getElementById("dayCashExpected").textContent = fmt(expectedCash);
+
+      const diff = closure ? Number(closure.difference||0) : null;
+      document.getElementById("dayCashDiff").textContent = closure ? ("Diferencia: " + fmt(diff)) : "-";
+
+      document.getElementById("dayOpenTickets").textContent = openTickets.length;
+      document.getElementById("dayOpenTables").textContent = (busyTables.length) + " mesas";
+
+      const byPay = {};
+      for (const s of salesToday) byPay[s.paymentMethod||"otro"] = (byPay[s.paymentMethod||"otro"]||0) + Number(s.total||0);
+      const parts = Object.keys(byPay).map(k=> `${k}: ${fmt(byPay[k])}`).join(" | ");
+      document.getElementById("dayBreakdown").textContent = parts || "Sin ventas todavia.";
+
+      document.getElementById("btnCloseDay").disabled = !!closure;
+      document.getElementById("btnCloseDay").style.opacity = closure ? .55 : 1;
+
+      const att = (db.attendance||[]).filter(a => a.dateKey === today);
+      document.getElementById("attCount").textContent = att.length + " marcas";
+      const empById = new Map(((db.people&&db.people.employees)||[]).map(e=>[e.id,e]));
+      const lastByEmp = new Map();
+      for (const a of att) if(!lastByEmp.has(a.employeeId)) lastByEmp.set(a.employeeId, a);
+      const rows = Array.from(lastByEmp.entries()).map(([eid, a])=>{
+        const e = empById.get(eid);
+        const name = e ? e.name : eid;
+        const hh = new Date(a.at).toLocaleTimeString("es-AR", {hour:"2-digit", minute:"2-digit"});
+        return `- <strong>${esc(name)}</strong> - ${a.type==="in" ? "Entrada" : "Salida"} (${hh})`;
+      });
+      document.getElementById("attendanceList").innerHTML = rows.length ? rows.join("<br>") : "<span class=\"small\">Sin marcas hoy.</span>";
+
+      document.getElementById("netStatus").textContent = connected ? "OK" : "Reconectando.";
+    }
+
+    onState(render);
+
+    fetch("/api/info").then(r=>r.json()).then(info=>{
+      const preferred = info.preferred || ("http://localhost:" + info.port);
+      document.getElementById("bestUrl").textContent = preferred;
+      document.getElementById("qrMenu").src = "/qr.png?u=" + encodeURIComponent(preferred + "/menu.html?qr=1");
+      document.getElementById("qrMozo").src = "/qr.png?u=" + encodeURIComponent(preferred + "/login.html?role=mozo&next=/mozo.html");
+    }).catch(()=>{
+      document.getElementById("netStatus").textContent = "OFF";
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
