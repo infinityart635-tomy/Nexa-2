@@ -15,8 +15,10 @@
   const NOTIF_SEEN_KEY = "resto_notifications_seen";
   const THEME_KEY = "nexa_theme";
   const ACTIVITY_KEY = "nexa_last_active_at";
+  const PWA_DISMISSED_KEY = "nexa_pwa_install_dismissed";
   const THEMES = ["noir","ember","mint","cobalt","sand"];
   let notifications = [];
+  let installPromptEvent = null;
 
   function loadNotifications(){
     try{
@@ -277,6 +279,107 @@
     setTimeout(()=>{ el.classList.remove("show"); setTimeout(()=>el.remove(), 250); }, 2600);
   }
 
+  function isStandaloneApp(){
+    try{
+      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }catch{
+      return false;
+    }
+  }
+  function isInstallEligibleContext(){
+    return location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  }
+  function ensurePwaHead(){
+    if(!document.querySelector('link[rel="manifest"]')){
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = "/manifest.webmanifest";
+      document.head.appendChild(link);
+    }
+    if(!document.querySelector('meta[name="theme-color"]')){
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = "#121212";
+      document.head.appendChild(meta);
+    }
+    if(!document.querySelector('link[rel="icon"]')){
+      const icon = document.createElement("link");
+      icon.rel = "icon";
+      icon.href = "/icons/icon-192.png";
+      icon.type = "image/png";
+      document.head.appendChild(icon);
+    }
+  }
+  function ensureInstallPrompt(){
+    if(document.getElementById("pwaInstallCard")) return document.getElementById("pwaInstallCard");
+    const card = document.createElement("div");
+    card.id = "pwaInstallCard";
+    card.className = "pwaInstallCard";
+    card.style.display = "none";
+    card.innerHTML = `
+      <div class="pwaInstallTitle">Instalar NEXA</div>
+      <div class="pwaInstallText">Puedes agregar la app al escritorio y abrirla como programa.</div>
+      <div class="pwaInstallActions">
+        <button class="btn primary" id="pwaInstallBtn" type="button">Instalar</button>
+        <button class="btn" id="pwaInstallClose" type="button">Ahora no</button>
+      </div>
+    `;
+    document.body.appendChild(card);
+    document.getElementById("pwaInstallBtn").addEventListener("click", triggerInstallPrompt);
+    document.getElementById("pwaInstallClose").addEventListener("click", ()=>{
+      try{ localStorage.setItem(PWA_DISMISSED_KEY, String(Date.now())); }catch{}
+      hideInstallPrompt();
+    });
+    return card;
+  }
+  function showInstallPrompt(){
+    const card = ensureInstallPrompt();
+    if(!installPromptEvent || isStandaloneApp() || !isInstallEligibleContext()) return;
+    card.style.display = "block";
+  }
+  function hideInstallPrompt(){
+    const card = document.getElementById("pwaInstallCard");
+    if(card) card.style.display = "none";
+  }
+  async function triggerInstallPrompt(){
+    if(!installPromptEvent) return;
+    hideInstallPrompt();
+    const promptEvent = installPromptEvent;
+    installPromptEvent = null;
+    promptEvent.prompt();
+    try{
+      const choice = await promptEvent.userChoice;
+      if(choice && choice.outcome === "accepted"){
+        toast("NEXA se agrego al escritorio.", "success");
+      } else {
+        try{ localStorage.setItem(PWA_DISMISSED_KEY, String(Date.now())); }catch{}
+      }
+    }catch{}
+  }
+  function registerPwa(){
+    ensurePwaHead();
+    if(!isInstallEligibleContext() || isStandaloneApp()) return;
+    if("serviceWorker" in navigator){
+      window.addEventListener("load", ()=>{
+        navigator.serviceWorker.register("/sw.js").catch(()=>{});
+      }, { once: true });
+    }
+    window.addEventListener("beforeinstallprompt", (ev)=>{
+      ev.preventDefault();
+      installPromptEvent = ev;
+      const dismissedAt = Number(localStorage.getItem(PWA_DISMISSED_KEY) || 0);
+      if(!dismissedAt || (Date.now() - dismissedAt) > 86400000){
+        showInstallPrompt();
+      }
+    });
+    window.addEventListener("appinstalled", ()=>{
+      installPromptEvent = null;
+      hideInstallPrompt();
+      try{ localStorage.removeItem(PWA_DISMISSED_KEY); }catch{}
+      toast("App instalada correctamente.", "success");
+    });
+  }
+
   // Aviso global de caja/turno abierto al reabrir la app
   const CASH_NOTICE_KEY = "nexa_cash_open_notice";
   async function checkCashOpenNotice(){
@@ -376,9 +479,11 @@
   if(document.readyState === "loading"){
     document.addEventListener("DOMContentLoaded", ()=>{
       ensureNotifDock();
+      registerPwa();
     });
   }else{
     ensureNotifDock();
+    registerPwa();
   }
   window.RestoApp = { connect, onState, onMessage, sendAction, money, byId, esc, toast, getNotifications, clearNotifications, setTheme, getTheme, themes: THEMES.slice() };
 
