@@ -11,14 +11,14 @@
   <style>
     .top{display:none;}
     .accessShell{
-      min-height:100%;
+      min-height:100dvh;
       display:grid;
       place-items:center;
       padding:0;
     }
     .authCard{
       width:min(100%, 1180px);
-      min-height:100vh;
+      min-height:100dvh;
       border:none;
       border-radius:0;
       background:
@@ -26,7 +26,7 @@
         radial-gradient(circle at 85% 15%, rgba(120,220,255,.08), transparent 22%),
         linear-gradient(180deg, rgba(8,10,14,.96), rgba(10,12,18,.98));
       box-shadow:none;
-      padding:34px 24px;
+      padding:18px 20px;
       display:grid;
       align-content:center;
       position:relative;
@@ -45,7 +45,7 @@
       gap:14px;
       align-items:flex-start;
       flex-wrap:wrap;
-      margin-bottom:14px;
+      margin-bottom:10px;
     }
     .brandBlock{
       display:flex;
@@ -69,8 +69,8 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
     .authEyebrow{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);}
-    .authTitle{margin:2px 0 0; font-size:28px; line-height:1.02; font-weight:900;}
-    .authSub{margin-top:4px; max-width:30ch; color:var(--muted); line-height:1.35;}
+    .authTitle{margin:2px 0 0; font-size:26px; line-height:1.02; font-weight:900;}
+    .authSub{margin-top:3px; max-width:30ch; color:var(--muted); line-height:1.3; font-size:14px;}
     .statusBar{
       margin:0;
       padding:8px 10px;
@@ -94,7 +94,7 @@
     .tabBtn{
       border:1px solid transparent;
       border-radius:8px;
-      padding:9px 10px;
+      padding:8px 10px;
       background:transparent;
       color:var(--text);
       font-size:11px;
@@ -132,7 +132,7 @@
       background:transparent;
     }
     .panel.active{display:block;}
-    .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+    .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px;}
     @media (max-width: 720px){
       .formGrid{grid-template-columns:minmax(0,1fr);}
     }
@@ -146,7 +146,7 @@
     }
     .authCard .input{
       border-radius:8px;
-      padding:12px 13px;
+      padding:10px 12px;
       background:rgba(0,0,0,.22);
       border-color:rgba(255,255,255,.10);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
@@ -178,7 +178,7 @@
     }
     .fieldHint{display:none;}
     .readonlyBox{min-height:44px; display:flex; align-items:center; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.02); line-height:1.35;}
-    .formActions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .formActions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
     .authCard .btn{
       border-radius:8px;
       padding:10px 14px;
@@ -195,16 +195,17 @@
     .miniBox{display:none;}
     .registerShowcase{
       display:grid;
-      grid-template-columns:minmax(0,1.15fr) minmax(360px, 440px);
-      gap:28px;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      gap:18px;
       align-items:stretch;
+      min-height:calc(100dvh - 36px);
     }
     .registerHero{
       position:relative;
       overflow:hidden;
-      padding:44px 22px 40px;
-      border-radius:34px;
-      min-height:680px;
+      padding:24px 20px 20px;
+      border-radius:28px;
+      min-height:0;
       background:
         radial-gradient(circle at top left, rgba(120,240,190,.14), transparent 30%),
         radial-gradient(circle at 80% 20%, rgba(120,220,255,.12), transparent 28%),
@@ -214,6 +215,7 @@
       box-shadow:0 28px 60px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.04);
       display:grid;
       align-content:start;
+      height:100%;
     }
     .registerHeroBrand{
       display:inline-flex;
@@ -237,16 +239,16 @@
       box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
     }
     .registerHeroEyebrow{
-      margin-top:44px;
-      font-size:13px;
+      margin-top:18px;
+      font-size:11px;
       letter-spacing:.16em;
       text-transform:uppercase;
       color:rgba(232,239,248,.62);
     }
     .registerHeroTitle{
-      margin:16px 0 0;
-      font-size:clamp(44px, 6vw, 72px);
-      line-height:.96;
+      margin:10px 0 0;
+      font-size:clamp(34px, 4.4vw, 58px);
+      line-height:.92;
       font-weight:900;
       letter-spacing:-.05em;
       max-width:9ch;
@@ -258,9 +260,9 @@
       padding-bottom:6px;
     }
     .registerHeroVisual{
-      margin-top:30px;
-      min-height:210px;
-      border-radius:32px 32px 28px 28px;
+      margin-top:16px;
+      min-height:170px;
+      border-radius:26px 26px 22px 22px;
       background:
         radial-gradient(circle at 20% 10%, rgba(255,255,255,.08), transparent 22%),
         linear-gradient(180deg, rgba(18,22,30,.96), rgba(8,12,18,.96));
@@ -272,17 +274,17 @@
       position:absolute;
       left:-8%;
       right:-8%;
-      top:-68px;
-      height:138px;
+      top:-54px;
+      height:112px;
       border-radius:0 0 50% 50%;
       background:linear-gradient(180deg, rgba(120,240,190,.92), rgba(120,220,255,.82));
     }
     .registerHeroDevices{
       position:absolute;
-      inset:auto 34px 28px;
+      inset:auto 24px 20px;
       display:flex;
       align-items:flex-end;
-      gap:18px;
+      gap:14px;
       justify-content:center;
     }
     .registerDevice{
@@ -301,9 +303,9 @@
       background:
         linear-gradient(180deg, rgba(232,240,248,.94), rgba(211,220,232,.96));
     }
-    .registerPhone{ width:72px; height:132px; }
-    .registerTablet{ width:176px; height:110px; }
-    .registerDesktop{ width:198px; height:122px; }
+    .registerPhone{ width:60px; height:110px; }
+    .registerTablet{ width:150px; height:94px; }
+    .registerDesktop{ width:170px; height:104px; }
     .registerScreenBars{
       position:absolute;
       inset:20px 16px auto;
@@ -330,20 +332,20 @@
       opacity:.9;
     }
     .registerBenefits{
-      margin-top:28px;
+      margin-top:16px;
       display:grid;
-      gap:18px;
+      gap:12px;
       color:#e7edf5;
     }
     .registerBenefitsTitle{
-      font-size:20px;
+      font-size:17px;
       font-weight:800;
       line-height:1.2;
     }
     .registerBenefitsGrid{
       display:grid;
       grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:14px 18px;
+      gap:10px 14px;
     }
     .registerBenefit{
       display:grid;
@@ -352,30 +354,30 @@
       align-items:start;
     }
     .registerBenefitIcon{
-      width:34px;
-      height:34px;
-      border-radius:12px;
+      width:30px;
+      height:30px;
+      border-radius:10px;
       display:grid;
       place-items:center;
       background:rgba(255,255,255,.04);
       color:#8deec2;
       border:1px solid rgba(120,240,190,.18);
       box-shadow:0 8px 16px rgba(0,0,0,.18);
-      font-size:16px;
+      font-size:14px;
     }
     .registerBenefitText{
-      font-size:15px;
-      line-height:1.35;
+      font-size:13px;
+      line-height:1.28;
       color:rgba(232,239,248,.74);
     }
     .registerSocial{
-      margin-top:22px;
+      margin-top:12px;
       display:grid;
-      gap:14px;
+      gap:10px;
     }
     .registerSocialTitle{
-      font-size:18px;
-      line-height:1.3;
+      font-size:15px;
+      line-height:1.25;
       color:#e7edf5;
     }
     .registerSocialTitle strong{
@@ -387,16 +389,16 @@
       gap:12px;
     }
     .registerLogo{
-      min-height:74px;
-      border-radius:18px;
+      min-height:54px;
+      border-radius:14px;
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.08);
       display:grid;
       place-items:center;
       text-align:center;
-      padding:10px;
+      padding:8px;
       color:rgba(232,239,248,.62);
-      font-size:12px;
+      font-size:11px;
       font-weight:800;
       line-height:1.15;
     }
@@ -408,10 +410,11 @@
       color:#eaf1f7;
       border:1px solid rgba(255,255,255,.08);
       box-shadow:0 24px 48px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
-      padding:26px 24px 24px;
+      padding:18px 18px 16px;
       display:grid;
       align-content:start;
-      min-height:680px;
+      min-height:0;
+      height:100%;
     }
     .registerFormHead{
       display:flex;
@@ -427,17 +430,18 @@
       color:rgba(232,239,248,.56);
     }
     .registerFormTitle{
-      margin:8px 0 0;
-      font-size:34px;
+      margin:5px 0 0;
+      font-size:26px;
       line-height:1.02;
       font-weight:900;
       color:#f2f6fb;
     }
     .registerFormSub{
-      margin-top:6px;
+      margin-top:3px;
       color:rgba(232,239,248,.72);
-      line-height:1.45;
+      line-height:1.28;
       max-width:28ch;
+      font-size:14px;
     }
     .registerBackBtn{
       padding:10px 14px;
@@ -483,13 +487,13 @@
       background:#161a1e;
     }
     .registerHint{
-      margin-top:8px;
+      margin-top:5px;
       color:rgba(232,239,248,.56);
       line-height:1.4;
-      font-size:13px;
+      font-size:12px;
     }
     .registerTerms{
-      margin-top:14px;
+      margin-top:8px;
       display:grid;
       gap:10px;
     }
@@ -499,8 +503,8 @@
       gap:10px;
       align-items:flex-start;
       color:rgba(232,239,248,.66);
-      font-size:14px;
-      line-height:1.45;
+      font-size:12px;
+      line-height:1.28;
     }
     .registerTermsRow input{
       margin-top:3px;
@@ -517,7 +521,7 @@
       text-decoration:underline;
     }
     .registerFormCard .formActions{
-      margin-top:16px;
+      margin-top:10px;
     }
     .registerFormCard .btn.primary{
       width:100%;
@@ -526,8 +530,8 @@
       background:linear-gradient(180deg, rgba(120,240,190,.20), rgba(120,220,255,.10));
       color:#ecfff6;
       box-shadow:0 14px 24px rgba(0,0,0,.22);
-      padding:14px 18px;
-      font-size:14px;
+      padding:11px 14px;
+      font-size:12px;
       font-weight:900;
     }
     .registerFormCard .btn.flat{
@@ -536,16 +540,16 @@
       border-color:rgba(255,255,255,.12);
     }
     .registerFootNote{
-      margin-top:10px;
+      margin-top:8px;
       text-align:center;
       color:rgba(232,239,248,.56);
-      font-size:13px;
+      font-size:12px;
     }
     .registerLoginLink{
-      margin-top:22px;
+      margin-top:10px;
       text-align:center;
       color:rgba(232,239,248,.66);
-      font-size:15px;
+      font-size:13px;
     }
     .registerLoginLink button{
       border:none;
@@ -557,10 +561,20 @@
       font:inherit;
     }
     @media (max-height: 820px){
-      .authCard{padding:14px;}
-      .panel{padding:12px;}
+      .authCard{padding:12px 14px;}
       .authTitle{font-size:24px;}
       .brandDot{width:36px; height:36px;}
+      .registerShowcase{min-height:calc(100dvh - 24px);}
+      .registerHero{padding:20px 18px 16px;}
+      .registerHeroTitle{font-size:clamp(30px, 4vw, 48px);}
+      .registerHeroVisual{min-height:142px;}
+      .registerBenefitsTitle{font-size:15px;}
+      .registerBenefitText{font-size:12px;}
+      .registerSocial{display:none;}
+      .registerFormCard{padding:16px;}
+    }
+    @media (min-width: 981px){
+      body{overflow:hidden;}
     }
     @media (max-width: 560px){
       .authCard{padding:18px 12px;}
@@ -574,15 +588,19 @@
     @media (max-width: 980px){
       .authCard{
         padding:18px 14px 24px;
+        min-height:auto;
       }
       .registerShowcase{
         grid-template-columns:minmax(0,1fr);
+        min-height:auto;
       }
       .registerHero{
         min-height:520px;
+        height:auto;
       }
       .registerFormCard{
         min-height:auto;
+        height:auto;
       }
       .registerSocialRow{
         grid-template-columns:repeat(2, minmax(0,1fr));
@@ -656,7 +674,7 @@
                 </div>
                 <div class="registerBenefit">
                   <div class="registerBenefitIcon">+</div>
-                  <div class="registerBenefitText">Integracion con apps de delivery</div>
+                  <div class="registerBenefitText">Gestion de productos y categorias</div>
                 </div>
                 <div class="registerBenefit">
                   <div class="registerBenefitIcon">=</div>
@@ -664,20 +682,11 @@
                 </div>
                 <div class="registerBenefit">
                   <div class="registerBenefitIcon">@</div>
-                  <div class="registerBenefitText">Carta QR y toma de pedidos</div>
+                  <div class="registerBenefitText">Salon con mesas y estados en tiempo real</div>
                 </div>
                 <div class="registerBenefit">
                   <div class="registerBenefitIcon">%</div>
-                  <div class="registerBenefitText">Usuarios, roles y estadisticas</div>
-                </div>
-              </div>
-              <div class="registerSocial">
-                <div class="registerSocialTitle">Mas de <strong>25.000 negocios</strong> confian en soluciones modernas.</div>
-                <div class="registerSocialRow">
-                  <div class="registerLogo">PISTA<br/>URBANA</div>
-                  <div class="registerLogo">REFUGIO<br/>DE NAVEGANTES</div>
-                  <div class="registerLogo">ROOT<br/>COFFEE HOUSE</div>
-                  <div class="registerLogo">CHOCOLAT<br/>VALMYNIA</div>
+                  <div class="registerBenefitText">Usuarios, roles, fiscal y estadisticas</div>
                 </div>
               </div>
             </div>
