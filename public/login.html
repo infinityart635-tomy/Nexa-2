@@ -16,6 +16,10 @@
       place-items:center;
       padding:20px 0;
     }
+    body[data-auth-view="register"] .accessShell{
+      place-items:stretch;
+      padding:0;
+    }
     .authCard{
       width:min(100%, 520px);
       border:1px solid rgba(255,255,255,.10);
@@ -30,12 +34,26 @@
       position:relative;
       overflow:hidden;
     }
+    body[data-auth-view="register"] .authCard{
+      width:min(100%, 1180px);
+      min-height:100vh;
+      border:none;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+      padding:34px 24px;
+      display:grid;
+      align-content:center;
+    }
     .authCard::before{
       content:"";
       position:absolute;
       inset:0 0 auto;
       height:3px;
       background:linear-gradient(90deg, rgba(120,240,190,.92), rgba(120,220,255,.72));
+    }
+    body[data-auth-view="register"] .authCard::before{
+      display:none;
     }
     .authHeader{
       display:flex;
@@ -130,6 +148,13 @@
       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
     }
     .panel.active{display:block;}
+    body[data-auth-view="register"] .panel[data-panel="register"]{
+      display:block;
+      margin-top:18px;
+      padding:0;
+      border:none;
+      background:transparent;
+    }
     .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
     @media (max-width: 720px){
       .formGrid{grid-template-columns:minmax(0,1fr);}
@@ -191,6 +216,376 @@
     .btn.flat{border-color:rgba(255,255,255,.12); background:rgba(255,255,255,.02);}
     .sectionNote{display:none;}
     .miniBox{display:none;}
+    .registerShowcase{
+      display:none;
+    }
+    body[data-auth-view="register"] .authHeader,
+    body[data-auth-view="register"] .tabRow,
+    body[data-auth-view="register"] .panel[data-panel="login"],
+    body[data-auth-view="register"] .panel[data-panel="recover"]{
+      display:none;
+    }
+    body[data-auth-view="register"] #msgBox{
+      max-width:430px;
+      margin:0 0 14px auto;
+    }
+    body[data-auth-view="register"] .registerShowcase{
+      display:grid;
+      grid-template-columns:minmax(0,1.15fr) minmax(360px, 440px);
+      gap:28px;
+      align-items:stretch;
+    }
+    .registerHero{
+      position:relative;
+      overflow:hidden;
+      padding:44px 22px 40px;
+      border-radius:34px;
+      min-height:680px;
+      background:
+        radial-gradient(circle at top left, rgba(255,87,34,.18), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(255,130,82,.16), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,245,242,.98));
+      color:#242833;
+      box-shadow:0 28px 60px rgba(0,0,0,.24);
+      display:grid;
+      align-content:start;
+    }
+    .registerHeroBrand{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      color:#ff5a2f;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size:14px;
+    }
+    .registerHeroMark{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:#fff2ed;
+      border:1px solid rgba(255,90,47,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .registerHeroEyebrow{
+      margin-top:44px;
+      font-size:13px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:#667085;
+    }
+    .registerHeroTitle{
+      margin:16px 0 0;
+      font-size:clamp(44px, 6vw, 72px);
+      line-height:.96;
+      font-weight:900;
+      letter-spacing:-.05em;
+      max-width:9ch;
+    }
+    .registerHeroTitleAccent{
+      color:#ff5a2f;
+      display:inline-block;
+      border-bottom:5px solid #ff5a2f;
+      padding-bottom:6px;
+    }
+    .registerHeroVisual{
+      margin-top:30px;
+      min-height:210px;
+      border-radius:32px 32px 28px 28px;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.32), transparent 22%),
+        linear-gradient(180deg, rgba(255,96,46,.96), rgba(255,74,28,.96));
+      position:relative;
+      overflow:hidden;
+    }
+    .registerHeroWave{
+      position:absolute;
+      left:-8%;
+      right:-8%;
+      top:-68px;
+      height:138px;
+      border-radius:0 0 50% 50%;
+      background:rgba(255,255,255,.96);
+    }
+    .registerHeroDevices{
+      position:absolute;
+      inset:auto 34px 28px;
+      display:flex;
+      align-items:flex-end;
+      gap:18px;
+      justify-content:center;
+    }
+    .registerDevice{
+      border-radius:20px;
+      background:#20242f;
+      border:3px solid #0e1117;
+      box-shadow:0 16px 26px rgba(0,0,0,.24);
+      position:relative;
+      overflow:hidden;
+    }
+    .registerDevice::before{
+      content:"";
+      position:absolute;
+      inset:10px;
+      border-radius:10px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(231,235,241,.96));
+    }
+    .registerPhone{ width:72px; height:132px; }
+    .registerTablet{ width:176px; height:110px; }
+    .registerDesktop{ width:198px; height:122px; }
+    .registerScreenBars{
+      position:absolute;
+      inset:20px 16px auto;
+      height:10px;
+      display:flex;
+      gap:5px;
+      z-index:1;
+    }
+    .registerScreenBars span{
+      flex:1;
+      border-radius:999px;
+      background:#ff7f59;
+      opacity:.9;
+    }
+    .registerChart{
+      position:absolute;
+      left:18px;
+      right:18px;
+      bottom:20px;
+      height:48px;
+      z-index:1;
+      background:
+        linear-gradient(120deg, transparent 0 8%, #9fd6b5 8% 11%, transparent 11% 18%, #9fd6b5 18% 21%, transparent 21% 27%, #76aeea 27% 30%, transparent 30% 39%, #76aeea 39% 43%, transparent 43% 52%, #9fd6b5 52% 56%, transparent 56%);
+      opacity:.9;
+    }
+    .registerBenefits{
+      margin-top:28px;
+      display:grid;
+      gap:18px;
+      color:#2c3342;
+    }
+    .registerBenefitsTitle{
+      font-size:20px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .registerBenefitsGrid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px 18px;
+    }
+    .registerBenefit{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr);
+      gap:12px;
+      align-items:start;
+    }
+    .registerBenefitIcon{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:#fff;
+      color:#ff5a2f;
+      border:1px solid rgba(255,90,47,.16);
+      box-shadow:0 8px 16px rgba(255,90,47,.08);
+      font-size:16px;
+    }
+    .registerBenefitText{
+      font-size:15px;
+      line-height:1.35;
+      color:#3a4151;
+    }
+    .registerSocial{
+      margin-top:22px;
+      display:grid;
+      gap:14px;
+    }
+    .registerSocialTitle{
+      font-size:18px;
+      line-height:1.3;
+      color:#2c3342;
+    }
+    .registerSocialTitle strong{
+      font-weight:900;
+    }
+    .registerSocialRow{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:12px;
+    }
+    .registerLogo{
+      min-height:74px;
+      border-radius:18px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(36,40,51,.08);
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:10px;
+      color:#6b7280;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.15;
+    }
+    .registerFormCard{
+      border-radius:28px;
+      background:rgba(255,255,255,.98);
+      color:#283042;
+      box-shadow:0 24px 48px rgba(0,0,0,.16);
+      padding:26px 24px 24px;
+      display:grid;
+      align-content:start;
+      min-height:680px;
+    }
+    .registerFormHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .registerFormKicker{
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#8a94a6;
+    }
+    .registerFormTitle{
+      margin:8px 0 0;
+      font-size:34px;
+      line-height:1.02;
+      font-weight:900;
+      color:#242833;
+    }
+    .registerFormSub{
+      margin-top:6px;
+      color:#667085;
+      line-height:1.45;
+      max-width:28ch;
+    }
+    .registerBackBtn{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(36,40,51,.12);
+      background:#fff;
+      color:#31384a;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    body[data-auth-view="register"] .registerFormCard .small{
+      color:#8a94a6;
+    }
+    body[data-auth-view="register"] .registerFormCard .input{
+      color:#283042;
+      background:#fff;
+      border:1px solid #d0d5dd;
+      box-shadow:none;
+    }
+    body[data-auth-view="register"] .registerFormCard .input::placeholder{
+      color:#98a2b3;
+    }
+    body[data-auth-view="register"] .registerFormCard .input:focus{
+      border-color:#ff5a2f;
+      box-shadow:0 0 0 3px rgba(255,90,47,.14);
+    }
+    body[data-auth-view="register"] .registerFormCard select.input{
+      color:#283042;
+      background:
+        linear-gradient(45deg, transparent 50%, rgba(40,48,66,.76) 50%),
+        linear-gradient(135deg, rgba(40,48,66,.76) 50%, transparent 50%),
+        linear-gradient(180deg, #ffffff, #ffffff);
+      background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px),
+        0 0;
+      background-size:6px 6px, 6px 6px, 100% 100%;
+      background-repeat:no-repeat;
+    }
+    body[data-auth-view="register"] .registerFormCard select.input option{
+      color:#283042;
+      background:#ffffff;
+    }
+    .registerHint{
+      margin-top:8px;
+      color:#8a94a6;
+      line-height:1.4;
+      font-size:13px;
+    }
+    .registerTerms{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+    }
+    .registerTermsRow{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr);
+      gap:10px;
+      align-items:flex-start;
+      color:#667085;
+      font-size:14px;
+      line-height:1.45;
+    }
+    .registerTermsRow input{
+      margin-top:3px;
+      width:18px;
+      height:18px;
+      accent-color:#ff5a2f;
+    }
+    .registerTermsRow a{
+      color:#ff5a2f;
+      font-weight:700;
+      text-decoration:none;
+    }
+    .registerTermsRow a:hover{
+      text-decoration:underline;
+    }
+    body[data-auth-view="register"] .registerFormCard .formActions{
+      margin-top:16px;
+    }
+    body[data-auth-view="register"] .registerFormCard .btn.primary{
+      width:100%;
+      min-width:180px;
+      border-color:#ff5a2f;
+      background:linear-gradient(180deg, #ff6a3d, #ff5122);
+      color:#fff7f2;
+      box-shadow:0 14px 24px rgba(255,90,47,.18);
+      padding:14px 18px;
+      font-size:14px;
+      font-weight:900;
+    }
+    body[data-auth-view="register"] .registerFormCard .btn.flat{
+      background:#fff;
+      color:#344054;
+      border-color:#d0d5dd;
+    }
+    .registerFootNote{
+      margin-top:10px;
+      text-align:center;
+      color:#8a94a6;
+      font-size:13px;
+    }
+    .registerLoginLink{
+      margin-top:22px;
+      text-align:center;
+      color:#667085;
+      font-size:15px;
+    }
+    .registerLoginLink button{
+      border:none;
+      background:transparent;
+      color:#ff5a2f;
+      font-weight:800;
+      cursor:pointer;
+      padding:0;
+      font:inherit;
+    }
     @media (max-height: 820px){
       .authCard{padding:14px;}
       .panel{padding:12px;}
@@ -205,6 +600,49 @@
       .tabRow{grid-template-columns:1fr;}
       .statusBar{width:100%; text-align:center;}
       .formActions .btn{width:100%;}
+    }
+    @media (max-width: 980px){
+      body[data-auth-view="register"] .authCard{
+        padding:18px 14px 24px;
+      }
+      body[data-auth-view="register"] .registerShowcase{
+        grid-template-columns:minmax(0,1fr);
+      }
+      .registerHero{
+        min-height:520px;
+      }
+      .registerFormCard{
+        min-height:auto;
+      }
+      .registerSocialRow{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+    }
+    @media (max-width: 680px){
+      .registerHero{
+        padding:26px 18px 24px;
+        min-height:440px;
+      }
+      .registerHeroTitle{
+        font-size:44px;
+      }
+      .registerHeroVisual{
+        min-height:170px;
+      }
+      .registerHeroDevices{
+        gap:10px;
+        inset:auto 16px 18px;
+      }
+      .registerPhone{ width:50px; height:94px; }
+      .registerTablet{ width:124px; height:80px; }
+      .registerDesktop{ width:138px; height:88px; }
+      .registerFormCard{
+        padding:20px 16px 18px;
+        border-radius:22px;
+      }
+      .registerBenefitsGrid{
+        grid-template-columns:minmax(0,1fr);
+      }
     }
   </style>
 </head>
@@ -246,50 +684,135 @@
       </section>
 
       <section class="panel" data-panel="register">
-        <div class="formGrid">
-          <div class="field">
-            <label class="small" for="registerName">Nombre</label>
-            <input id="registerName" class="input" autocomplete="name" placeholder="Tu nombre"/>
-          </div>
-          <div class="field">
-            <label class="small" for="registerUsername">Usuario</label>
-            <input id="registerUsername" class="input" autocomplete="username" placeholder="Usuario"/>
-          </div>
-          <div class="field full">
-            <label class="small" for="registerEmail">Mail</label>
-            <input id="registerEmail" class="input" type="email" autocomplete="email" placeholder="mail@ejemplo.com"/>
-          </div>
-          <div class="field">
-            <label class="small" for="registerPassword">Contrasena</label>
-            <input id="registerPassword" class="input" type="password" autocomplete="new-password" placeholder="Minimo 4 caracteres"/>
-          </div>
-          <div class="field">
-            <label class="small" for="registerPassword2">Repetir contrasena</label>
-            <input id="registerPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
-          </div>
-          <div class="field full">
-            <label class="small" for="registerQuestionPreset">Pregunta de seguridad</label>
-            <select id="registerQuestionPreset" class="input">
-              <option value="Nombre de mi primera mascota">Nombre de mi primera mascota</option>
-              <option value="Ciudad donde naci">Ciudad donde naci</option>
-              <option value="Nombre de mi escuela primaria">Nombre de mi escuela primaria</option>
-              <option value="Segundo nombre de mi madre">Segundo nombre de mi madre</option>
-              <option value="Marca de mi primer auto o moto">Marca de mi primer auto o moto</option>
-              <option value="custom">Escribir una pregunta personalizada</option>
-            </select>
-          </div>
-          <div class="field full" id="registerQuestionCustomWrap" style="display:none;">
-            <label class="small" for="registerQuestion">Pregunta personalizada</label>
-            <input id="registerQuestion" class="input" placeholder="Ej: Nombre de mi primera mascota"/>
-          </div>
-          <div class="field full">
-            <label class="small" for="registerAnswer">Respuesta</label>
-            <input id="registerAnswer" class="input" autocomplete="off" placeholder="Respuesta de seguridad"/>
-          </div>
-        </div>
-        <div class="formActions">
-          <button id="btnRegister" class="btn primary" type="button">Crear cuenta</button>
-          <button id="btnToLogin" class="btn flat" type="button">Volver a ingresar</button>
+        <div class="registerShowcase">
+          <section class="registerHero">
+            <div class="registerHeroBrand">
+              <span class="registerHeroMark">N</span>
+              <span>NEXA</span>
+            </div>
+            <div class="registerHeroEyebrow">Software para restaurantes, bares y cafes</div>
+            <h2 class="registerHeroTitle">Transforma tu negocio <span class="registerHeroTitleAccent">con NEXA</span></h2>
+            <div class="registerHeroVisual" aria-hidden="true">
+              <div class="registerHeroWave"></div>
+              <div class="registerHeroDevices">
+                <div class="registerDevice registerPhone">
+                  <div class="registerScreenBars"><span></span><span></span><span></span></div>
+                </div>
+                <div class="registerDevice registerTablet">
+                  <div class="registerScreenBars"><span></span><span></span><span></span><span></span></div>
+                  <div class="registerChart"></div>
+                </div>
+                <div class="registerDevice registerDesktop">
+                  <div class="registerScreenBars"><span></span><span></span><span></span><span></span></div>
+                  <div class="registerChart"></div>
+                </div>
+              </div>
+            </div>
+            <div class="registerBenefits">
+              <div class="registerBenefitsTitle">Descubri todo lo que podes hacer con nuestro sistema:</div>
+              <div class="registerBenefitsGrid">
+                <div class="registerBenefit">
+                  <div class="registerBenefitIcon">#</div>
+                  <div class="registerBenefitText">Arqueo de caja diario</div>
+                </div>
+                <div class="registerBenefit">
+                  <div class="registerBenefitIcon">*</div>
+                  <div class="registerBenefitText">Control de stock eficiente</div>
+                </div>
+                <div class="registerBenefit">
+                  <div class="registerBenefitIcon">+</div>
+                  <div class="registerBenefitText">Integracion con apps de delivery</div>
+                </div>
+                <div class="registerBenefit">
+                  <div class="registerBenefitIcon">=</div>
+                  <div class="registerBenefitText">Impresion de comandas y precuentas</div>
+                </div>
+                <div class="registerBenefit">
+                  <div class="registerBenefitIcon">@</div>
+                  <div class="registerBenefitText">Carta QR y toma de pedidos</div>
+                </div>
+                <div class="registerBenefit">
+                  <div class="registerBenefitIcon">%</div>
+                  <div class="registerBenefitText">Usuarios, roles y estadisticas</div>
+                </div>
+              </div>
+              <div class="registerSocial">
+                <div class="registerSocialTitle">Mas de <strong>25.000 negocios</strong> confian en soluciones modernas.</div>
+                <div class="registerSocialRow">
+                  <div class="registerLogo">PISTA<br/>URBANA</div>
+                  <div class="registerLogo">REFUGIO<br/>DE NAVEGANTES</div>
+                  <div class="registerLogo">ROOT<br/>COFFEE HOUSE</div>
+                  <div class="registerLogo">CHOCOLAT<br/>VALMYNIA</div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="registerFormCard">
+            <div class="registerFormHead">
+              <div>
+                <div class="registerFormKicker">Cuenta nueva</div>
+                <h3 class="registerFormTitle">Crea tu acceso</h3>
+                <div class="registerFormSub">Completa los datos principales y deja configurada la recuperacion desde el primer ingreso.</div>
+              </div>
+              <button id="btnToLoginTop" class="registerBackBtn" type="button">Volver</button>
+            </div>
+            <div class="formGrid">
+              <div class="field full">
+                <label class="small" for="registerName">Nombre y apellido</label>
+                <input id="registerName" class="input" autocomplete="name" placeholder="Tu nombre completo"/>
+              </div>
+              <div class="field">
+                <label class="small" for="registerUsername">Usuario</label>
+                <input id="registerUsername" class="input" autocomplete="username" placeholder="Usuario para ingresar"/>
+              </div>
+              <div class="field">
+                <label class="small" for="registerEmail">E-mail de contacto</label>
+                <input id="registerEmail" class="input" type="email" autocomplete="email" placeholder="nombre@gmail.com"/>
+              </div>
+              <div class="field">
+                <label class="small" for="registerPassword">Contrasena para tu cuenta</label>
+                <input id="registerPassword" class="input" type="password" autocomplete="new-password" placeholder="Minimo 4 caracteres"/>
+              </div>
+              <div class="field">
+                <label class="small" for="registerPassword2">Confirmar contrasena</label>
+                <input id="registerPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
+              </div>
+              <div class="field full">
+                <label class="small" for="registerQuestionPreset">Pregunta de seguridad</label>
+                <select id="registerQuestionPreset" class="input">
+                  <option value="Nombre de mi primera mascota">Nombre de mi primera mascota</option>
+                  <option value="Ciudad donde naci">Ciudad donde naci</option>
+                  <option value="Nombre de mi escuela primaria">Nombre de mi escuela primaria</option>
+                  <option value="Segundo nombre de mi madre">Segundo nombre de mi madre</option>
+                  <option value="Marca de mi primer auto o moto">Marca de mi primer auto o moto</option>
+                  <option value="custom">Escribir una pregunta personalizada</option>
+                </select>
+              </div>
+              <div class="field full" id="registerQuestionCustomWrap" style="display:none;">
+                <label class="small" for="registerQuestion">Pregunta personalizada</label>
+                <input id="registerQuestion" class="input" placeholder="Ej: Nombre de mi primer local"/>
+              </div>
+              <div class="field full">
+                <label class="small" for="registerAnswer">Respuesta</label>
+                <input id="registerAnswer" class="input" autocomplete="off" placeholder="Tu respuesta de seguridad"/>
+                <div class="registerHint">Esta respuesta se usa para recuperar la cuenta si olvidas la contrasena.</div>
+              </div>
+            </div>
+            <div class="registerTerms">
+              <label class="registerTermsRow">
+                <input id="registerTerms" type="checkbox"/>
+                <span>Acepto los <a href="#" onclick="return false;">Terminos del servicio</a> y las <a href="#" onclick="return false;">Politicas de privacidad</a> de NEXA.</span>
+              </label>
+            </div>
+            <div class="formActions">
+              <button id="btnRegister" class="btn primary" type="button">Crear cuenta gratis</button>
+            </div>
+            <div class="registerFootNote">Sin tarjeta de credito. Puedes empezar y configurar todo despues.</div>
+            <div class="registerLoginLink">Ya tienes cuenta? <button id="btnToLoginInline" type="button">Ingresar</button></div>
+            <div class="formActions" style="margin-top:16px;">
+              <button id="btnToLogin" class="btn flat" type="button">Volver a ingresar</button>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -351,6 +874,7 @@
 
     function setTab(tab) {
       state.tab = tab;
+      document.body.setAttribute("data-auth-view", tab);
       $$('[data-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tab));
       $$('[data-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === tab));
       showMessage("", "");
@@ -402,6 +926,7 @@
       if (error === "account_not_found") return "No existe una cuenta con ese usuario o mail.";
       if (error === "invalid_security_answer") return "La respuesta de seguridad no coincide.";
       if (error === "recovery_not_configured") return "La recuperacion no esta configurada para esta cuenta.";
+      if (error === "missing_terms") return "Debes aceptar los terminos para continuar.";
       return error ? `Error: ${error}` : "No se pudo completar la accion.";
     }
 
@@ -465,6 +990,7 @@
       if (payload.password !== password2) return showMessage("La confirmacion de contrasena no coincide.", "error");
       if (!payload.securityQuestion) return showMessage("Escribe una pregunta de seguridad.", "error");
       if (!payload.securityAnswer) return showMessage("Completa la respuesta de seguridad.", "error");
+      if (!$("registerTerms").checked) return showMessage("Debes aceptar los terminos para continuar.", "error");
       try {
         await api("/api/auth/register", {
           method: "POST",
@@ -527,6 +1053,8 @@
     $("btnLogin").addEventListener("click", submitLogin);
     $("btnRegister").addEventListener("click", submitRegister);
     $("btnToLogin").addEventListener("click", () => setTab("login"));
+    $("btnToLoginTop").addEventListener("click", () => setTab("login"));
+    $("btnToLoginInline").addEventListener("click", () => setTab("login"));
     $("btnLoadQuestion").addEventListener("click", loadRecoveryQuestion);
     $("btnRecover").addEventListener("click", submitRecover);
     $("loginPassword").addEventListener("keydown", (ev) => { if (ev.key === "Enter") submitLogin(); });

@@ -81,6 +81,57 @@
     .attVal{font-weight:900; font-size:18px}
     .attLbl{font-size:12px; color:var(--muted); margin-top:4px}
     .attList{margin-top:10px}
+    .statsSplit{display:grid; gap:12px; margin-top:12px}
+    @media (min-width:980px){ .statsSplit{grid-template-columns:1.25fr .95fr;} }
+    .miniTabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .miniTab{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:10px 14px;
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      font-weight:700;
+    }
+    .miniTab.active{
+      background:linear-gradient(135deg, rgba(243,179,97,.28), rgba(255,255,255,.08));
+      border-color:rgba(243,179,97,.38);
+    }
+    .statSection{display:none}
+    .statSection.active{display:block}
+    .historyList{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px;
+      padding:12px;
+      background:rgba(0,0,0,.18);
+      max-height:520px;
+      overflow:auto;
+    }
+    .historyItem{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .historyItem:last-child{border-bottom:none}
+    .historyMeta{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.45}
+    .arqueoGrid{display:grid; gap:12px}
+    @media (min-width:980px){ .arqueoGrid{grid-template-columns:1.1fr .9fr;} }
+    .summaryStack{display:grid; gap:10px}
+    .summaryMini{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      padding:12px;
+      background:rgba(0,0,0,.18);
+    }
+    .summaryMini .label{font-size:12px; color:var(--muted); margin-bottom:6px}
+    .summaryMini .value{font-size:20px; font-weight:900}
   </style>
 </head>
 <body>
@@ -88,8 +139,8 @@
     <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
       <div class="brand">
         <div>
-          <h1>Estad?sticas</h1>
-          <p>Semana / mes / rango ? costes ? beneficio ? top productos</p>
+          <h1>Ventas y analisis</h1>
+          <p>Ventas, tendencias, cierres y arqueos en una sola vista</p>
         </div>
       </div>
       <nav class="megaNav">
@@ -136,11 +187,18 @@
     <section class="analysisBoard">
       <div class="analysisHeader">
         <div>
-          <div class="analysisTitle">Analisis</div>
+          <div class="analysisTitle">Ventas y analisis</div>
           <div class="analysisSub" id="rangeLabel">-</div>
         </div>
         <div class="badge2">Actualizado <strong id="updated">-</strong></div>
       </div>
+
+      <div class="miniTabs">
+        <button id="tabStatsSales" class="miniTab active" type="button">Ventas</button>
+        <button id="tabStatsArqueos" class="miniTab" type="button">Arqueos</button>
+      </div>
+
+      <section id="statsSalesSection" class="statSection active">
 
       <div class="analysisControls">
         <button class="btn primary" id="pWeek" type="button">Semana</button>
@@ -276,6 +334,35 @@
           <div class="mini">Usa los botones de rango para comparar tendencias y detectar horas pico.</div>
         </div>
       </div>
+      </section>
+
+      <section id="statsArqueosSection" class="statSection">
+        <div class="statsSplit">
+          <div class="analysisCard">
+            <h3>Arqueos de caja</h3>
+            <div class="hint">Historial de cierres de turno para control y revision.</div>
+            <div class="historyList" id="arqueoStatsList" style="margin-top:12px;">-</div>
+          </div>
+          <div class="summaryStack">
+            <div class="summaryMini">
+              <div class="label">Arqueos cerrados</div>
+              <div class="value" id="arqueoCount">0</div>
+            </div>
+            <div class="summaryMini">
+              <div class="label">Ultimo cierre</div>
+              <div class="value" id="arqueoLastClose">-</div>
+            </div>
+            <div class="summaryMini">
+              <div class="label">Ultima diferencia</div>
+              <div class="value" id="arqueoLastDiff">-</div>
+            </div>
+            <div class="summaryMini">
+              <div class="label">Referencia</div>
+              <div class="historyMeta">Caja/Cierre queda para apertura, movimientos y cierre. El historial y lectura general de arqueos vive aqui.</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </section>
 
       <section class="analysisCard" style="margin-top:12px;">
@@ -391,6 +478,58 @@
 
     function escapeHtml(s){
       return String(s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+
+    function setStatsTab(tab){
+      const isArqueos = tab === "arqueos";
+      $("tabStatsSales").classList.toggle("active", !isArqueos);
+      $("tabStatsArqueos").classList.toggle("active", isArqueos);
+      $("statsSalesSection").classList.toggle("active", !isArqueos);
+      $("statsArqueosSection").classList.toggle("active", isArqueos);
+      if(isArqueos) location.hash = "arqueos";
+      else if(location.hash === "#arqueos") history.replaceState(null, "", location.pathname + location.search);
+    }
+
+    function renderArqueos(db){
+      const listEl = $("arqueoStatsList");
+      if(!listEl) return;
+      const turns = (db && db.cash && Array.isArray(db.cash.turns)) ? db.cash.turns : [];
+      const closed = turns.filter(t => t && t.closedAt).sort((a,b)=>Number(b.closedAt||0)-Number(a.closedAt||0));
+      $("arqueoCount").textContent = String(closed.length || 0);
+      if(!closed.length){
+        listEl.innerHTML = '<div class="muted mini">Todavia no hay arqueos cerrados.</div>';
+        $("arqueoLastClose").textContent = "-";
+        $("arqueoLastDiff").textContent = "-";
+        return;
+      }
+      const latest = closed[0];
+      const latestDiff = Number(latest.closingTotal || 0) - Number(latest.openingTotal || 0);
+      $("arqueoLastClose").textContent = new Date(latest.closedAt).toLocaleString("es-AR");
+      $("arqueoLastDiff").textContent = money(latestDiff);
+      listEl.innerHTML = closed.slice(0, 20).map(t => {
+        const openTotal = Number(t.openingTotal || 0);
+        const closeTotal = Number(t.closingTotal || 0);
+        const diff = closeTotal - openTotal;
+        const when = t.closedAt ? new Date(t.closedAt).toLocaleString("es-AR") : "-";
+        const opened = t.openedAt ? new Date(t.openedAt).toLocaleString("es-AR") : "-";
+        const shift = t.shift || "-";
+        const cashier = t.cashier || "-";
+        const nonCashTotal = Array.isArray(t.nonCash) ? t.nonCash.reduce((acc, item) => acc + Number(item && item.amount || 0), 0) : 0;
+        return `
+          <div class="historyItem">
+            <div style="flex:1; min-width:0;">
+              <div><strong>${escapeHtml(shift)}</strong> · ${escapeHtml(cashier)}</div>
+              <div class="historyMeta">Apertura: ${escapeHtml(opened)} · Cierre: ${escapeHtml(when)}</div>
+              <div class="historyMeta">No efectivo declarado: ${money(nonCashTotal)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div><strong>${money(closeTotal)}</strong></div>
+              <div class="historyMeta">Apertura ${money(openTotal)}</div>
+              <div class="historyMeta">Diferencia ${money(diff)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
 
     function drawChart(series){
@@ -538,6 +677,8 @@
     $("pWeek").addEventListener("click", presetWeek);
     $("pMonth").addEventListener("click", presetMonth);
     $("p30").addEventListener("click", preset30);
+    $("tabStatsSales").addEventListener("click", ()=>setStatsTab("ventas"));
+    $("tabStatsArqueos").addEventListener("click", ()=>setStatsTab("arqueos"));
 
     $("pApply").addEventListener("click", ()=>{
       const from = $("from").value || "";
@@ -548,6 +689,7 @@
 
     // boot: mes por defecto
     presetMonth();
+    if(location.hash === "#arqueos") setStatsTab("arqueos");
   </script>
     <script src="/app.js"></script>
   <script>
@@ -723,9 +865,11 @@ if(onState){
         window.__db = db;
         renderDay(ok);
         renderAttendance(db);
+        renderArqueos(db);
       });
     } else {
       renderDay(true);
+      renderArqueos(window.__db || null);
     }
   </script>
 </body>

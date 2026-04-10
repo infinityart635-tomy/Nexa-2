@@ -138,9 +138,9 @@
       <button id="tabMovView" class="miniTab mainTab" type="button">
         <span class="tabTitle">Movimientos de caja</span>
       </button>
-      <button id="tabArqueoHist" class="miniTab histTab" type="button">
-        <span class="tabTitle">Historial de arqueos</span>
-      </button>
+      <a class="miniTab histTab" href="/admin_stats.html#arqueos">
+        <span class="tabTitle">Ver arqueos en estadisticas</span>
+      </a>
     </div>
   </div>
 <main class="wrap fullWidth compactTop" style="margin-top:0; padding-top:0;">
@@ -890,21 +890,18 @@ sendAction("cash:open", { dateKey, openingCash: openingTotal, note: "Desde Caja/
     function setTopTab(active, opts = {}){
       const tabC = document.getElementById("tabMainView");
       const tabM = document.getElementById("tabMovView");
-      const tabH = document.getElementById("tabArqueoHist");
       const viewC = document.getElementById("mainView");
       const viewM = document.getElementById("movementsView");
       const viewH = document.getElementById("arqueoHistory");
-      if(!tabC || !tabM || !tabH || !viewC || !viewM || !viewH) return;
-      const safe = (active === "main" || active === "mov" || active === "hist") ? active : "main";
-      const showMain = active === "main";
-      const showMov = active === "mov";
-      const showHist = active === "hist";
+      if(!tabC || !tabM || !viewC || !viewM) return;
+      const safe = (active === "main" || active === "mov") ? active : "main";
+      const showMain = safe === "main";
+      const showMov = safe === "mov";
       tabC.classList.toggle("active", showMain);
       tabM.classList.toggle("active", showMov);
-      tabH.classList.toggle("active", showHist);
       viewC.style.display = showMain ? "" : "none";
       viewM.style.display = showMov ? "" : "none";
-      viewH.style.display = showHist ? "" : "none";
+      if(viewH) viewH.style.display = "none";
       if(!opts.skipSave){
         try{ localStorage.setItem(TOP_TAB_KEY, safe); } catch(e){}
       }
@@ -912,7 +909,6 @@ sendAction("cash:open", { dateKey, openingCash: openingTotal, note: "Desde Caja/
 
     document.getElementById("tabMainView").addEventListener("click", ()=>setTopTab("main"));
     document.getElementById("tabMovView").addEventListener("click", ()=>setTopTab("mov"));
-    document.getElementById("tabArqueoHist").addEventListener("click", ()=>setTopTab("hist"));
     try{
       const savedTopTab = localStorage.getItem(TOP_TAB_KEY);
       if(savedTopTab) setTopTab(savedTopTab, { skipSave: true });

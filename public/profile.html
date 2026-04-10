@@ -382,6 +382,20 @@
         linear-gradient(180deg, rgba(120,240,190,.22), rgba(120,220,255,.08));
       box-shadow:0 14px 30px rgba(0,0,0,.22);
     }
+    .profileNavBtn.warm{
+      border-color:rgba(255,160,110,.34);
+      background:
+        radial-gradient(circle at 12% 50%, rgba(255,120,84,.16), transparent 40%),
+        linear-gradient(180deg, rgba(255,120,84,.12), rgba(255,120,84,.04));
+      color:#fff4ec;
+    }
+    .profileNavBtn.warm.active{
+      border-color:rgba(255,120,84,.5);
+      background:
+        radial-gradient(circle at 12% 50%, rgba(255,120,84,.24), transparent 42%),
+        linear-gradient(180deg, rgba(255,120,84,.22), rgba(255,190,120,.08));
+      box-shadow:0 14px 30px rgba(0,0,0,.22);
+    }
     .groupGrid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -475,6 +489,127 @@
       justify-content:flex-start;
     }
     .backBtn{min-width:120px;}
+    .stepsHero{
+      display:grid;
+      gap:10px;
+      padding:18px;
+      border-radius:18px;
+      background:
+        radial-gradient(circle at top left, rgba(255,120,84,.16), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+      border:1px solid rgba(255,160,110,.18);
+    }
+    .stepsProgressRow{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:12px;
+      align-items:center;
+    }
+    .stepsProgressTrack{
+      height:12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .stepsProgressFill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg, #ff7b4d, #ffc26b);
+      width:0%;
+    }
+    .stepsProgressPct{
+      font-size:13px;
+      font-weight:800;
+      color:#fff0e8;
+    }
+    .stepsGrid{
+      display:grid;
+      gap:14px;
+    }
+    .stepCard{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:16px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:10px;
+    }
+    .stepCard.done{
+      border-color:rgba(120,240,190,.26);
+      background:
+        radial-gradient(circle at top left, rgba(120,240,190,.10), transparent 30%),
+        rgba(255,255,255,.02);
+    }
+    .stepTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .stepTitle{
+      font-size:20px;
+      line-height:1.15;
+      font-weight:900;
+    }
+    .stepStatus{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      color:#f4eadf;
+    }
+    .stepStatus.pending{
+      border-color:rgba(255,195,120,.35);
+      background:rgba(255,195,120,.10);
+      color:#ffe8c7;
+    }
+    .stepStatus.done{
+      border-color:rgba(120,240,190,.35);
+      background:rgba(120,240,190,.10);
+      color:#d9ffe9;
+    }
+    .stepsAside{
+      display:grid;
+      gap:12px;
+    }
+    .stepsLayout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 240px;
+      gap:18px;
+    }
+    .resourceCard{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:16px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:10px;
+      align-content:start;
+    }
+    .resourceList{
+      display:grid;
+      gap:10px;
+    }
+    .resourceList a{
+      color:#9ed5ff;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .resourceList a:hover{
+      text-decoration:underline;
+    }
+    @media (max-width: 960px){
+      .stepsLayout{
+        grid-template-columns:minmax(0,1fr);
+      }
+    }
     .createLaunchCard{
       border:1px dashed rgba(120,240,190,.28);
       border-radius:16px;
@@ -700,6 +835,7 @@
 
           <div class="navButtonGrid">
             <button id="btnViewAccount" class="btn profileNavBtn" type="button">Datos de la cuenta</button>
+            <button id="btnViewFirstSteps" class="btn profileNavBtn warm" type="button">Primeros pasos</button>
             <button id="btnViewRestaurants" class="btn profileNavBtn emphasis active" type="button">Restaurantes</button>
             <button id="btnViewTrash" class="btn profileNavBtn dangerish iconOnlyBtn" type="button" title="Papelera" aria-label="Papelera"><span class="trashIcon">🗑</span><span class="navBadge" id="trashCountBadge"></span></button>
           </div>
@@ -819,6 +955,47 @@
               </section>
             </div>
 
+          </div>
+        </section>
+      </section>
+
+      <section class="profilePanel firstStepsPanel" data-panel="firstSteps">
+        <section class="groupCard profileSection">
+          <div class="stepsLayout">
+            <div class="stepsMain">
+              <div class="stepsHero">
+                <div>
+                  <div class="eyebrow">Onboarding</div>
+                  <h2 class="groupTitle">Primeros pasos</h2>
+                  <div class="sub">Deja el sistema listo para vender, cobrar y operar con menos friccion.</div>
+                </div>
+                <div class="stepsProgressRow">
+                  <div class="stepsProgressTrack">
+                    <div id="firstStepsProgressFill" class="stepsProgressFill"></div>
+                  </div>
+                  <div id="firstStepsProgressPct" class="stepsProgressPct">0%</div>
+                </div>
+              </div>
+              <div class="msgBox" id="firstStepsMsg"></div>
+              <div class="stepsGrid" id="firstStepsList"></div>
+            </div>
+            <aside class="stepsAside">
+              <section class="resourceCard">
+                <div class="eyebrow">Atajos</div>
+                <h3 class="subSectionTitle">Recursos</h3>
+                <div class="resourceList">
+                  <a href="/admin_productos.html">Cargar productos</a>
+                  <a href="/admin_fiscal_test.html">Facturacion y comprobantes</a>
+                  <a href="/config.html">Impresoras y ajustes</a>
+                  <a href="/salon_pc.html">Salon y mapa de mesas</a>
+                </div>
+              </section>
+              <section class="resourceCard">
+                <div class="eyebrow">Estado</div>
+                <h3 class="subSectionTitle">Tu cuenta</h3>
+                <div class="fieldHint">Si entraste solo como cuenta y todavia no abriste un comercio, la checklist te marca igual el orden recomendado.</div>
+              </section>
+            </aside>
           </div>
         </section>
       </section>
@@ -966,6 +1143,7 @@
     const state = {
       me: null,
       profile: null,
+      restaurantState: null,
       passwordVerified: false,
       deleteRestaurantId: "",
       trashedRestaurants: [],
@@ -1111,6 +1289,7 @@
         panel.classList.toggle("active", panel.dataset.panel === panelName);
       });
       $("btnViewAccount").classList.toggle("active", panelName === "account");
+      $("btnViewFirstSteps").classList.toggle("active", panelName === "firstSteps");
       $("btnViewRestaurants").classList.toggle("active", panelName === "restaurants" || panelName === "createRestaurant" || panelName === "branch");
       $("btnViewTrash").classList.toggle("active", panelName === "trash");
       message("passwordMsg", "", "");
@@ -1262,6 +1441,135 @@
       `).join("");
     }
 
+    function canInspectRestaurantData() {
+      const me = state.me || {};
+      return !!(me.restaurantId && (me.role === "admin" || me.role === "mozo"));
+    }
+
+    async function loadRestaurantStateForChecklist() {
+      state.restaurantState = null;
+      if (!canInspectRestaurantData()) return;
+      try {
+        state.restaurantState = await api("/api/state");
+      } catch (error) {
+        state.restaurantState = null;
+      }
+    }
+
+    function checklistItems() {
+      const profile = state.profile || {};
+      const me = state.me || {};
+      const restaurantState = state.restaurantState || {};
+      const ownedRestaurants = Array.isArray(profile.ownedRestaurants) ? profile.ownedRestaurants : [];
+      const mozoRestaurants = Array.isArray(profile.mozoRestaurants) ? profile.mozoRestaurants : [];
+      const products = Array.isArray(restaurantState.products) ? restaurantState.products : [];
+      const sales = Array.isArray(restaurantState.sales) ? restaurantState.sales : [];
+      const tables = Array.isArray(restaurantState.tables) ? restaurantState.tables : [];
+      const settings = restaurantState.settings && typeof restaurantState.settings === "object" ? restaurantState.settings : {};
+      const printing = settings.printing && typeof settings.printing === "object" ? settings.printing : {};
+      const fiscal = settings.fiscal && typeof settings.fiscal === "object" ? settings.fiscal : {};
+      const printers = printing.sectorPrinters && typeof printing.sectorPrinters === "object" ? printing.sectorPrinters : {};
+      const printerReady = Object.values(printers).some((value) => !!String(value || "").trim());
+      const hasRestaurant = ownedRestaurants.length > 0 || mozoRestaurants.length > 0;
+      const hasOpenRestaurant = !!me.restaurantId;
+      const hasMenu = products.some((item) => item && item.active !== false);
+      const hasSales = sales.length > 0 || !!fiscal.enabled;
+      const hasTeam = ownedRestaurants.some((item) => Number(item.pendingMozoCount || 0) > 0) || mozoRestaurants.length > 0;
+      const hasTables = tables.length > 0;
+      return [
+        {
+          title: "Crea tu restaurante",
+          text: hasRestaurant
+            ? "Ya tienes al menos un comercio disponible en tu cuenta."
+            : "Crea el primer comercio para empezar a configurar el sistema.",
+          done: hasRestaurant,
+          actionLabel: hasRestaurant ? "Ver restaurantes" : "Crear restaurante",
+          actionType: "panel",
+          actionValue: hasRestaurant ? "restaurants" : "createRestaurant"
+        },
+        {
+          title: "Carga tu carta",
+          text: hasOpenRestaurant
+            ? "Gestiona productos y precios desde un solo lugar."
+            : "Entra a un comercio para poder cargar productos y categorias.",
+          done: hasMenu,
+          actionLabel: hasOpenRestaurant ? "Abrir productos" : "Entrar al comercio",
+          actionType: hasOpenRestaurant ? "link" : "panel",
+          actionValue: hasOpenRestaurant ? "/admin_productos.html" : "restaurants"
+        },
+        {
+          title: "Empeza a facturar",
+          text: hasOpenRestaurant
+            ? "Activa el flujo fiscal o registra tu primera venta."
+            : "Primero entra a un comercio para configurar facturacion.",
+          done: hasSales,
+          actionLabel: hasOpenRestaurant ? "Ir a fiscal" : "Entrar al comercio",
+          actionType: hasOpenRestaurant ? "link" : "panel",
+          actionValue: hasOpenRestaurant ? "/admin_fiscal_test.html" : "restaurants"
+        },
+        {
+          title: "Instala tu impresora",
+          text: hasOpenRestaurant
+            ? "Define impresoras por sector para comandas y pre-cuentas."
+            : "Necesitas abrir un comercio para asociar impresoras.",
+          done: printerReady,
+          actionLabel: hasOpenRestaurant ? "Configurar" : "Entrar al comercio",
+          actionType: hasOpenRestaurant ? "link" : "panel",
+          actionValue: hasOpenRestaurant ? "/config.html" : "restaurants"
+        },
+        {
+          title: "Registra tu equipo",
+          text: "Invita o administra usuarios que operan el negocio contigo.",
+          done: hasTeam,
+          actionLabel: "Ver restaurantes",
+          actionType: "panel",
+          actionValue: "restaurants"
+        },
+        {
+          title: "Disena tu mapa de mesas",
+          text: hasOpenRestaurant
+            ? "Ordena el salon y deja preparadas las mesas para el servicio."
+            : "Abre un comercio para poder trabajar el salon.",
+          done: hasTables,
+          actionLabel: hasOpenRestaurant ? "Abrir salon" : "Entrar al comercio",
+          actionType: hasOpenRestaurant ? "link" : "panel",
+          actionValue: hasOpenRestaurant ? "/salon_pc.html" : "restaurants"
+        }
+      ];
+    }
+
+    function renderFirstSteps() {
+      const box = $("firstStepsList");
+      const items = checklistItems();
+      const total = items.length || 1;
+      const completed = items.filter((item) => item.done).length;
+      const percent = Math.round((completed / total) * 100);
+      $("firstStepsProgressFill").style.width = `${percent}%`;
+      $("firstStepsProgressPct").textContent = `${percent}%`;
+      if (!canInspectRestaurantData()) {
+        message("firstStepsMsg", "Para completar automaticamente todos los pasos, entra a uno de tus comercios desde la lista de restaurantes.", "success");
+      } else {
+        message("firstStepsMsg", "", "");
+      }
+      box.innerHTML = items.map((item) => `
+        <article class="stepCard ${item.done ? "done" : ""}">
+          <div class="stepTop">
+            <div>
+              <div class="stepTitle">${escapeHtml(item.title)}</div>
+              <div class="itemSub">${escapeHtml(item.text)}</div>
+            </div>
+            <span class="stepStatus ${item.done ? "done" : "pending"}">${item.done ? "Listo" : "Pendiente"}</span>
+          </div>
+          <div class="buttonRow">
+            ${item.actionType === "link"
+              ? `<a class="btn ${item.done ? "" : "primary"}" href="${escapeHtml(item.actionValue)}">${escapeHtml(item.actionLabel)}</a>`
+              : `<button class="btn ${item.done ? "" : "primary"}" type="button" onclick="setMainPanel('${item.actionValue}')">${escapeHtml(item.actionLabel)}</button>`
+            }
+          </div>
+        </article>
+      `).join("");
+    }
+
     async function refreshProfile() {
       try {
         const [me, profile] = await Promise.all([
@@ -1275,10 +1583,12 @@
         state.me = me;
         state.profile = profile;
         state.trashedRestaurants = profile.trashedRestaurants || [];
+        await loadRestaurantStateForChecklist();
         renderSummary();
         fillAccountForm();
         renderOwnedRestaurants();
         renderTrashedRestaurants();
+        renderFirstSteps();
       } catch (error) {
         if (error.message === "unauthorized") {
           location.replace(loginUrl());
@@ -1537,6 +1847,7 @@
     $("btnLogout").addEventListener("click", logout);
     $("btnLeaveRestaurant").addEventListener("click", leaveRestaurant);
     $("btnViewAccount").addEventListener("click", () => setMainPanel("account"));
+    $("btnViewFirstSteps").addEventListener("click", () => setMainPanel("firstSteps"));
     $("btnViewRestaurants").addEventListener("click", () => setMainPanel("restaurants"));
     $("btnViewTrash").addEventListener("click", () => setMainPanel("trash"));
     $("btnOpenPasswordPanel").addEventListener("click", () => setMainPanel("password"));
