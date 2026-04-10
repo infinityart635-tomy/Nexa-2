@@ -2200,6 +2200,92 @@ textarea.input{
     radial-gradient(900px 600px at 90% 40%, var(--bgB), transparent 55%),
     linear-gradient(180deg, var(--bgC) 0%, var(--bgD) 55%, var(--bgC) 100%);
 }
+@media (min-width: 1101px){
+  html:has(body.salonPc),
+  body.salonPc{
+    height:100dvh;
+    min-height:100dvh;
+    overflow:hidden;
+  }
+  body.salonPc{
+    display:grid;
+    grid-template-rows:auto minmax(0, 1fr);
+  }
+  body.salonPc .top{
+    min-height:0;
+  }
+  body.salonPc .salonWrap{
+    height:calc(100dvh - var(--app-top-height));
+    min-height:0;
+    padding:10px 12px 12px;
+    overflow:hidden;
+  }
+  body.salonPc .salonLayout{
+    height:100%;
+    min-height:0;
+    gap:10px;
+    grid-template-rows:auto minmax(0, 1fr);
+    grid-template-areas:
+      "notice notice notice"
+      "actions floor side";
+  }
+  body.salonPc .kitchenNotice:empty,
+  body.salonPc .kitchenNotice[style*="display:none"]{
+    display:none !important;
+  }
+  body.salonPc .salonActions,
+  body.salonPc .salonFloor,
+  body.salonPc .salonSide{
+    min-height:0;
+    height:100%;
+  }
+  body.salonPc .salonActions,
+  body.salonPc .salonSide{
+    overflow:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  body.salonPc .salonActions::-webkit-scrollbar,
+  body.salonPc .salonSide::-webkit-scrollbar{
+    width:0;
+    height:0;
+  }
+  body.salonPc .salonSide{
+    position:relative;
+    top:auto;
+    max-height:none;
+  }
+  body.salonPc .salonFloor{
+    min-height:0;
+    padding:10px;
+  }
+  body.salonPc .salonFloor .floorWrap{
+    flex:1 1 auto;
+    height:auto;
+    min-height:0;
+    max-height:none;
+    border-radius:16px;
+  }
+  body.salonPc .salonFloor > .mini{
+    display:none;
+  }
+  body.salonPc .salonOrder{
+    min-height:0;
+    flex:1 1 auto;
+    overflow:hidden;
+  }
+  body.salonPc #menu{
+    flex:1 1 auto;
+    min-height:0;
+    overflow:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  body.salonPc #menu::-webkit-scrollbar{
+    width:0;
+    height:0;
+  }
+}
 .salonPc .card,
 .salonPc .panel{
   background:var(--neo-bg);
