@@ -1090,7 +1090,7 @@ function normalizeRestaurantWorkspaceData(workspace, menu){
   delete db.settings.auth;
   delete db.sessions;
 
-  if (!Array.isArray(db.products) || db.products.length === 0) db.products = cloneJson(base.products, []);
+  if (!Array.isArray(db.products)) db.products = cloneJson(base.products, []);
   if (!Array.isArray(db.tables) || db.tables.length === 0) db.tables = cloneJson(base.tables, []);
   if (!Array.isArray(db.tickets)) db.tickets = [];
   if (!Array.isArray(db.sales)) db.sales = [];
@@ -4026,7 +4026,7 @@ function createRestaurantForUser(user, name){
       updatedAt: now()
     };
     ROOT_DB.restaurants.unshift(meta);
-    const workspace = normalizeRestaurantWorkspaceData({}, MENU);
+    const workspace = normalizeRestaurantWorkspaceData({ products: [] }, MENU);
     workspace.settings.restaurantName = clean;
     workspace.settings.ownerDisplayName = normalizeUserName(user.name || "");
     ROOT_DB.restaurantData[meta.id] = workspace;

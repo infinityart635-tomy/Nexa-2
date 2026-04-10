@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "migrate:postgres": "node scripts/migrate_to_postgres.js"
+    "migrate:postgres": "node scripts/migrate_to_postgres.js",
+    "clear:seed-products": "node scripts/clear_seed_products.js"
   },
   "dependencies": {
     "dotenv": "^17.4.1",
