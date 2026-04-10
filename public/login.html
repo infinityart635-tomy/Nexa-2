@@ -14,27 +14,9 @@
       min-height:100%;
       display:grid;
       place-items:center;
-      padding:20px 0;
-    }
-    body[data-auth-view="register"] .accessShell{
-      place-items:stretch;
       padding:0;
     }
     .authCard{
-      width:min(100%, 520px);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:8px;
-      background:
-        linear-gradient(180deg, rgba(24,26,32,.98), rgba(12,14,18,.98)),
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
-      box-shadow:
-        0 28px 60px rgba(0,0,0,.45),
-        inset 0 1px 0 rgba(255,255,255,.04);
-      padding:18px;
-      position:relative;
-      overflow:hidden;
-    }
-    body[data-auth-view="register"] .authCard{
       width:min(100%, 1180px);
       min-height:100vh;
       border:none;
@@ -47,6 +29,8 @@
       padding:34px 24px;
       display:grid;
       align-content:center;
+      position:relative;
+      overflow:hidden;
     }
     .authCard::before{
       content:"";
@@ -54,9 +38,6 @@
       inset:0 0 auto;
       height:3px;
       background:linear-gradient(90deg, rgba(120,240,190,.92), rgba(120,220,255,.72));
-    }
-    body[data-auth-view="register"] .authCard::before{
-      display:none;
     }
     .authHeader{
       display:flex;
@@ -144,20 +125,13 @@
     .msgBox.success{border-color:rgba(120,240,190,.34); background:rgba(18,86,52,.18); color:#d9ffe9;}
     .panel{
       display:none;
-      margin-top:12px;
-      padding:14px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:8px;
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
-    }
-    .panel.active{display:block;}
-    body[data-auth-view="register"] .panel[data-panel="register"]{
-      display:block;
-      margin-top:18px;
+      margin-top:14px;
       padding:0;
       border:none;
+      border-radius:0;
       background:transparent;
     }
+    .panel.active{display:block;}
     .formGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
     @media (max-width: 720px){
       .formGrid{grid-template-columns:minmax(0,1fr);}
@@ -220,19 +194,6 @@
     .sectionNote{display:none;}
     .miniBox{display:none;}
     .registerShowcase{
-      display:none;
-    }
-    body[data-auth-view="register"] .authHeader,
-    body[data-auth-view="register"] .tabRow,
-    body[data-auth-view="register"] .panel[data-panel="login"],
-    body[data-auth-view="register"] .panel[data-panel="recover"]{
-      display:none;
-    }
-    body[data-auth-view="register"] #msgBox{
-      max-width:430px;
-      margin:0 0 14px auto;
-    }
-    body[data-auth-view="register"] .registerShowcase{
       display:grid;
       grid-template-columns:minmax(0,1.15fr) minmax(360px, 440px);
       gap:28px;
@@ -488,23 +449,23 @@
       font-weight:800;
       cursor:pointer;
     }
-    body[data-auth-view="register"] .registerFormCard .small{
+    .registerFormCard .small{
       color:rgba(232,239,248,.56);
     }
-    body[data-auth-view="register"] .registerFormCard .input{
+    .registerFormCard .input{
       color:#eef3f8;
       background:rgba(0,0,0,.24);
       border:1px solid rgba(255,255,255,.10);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
     }
-    body[data-auth-view="register"] .registerFormCard .input::placeholder{
+    .registerFormCard .input::placeholder{
       color:rgba(232,239,248,.40);
     }
-    body[data-auth-view="register"] .registerFormCard .input:focus{
+    .registerFormCard .input:focus{
       border-color:rgba(120,240,190,.45);
       box-shadow:0 0 0 3px rgba(120,240,190,.10), inset 0 1px 0 rgba(255,255,255,.03);
     }
-    body[data-auth-view="register"] .registerFormCard select.input{
+    .registerFormCard select.input{
       color:#eef3f8;
       background:
         linear-gradient(45deg, transparent 50%, rgba(241,241,244,.78) 50%),
@@ -517,7 +478,7 @@
       background-size:6px 6px, 6px 6px, 100% 100%;
       background-repeat:no-repeat;
     }
-    body[data-auth-view="register"] .registerFormCard select.input option{
+    .registerFormCard select.input option{
       color:#eef3f8;
       background:#161a1e;
     }
@@ -555,10 +516,10 @@
     .registerTermsRow a:hover{
       text-decoration:underline;
     }
-    body[data-auth-view="register"] .registerFormCard .formActions{
+    .registerFormCard .formActions{
       margin-top:16px;
     }
-    body[data-auth-view="register"] .registerFormCard .btn.primary{
+    .registerFormCard .btn.primary{
       width:100%;
       min-width:180px;
       border-color:rgba(120,240,190,.42);
@@ -569,7 +530,7 @@
       font-size:14px;
       font-weight:900;
     }
-    body[data-auth-view="register"] .registerFormCard .btn.flat{
+    .registerFormCard .btn.flat{
       background:rgba(255,255,255,.03);
       color:#e9f1f8;
       border-color:rgba(255,255,255,.12);
@@ -602,7 +563,7 @@
       .brandDot{width:36px; height:36px;}
     }
     @media (max-width: 560px){
-      .authCard{padding:14px 12px;}
+      .authCard{padding:18px 12px;}
       .authHeader{gap:10px;}
       .brandBlock{gap:10px;}
       .authTitle{font-size:24px;}
@@ -611,10 +572,10 @@
       .formActions .btn{width:100%;}
     }
     @media (max-width: 980px){
-      body[data-auth-view="register"] .authCard{
+      .authCard{
         padding:18px 14px 24px;
       }
-      body[data-auth-view="register"] .registerShowcase{
+      .registerShowcase{
         grid-template-columns:minmax(0,1fr);
       }
       .registerHero{
@@ -658,43 +619,8 @@
 <body>
   <main class="wrap accessShell">
     <section class="authCard">
-      <div class="authHeader">
-        <div class="brandBlock">
-          <div class="brandDot">N</div>
-          <div>
-            <div class="authEyebrow">NEXA</div>
-            <h1 class="authTitle" id="viewTitle">Ingresar</h1>
-            <div class="authSub" id="viewSub">Usuario o mail y contrasena.</div>
-          </div>
-        </div>
-        <div class="statusBar" id="statusBar" style="display:none;" aria-hidden="true"></div>
-      </div>
-      <div class="tabRow" role="tablist" aria-label="Cuenta">
-        <button class="tabBtn active" type="button" data-tab="login">Ingresar</button>
-        <button class="tabBtn" type="button" data-tab="register">Crear cuenta</button>
-        <button class="tabBtn" type="button" data-tab="recover">Recuperar</button>
-      </div>
-      <div class="msgBox" id="msgBox"></div>
-
-      <section class="panel active" data-panel="login">
-        <div class="formGrid">
-          <div class="field full">
-            <label class="small" for="loginIdentifier">Usuario o mail</label>
-            <input id="loginIdentifier" class="input" autocomplete="username" placeholder="Usuario o mail"/>
-          </div>
-          <div class="field full">
-            <label class="small" for="loginPassword">Contrasena</label>
-            <input id="loginPassword" class="input" type="password" autocomplete="current-password" placeholder="Contrasena"/>
-          </div>
-        </div>
-        <div class="formActions">
-          <button id="btnLogin" class="btn primary" type="button">Entrar</button>
-        </div>
-      </section>
-
-      <section class="panel" data-panel="register">
-        <div class="registerShowcase">
-          <section class="registerHero">
+      <div class="registerShowcase">
+        <section class="registerHero">
             <div class="registerHeroBrand">
               <span class="registerHeroMark">N</span>
               <span>NEXA</span>
@@ -755,16 +681,52 @@
                 </div>
               </div>
             </div>
-          </section>
-          <section class="registerFormCard">
-            <div class="registerFormHead">
+        </section>
+        <section class="registerFormCard">
+            <div class="authHeader">
+              <div class="brandBlock">
+                <div class="brandDot">N</div>
+                <div>
+                  <div class="authEyebrow">NEXA</div>
+                  <h1 class="authTitle" id="viewTitle">Ingresar</h1>
+                  <div class="authSub" id="viewSub">Usuario o mail y contrasena.</div>
+                </div>
+              </div>
+              <div class="statusBar" id="statusBar" style="display:none;" aria-hidden="true"></div>
+            </div>
+            <div class="tabRow" role="tablist" aria-label="Cuenta">
+              <button class="tabBtn active" type="button" data-tab="login">Ingresar</button>
+              <button class="tabBtn" type="button" data-tab="register">Crear cuenta</button>
+              <button class="tabBtn" type="button" data-tab="recover">Recuperar</button>
+            </div>
+            <div class="msgBox" id="msgBox"></div>
+
+            <section class="panel active" data-panel="login">
+              <div class="formGrid">
+                <div class="field full">
+                  <label class="small" for="loginIdentifier">Usuario o mail</label>
+                  <input id="loginIdentifier" class="input" autocomplete="username" placeholder="Usuario o mail"/>
+                </div>
+                <div class="field full">
+                  <label class="small" for="loginPassword">Contrasena</label>
+                  <input id="loginPassword" class="input" type="password" autocomplete="current-password" placeholder="Contrasena"/>
+                </div>
+              </div>
+              <div class="formActions">
+                <button id="btnLogin" class="btn primary" type="button">Entrar</button>
+              </div>
+              <div class="registerLoginLink">Todavia no tienes cuenta? <button type="button" data-tab="register">Crear acceso</button></div>
+              <div class="formActions" style="margin-top:16px;">
+                <button class="btn flat" type="button" data-tab="recover">Recuperar contrasena</button>
+              </div>
+            </section>
+
+            <section class="panel" data-panel="register">
               <div>
                 <div class="registerFormKicker">Cuenta nueva</div>
                 <h3 class="registerFormTitle">Crea tu acceso</h3>
                 <div class="registerFormSub">Completa los datos principales y deja configurada la recuperacion desde el primer ingreso.</div>
               </div>
-              <button id="btnToLoginTop" class="registerBackBtn" type="button">Volver</button>
-            </div>
             <div class="formGrid">
               <div class="field full">
                 <label class="small" for="registerName">Nombre y apellido</label>
@@ -817,42 +779,48 @@
               <button id="btnRegister" class="btn primary" type="button">Crear cuenta gratis</button>
             </div>
             <div class="registerFootNote">Sin tarjeta de credito. Puedes empezar y configurar todo despues.</div>
-            <div class="registerLoginLink">Ya tienes cuenta? <button id="btnToLoginInline" type="button">Ingresar</button></div>
+            <div class="registerLoginLink">Ya tienes cuenta? <button type="button" data-tab="login">Ingresar</button></div>
             <div class="formActions" style="margin-top:16px;">
-              <button id="btnToLogin" class="btn flat" type="button">Volver a ingresar</button>
+              <button class="btn flat" type="button" data-tab="login">Volver a ingresar</button>
             </div>
-          </section>
-        </div>
-      </section>
+            </section>
 
-      <section class="panel" data-panel="recover">
-        <div class="formGrid">
-          <div class="field full">
-            <label class="small" for="recoverIdentifier">Usuario o mail</label>
-            <input id="recoverIdentifier" class="input" autocomplete="username" placeholder="Usuario o mail"/>
-          </div>
-          <div class="field full">
-            <label class="small">Pregunta de seguridad</label>
-            <div id="recoverQuestionBox" class="readonlyBox">Escribe tu usuario o mail y toca Ver pregunta.</div>
-          </div>
-          <div class="field full">
-            <label class="small" for="recoverAnswer">Respuesta</label>
-            <input id="recoverAnswer" class="input" autocomplete="off" placeholder="Respuesta de seguridad"/>
-          </div>
-          <div class="field">
-            <label class="small" for="recoverPassword">Nueva contrasena</label>
-            <input id="recoverPassword" class="input" type="password" autocomplete="new-password" placeholder="Minimo 4 caracteres"/>
-          </div>
-          <div class="field">
-            <label class="small" for="recoverPassword2">Repetir contrasena</label>
-            <input id="recoverPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
-          </div>
-        </div>
-        <div class="formActions">
-          <button id="btnLoadQuestion" class="btn flat" type="button">Ver pregunta</button>
-          <button id="btnRecover" class="btn primary" type="button">Restablecer acceso</button>
-        </div>
-      </section>
+            <section class="panel" data-panel="recover">
+              <div>
+                <div class="registerFormKicker">Recuperacion</div>
+                <h3 class="registerFormTitle">Recupera tu acceso</h3>
+                <div class="registerFormSub">Confirma tu identidad con la pregunta de seguridad y define una nueva contrasena.</div>
+              </div>
+              <div class="formGrid">
+                <div class="field full">
+                  <label class="small" for="recoverIdentifier">Usuario o mail</label>
+                  <input id="recoverIdentifier" class="input" autocomplete="username" placeholder="Usuario o mail"/>
+                </div>
+                <div class="field full">
+                  <label class="small">Pregunta de seguridad</label>
+                  <div id="recoverQuestionBox" class="readonlyBox">Escribe tu usuario o mail y toca Ver pregunta.</div>
+                </div>
+                <div class="field full">
+                  <label class="small" for="recoverAnswer">Respuesta</label>
+                  <input id="recoverAnswer" class="input" autocomplete="off" placeholder="Respuesta de seguridad"/>
+                </div>
+                <div class="field">
+                  <label class="small" for="recoverPassword">Nueva contrasena</label>
+                  <input id="recoverPassword" class="input" type="password" autocomplete="new-password" placeholder="Minimo 4 caracteres"/>
+                </div>
+                <div class="field">
+                  <label class="small" for="recoverPassword2">Repetir contrasena</label>
+                  <input id="recoverPassword2" class="input" type="password" autocomplete="new-password" placeholder="Repite la contrasena"/>
+                </div>
+              </div>
+              <div class="formActions">
+                <button id="btnLoadQuestion" class="btn flat" type="button">Ver pregunta</button>
+                <button id="btnRecover" class="btn primary" type="button">Restablecer acceso</button>
+              </div>
+              <div class="registerLoginLink">Recordaste tu acceso? <button type="button" data-tab="login">Ingresar</button></div>
+            </section>
+        </section>
+      </div>
     </section>
   </main>
 
@@ -1061,9 +1029,6 @@
     $("registerQuestionPreset").addEventListener("change", updateRegisterQuestionMode);
     $("btnLogin").addEventListener("click", submitLogin);
     $("btnRegister").addEventListener("click", submitRegister);
-    $("btnToLogin").addEventListener("click", () => setTab("login"));
-    $("btnToLoginTop").addEventListener("click", () => setTab("login"));
-    $("btnToLoginInline").addEventListener("click", () => setTab("login"));
     $("btnLoadQuestion").addEventListener("click", loadRecoveryQuestion);
     $("btnRecover").addEventListener("click", submitRecover);
     $("loginPassword").addEventListener("keydown", (ev) => { if (ev.key === "Enter") submitLogin(); });
