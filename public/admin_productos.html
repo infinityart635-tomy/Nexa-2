@@ -722,7 +722,11 @@
       const imageData = ($("newImgData").value||"").trim();
       const payload = { name, categoryTitle, price, prodCost, active:true, description, taxRate, stockMin, stockMax, showStock, tags: [] };
       if(imageData) payload.imageData = imageData;
-      sendAction("products:upsert", payload);
+      const sent = sendAction("products:upsert", payload);
+      if(!sent){
+        toast("Sin conexion. El producto no se guardo.", "warn");
+        return;
+      }
       $("newName").value = ""; $("newPrice").value = ""; $("newCost").value = "";
       $("newDesc").value = ""; $("newTax").value = ""; $("newStock").value = "";
       $("newShowStock").checked = false;

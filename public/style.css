@@ -1838,7 +1838,7 @@ kbd{
   height:0;
 }
 .inventoryWrap{
-  max-width:1400px;
+  max-width:none;
   width:100%;
 }
 .inventoryHeader{
@@ -1867,6 +1867,7 @@ kbd{
   flex:1 1 auto;
   min-height:0;
   align-items:stretch;
+  width:100%;
 }
 .inventorySidebar{
   display:flex;
@@ -1876,11 +1877,17 @@ kbd{
 }
 .inventoryMain{
   display:flex;
+  flex:1 1 auto;
   min-height:0;
 }
 .inventoryMain .panel,
 .inventorySidebar{
   height:100%;
+}
+.inventoryMain .panel{
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
 }
 .inventoryMain .panel,
 .inventorySidebar .panelBody,
