@@ -1830,6 +1830,12 @@ kbd{
   flex-direction:column;
   min-height:0;
   overflow:hidden;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.inventoryPage > .top + main.wrap.inventoryWrap::-webkit-scrollbar{
+  width:0;
+  height:0;
 }
 .inventoryWrap{
   max-width:1400px;
@@ -2073,6 +2079,12 @@ kbd{
 @media (max-width: 1100px){
   .inventoryPage > .top + main.wrap.inventoryWrap{
     overflow:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .inventoryPage > .top + main.wrap.inventoryWrap::-webkit-scrollbar{
+    width:0;
+    height:0;
   }
   .inventoryLayout{
     grid-template-columns: 1fr;

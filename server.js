@@ -5184,7 +5184,15 @@ function requiredRoleForAction(kind) {
 async function applyAction(kind, payload, ws) {
   const by = (ws && ws.name) ? ws.name : "Sistema";
   const dayOpen = !!(getOpenCashTurn(getBusinessDateKey(DB)) || getOpenCashSession(getBusinessDateKey(DB)) || getAnyOpenCashTurn() || getAnyOpenCashSession());
-  const allowWhenClosed = kind === "cash:open" || kind === "cash:turnClose" || kind === "cash:turnOpen" || String(kind || "").startsWith("attendance:");
+  const kindStr = String(kind || "");
+  const allowWhenClosed =
+    kindStr === "cash:open" ||
+    kindStr === "cash:turnClose" ||
+    kindStr === "cash:turnOpen" ||
+    kindStr.startsWith("attendance:") ||
+    kindStr.startsWith("products:") ||
+    kindStr.startsWith("inventory:") ||
+    kindStr.startsWith("settings:");
   if (!dayOpen && !allowWhenClosed) {
     notify(getDayBlockMessage(kind), "warn", { action: kind, reason: "day_closed" }, by);
     return;
