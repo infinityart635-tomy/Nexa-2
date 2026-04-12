@@ -9,79 +9,44 @@
   <style>
     .fiscalWrap{
       display:grid;
-      gap:14px;
-    }
-    .fiscalHero{
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:8px;
-      padding:18px;
-      background:
-        radial-gradient(circle at top left, rgba(255,170,110,.12), transparent 34%),
-        linear-gradient(180deg, rgba(28,29,35,.98), rgba(18,19,24,.98));
-      display:grid;
       gap:12px;
     }
-    .fiscalHeroTop{
+    .fiscalHeader{
       display:flex;
       justify-content:space-between;
       gap:12px;
       flex-wrap:wrap;
-      align-items:flex-start;
+      align-items:center;
     }
-    .fiscalHeroTitle{
+    .fiscalTitle{
       margin:0;
-      font-size:28px;
-      line-height:1.02;
+      font-size:26px;
+      line-height:1.05;
       font-weight:900;
       letter-spacing:.08em;
       text-transform:uppercase;
     }
-    .fiscalHeroSub{
-      margin:6px 0 0;
+    .fiscalSub{
+      margin:4px 0 0;
       color:var(--muted);
-      max-width:760px;
       line-height:1.45;
     }
-    .fiscalStepRow,
-    .fiscalStatGrid,
     .fiscalQuickLinks{
       display:flex;
       flex-wrap:wrap;
       gap:8px;
     }
-    .fiscalStep,
     .fiscalQuickLink{
       border:1px solid rgba(255,255,255,.10);
-      border-radius:999px;
-      padding:8px 12px;
-      background:rgba(255,255,255,.03);
+      border-radius:8px;
+      padding:7px 11px;
+      background:rgba(255,255,255,.025);
       font-size:12px;
-    }
-    .fiscalQuickLink{
       text-decoration:none;
       color:var(--text);
     }
     .fiscalQuickLink:hover{
       border-color:rgba(120,220,255,.28);
-    }
-    .fiscalStat{
-      min-width:160px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:8px;
-      padding:12px;
-      background:rgba(255,255,255,.02);
-      display:grid;
-      gap:4px;
-    }
-    .fiscalStat strong{
-      font-size:22px;
-      line-height:1;
-    }
-    .fiscalGrid{
-      display:grid;
-      grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);
-      gap:14px;
-      align-items:start;
     }
     .fiscalSection{
       border:1px solid rgba(255,255,255,.08);
@@ -110,99 +75,118 @@
     }
     .fiscalFilterGrid{
       display:grid;
-      grid-template-columns:repeat(6,minmax(0,1fr));
+      grid-template-columns:1.2fr 1.2fr .9fr .9fr 1.5fr auto auto;
       gap:10px;
+      align-items:end;
     }
-    .fiscalFieldWide{
-      grid-column:span 2;
-    }
-    .fiscalActionGrid{
+    .fiscalExportGrid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:10px;
     }
-    .fiscalSummaryBar{
+    .fiscalPresetRow,
+    .fiscalInlineStats{
       display:flex;
-      justify-content:space-between;
-      gap:12px;
       flex-wrap:wrap;
-      align-items:center;
-      padding:12px 14px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:8px;
-      background:rgba(255,255,255,.02);
+      gap:10px;
+    }
+    .fiscalInlineStats{
+      color:var(--muted);
+      font-size:13px;
+      padding:0 2px;
     }
     .fiscalList{
       display:grid;
-      gap:10px;
+      gap:8px;
     }
-    .reconCard{
+    .reconTableHead,
+    .reconRow{
+      display:grid;
+      grid-template-columns:minmax(220px,1.5fr) 150px 150px 150px minmax(250px,1.4fr);
+      gap:10px;
+      align-items:center;
+    }
+    .reconTableHead{
+      padding:0 10px 8px;
+      color:var(--muted);
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .reconRow{
       border:1px solid rgba(255,255,255,.08);
       border-radius:8px;
-      padding:14px;
+      padding:12px 10px;
       background:rgba(255,255,255,.02);
-      display:grid;
-      gap:12px;
     }
-    .reconCardTop,
-    .reconMetaGrid,
-    .reconActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:flex-start;
+    .reconCellMain{
+      min-width:0;
     }
-    .reconMetaGrid > div{
-      min-width:130px;
-      flex:1;
-      border:1px solid rgba(255,255,255,.07);
-      border-radius:8px;
-      padding:10px;
-      background:rgba(255,255,255,.015);
+    .reconPrimary{
+      font-size:14px;
+      font-weight:800;
+      line-height:1.25;
     }
-    .reconMain{
-      flex:1 1 320px;
-    }
-    .reconTitle{
-      font-size:17px;
-      font-weight:900;
-      line-height:1.2;
-    }
-    .reconSub{
+    .reconSecondary{
       margin-top:4px;
       color:var(--muted);
-      line-height:1.4;
+      line-height:1.35;
+      font-size:12px;
+    }
+    .reconCellCompact{
+      min-width:0;
+      font-size:13px;
+      line-height:1.35;
     }
     .reconActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
       justify-content:flex-end;
     }
     .reconActions .btn{
-      flex:0 0 auto;
+      padding:7px 10px;
+      font-size:11px;
+    }
+    .exportTypeList{
+      display:grid;
+      gap:8px;
+    }
+    .exportTypeOption{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:rgba(255,255,255,.02);
+    }
+    .exportTypeOption input{
+      margin:0;
     }
     @media (max-width: 1020px){
-      .fiscalGrid{
+      .reconTableHead,
+      .reconRow{
         grid-template-columns:minmax(0,1fr);
+        gap:8px;
+      }
+      .reconTableHead{
+        display:none;
+      }
+      .reconActions{
+        justify-content:flex-start;
       }
     }
     @media (max-width: 900px){
       .fiscalFilterGrid{
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
-      .fiscalFieldWide{
-        grid-column:span 2;
-      }
-      .fiscalActionGrid{
-        grid-template-columns:minmax(0,1fr);
-      }
     }
     @media (max-width: 640px){
       .fiscalFilterGrid{
         grid-template-columns:minmax(0,1fr);
       }
-      .fiscalFieldWide{
-        grid-column:span 1;
-      }
-      .fiscalHeroTitle{
+      .fiscalTitle{
         font-size:22px;
       }
     }
@@ -246,151 +230,129 @@
   </header>
 
   <main class="wrap fiscalWrap">
-    <section class="fiscalHero">
-      <div class="fiscalHeroTop">
-        <div>
-          <h1 class="fiscalHeroTitle">Comprobantes</h1>
-          <p class="fiscalHeroSub">Revisa borradores, controla que se cargaron en ARCA y exporta la informacion desde una sola vista. El perfil fiscal del comercio ahora vive en Perfil.</p>
-        </div>
-        <div class="fiscalQuickLinks">
-          <a class="fiscalQuickLink" href="/profile.html">Abrir perfil fiscal</a>
-          <a class="fiscalQuickLink" href="/admin_caja_test.html">Ver caja y cierres</a>
-        </div>
-      </div>
-      <div class="fiscalStepRow">
-        <div class="fiscalStep">1. Filtra por fecha o turno</div>
-        <div class="fiscalStep">2. Abre el borrador y valida datos</div>
-        <div class="fiscalStep">3. Marca estado segun lo cargado en ARCA</div>
-      </div>
-      <div class="fiscalStatGrid">
-        <div class="fiscalStat">
-          <span class="small">Borradores visibles</span>
-          <strong id="reconCount">0</strong>
-        </div>
-        <div class="fiscalStat">
-          <span class="small">Pendientes</span>
-          <strong id="statPending">0</strong>
-        </div>
-        <div class="fiscalStat">
-          <span class="small">Cargados</span>
-          <strong id="statLoaded">0</strong>
-        </div>
-        <div class="fiscalStat">
-          <span class="small">Observados</span>
-          <strong id="statObserved">0</strong>
-        </div>
-      </div>
-    </section>
-
-    <section class="fiscalGrid">
-      <section class="fiscalSection">
-        <div class="fiscalSectionHead">
-          <div>
-            <h2>Buscar borradores</h2>
-            <p>Usa una fecha corta para trabajar un dia puntual o un rango para conciliaciones.</p>
-          </div>
-        </div>
-        <div class="fiscalFilterGrid">
-          <div>
-            <div class="small">Fecha</div>
-            <input id="reconDate" class="input" type="date"/>
-          </div>
-          <div>
-            <div class="small">Desde</div>
-            <input id="reconFrom" class="input" type="date"/>
-          </div>
-          <div>
-            <div class="small">Hasta</div>
-            <input id="reconTo" class="input" type="date"/>
-          </div>
-          <div>
-            <div class="small">Turno</div>
-            <select id="reconTurn" class="input">
-              <option value="">Todos</option>
-            </select>
-          </div>
-          <div>
-            <div class="small">Estado</div>
-            <select id="reconStatus" class="input">
-              <option value="all">Todos</option>
-              <option value="pendiente_carga">Pendiente de carga</option>
-              <option value="cargado_arca">Cargado en ARCA</option>
-              <option value="observado">Observado</option>
-              <option value="anulado">Anulado</option>
-              <option value="sin_facturar">Sin facturar</option>
-            </select>
-          </div>
-          <div class="fiscalFieldWide">
-            <div class="small">Buscar</div>
-            <input id="reconSearch" class="input" placeholder="Cliente, mesa, borrador, numero oficial o CAE"/>
-          </div>
-        </div>
-        <div class="mini" id="turnLimitNote"></div>
-        <div class="mini" id="reconGuardNote"></div>
-        <div class="row" id="reconDayChips" style="gap:6px; flex-wrap:wrap;"></div>
-      </section>
-
-      <section class="fiscalSection">
-        <div class="fiscalSectionHead">
-          <div>
-            <h2>Exportaciones</h2>
-            <p>Arma el rango y exporta solo lo que necesitas para control, cierres o carga manual.</p>
-          </div>
-        </div>
-        <div class="row" style="gap:8px; flex-wrap:wrap;">
-          <button id="expQuickToday" class="btn" type="button">Hoy</button>
-          <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
-          <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
-          <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
-          <button id="expQuickClear" class="btn" type="button">Limpiar</button>
-        </div>
-        <div class="row" id="expDayChips" style="gap:6px; flex-wrap:wrap;"></div>
-        <div class="fiscalFilterGrid">
-          <div>
-            <div class="small">Fecha exportacion</div>
-            <input id="expDate" class="input" type="date"/>
-          </div>
-          <div>
-            <div class="small">Desde</div>
-            <input id="expFrom" class="input" type="date"/>
-          </div>
-          <div>
-            <div class="small">Hasta</div>
-            <input id="expTo" class="input" type="date"/>
-          </div>
-        </div>
-        <div class="fiscalActionGrid">
-          <button id="btnExpSales" class="btn" type="button">Exportar borradores</button>
-          <button id="btnExpPending" class="btn" type="button">Exportar pendientes</button>
-          <button id="btnExpPay" class="btn" type="button">Exportar medios de pago</button>
-          <button id="btnExpClose" class="btn" type="button">Exportar cierres</button>
-          <button id="btnExpBonif" class="btn" type="button">Exportar bonificaciones</button>
-          <button id="btnExpAnnul" class="btn" type="button">Exportar anulaciones</button>
-        </div>
-        <div class="mini" id="expSummary"></div>
-        <div class="mini" id="expGuardNote"></div>
-      </section>
-    </section>
-
-    <section class="fiscalSummaryBar">
+    <section class="fiscalHeader">
       <div>
-        <div class="small">Vista actual</div>
-        <div id="reconScopeSummary">Selecciona fecha o rango.</div>
+        <h1 class="fiscalTitle">Comprobantes</h1>
+        <p class="fiscalSub">Borradores internos, seguimiento manual en ARCA y exportaciones.</p>
       </div>
-      <div>
-        <div class="small">Ayuda rapida</div>
-        <div>Usa "Marcar cargado" solo cuando ya exista el comprobante oficial.</div>
+      <div class="fiscalQuickLinks">
+        <a class="fiscalQuickLink" href="/profile.html">Perfil fiscal</a>
+        <a class="fiscalQuickLink" href="/admin_caja_test.html">Caja y cierres</a>
       </div>
     </section>
 
     <section class="fiscalSection">
       <div class="fiscalSectionHead">
         <div>
-          <h2>Listado operativo</h2>
-          <p>Cada tarjeta resume el borrador, el receptor, el estado y las acciones disponibles.</p>
+          <h2>Buscar borradores</h2>
+          <p>Filtra y trabaja el listado.</p>
         </div>
       </div>
+      <div class="fiscalFilterGrid">
+        <div>
+          <div class="small">Fecha</div>
+          <input id="reconDate" class="input" type="date"/>
+        </div>
+        <div>
+          <div class="small">Desde</div>
+          <input id="reconFrom" class="input" type="date"/>
+        </div>
+        <div>
+          <div class="small">Hasta</div>
+          <input id="reconTo" class="input" type="date"/>
+        </div>
+        <div>
+          <div class="small">Turno</div>
+          <select id="reconTurn" class="input">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div>
+          <div class="small">Estado</div>
+          <select id="reconStatus" class="input">
+            <option value="all">Todos</option>
+            <option value="pendiente_carga">Pendiente de carga</option>
+            <option value="cargado_arca">Cargado en ARCA</option>
+            <option value="observado">Observado</option>
+            <option value="anulado">Anulado</option>
+            <option value="sin_facturar">Sin facturar</option>
+          </select>
+        </div>
+        <div>
+          <div class="small">Buscar</div>
+          <input id="reconSearch" class="input" placeholder="Cliente, mesa, borrador, numero o CAE"/>
+        </div>
+        <button id="btnRunSearch" class="btn primary" type="button">Buscar</button>
+        <button id="btnClearSearch" class="btn" type="button">Limpiar</button>
+      </div>
+      <div class="mini" id="turnLimitNote"></div>
+      <div class="mini" id="reconGuardNote"></div>
+      <div class="row" id="reconDayChips" style="gap:6px; flex-wrap:wrap;"></div>
+    </section>
+
+    <div class="fiscalInlineStats">
+      <span><strong id="reconCount">0</strong> visibles</span>
+      <span>&middot;</span>
+      <span><strong id="statPending">0</strong> pendientes</span>
+      <span>&middot;</span>
+      <span><strong id="statLoaded">0</strong> cargados</span>
+      <span>&middot;</span>
+      <span><strong id="statObserved">0</strong> observados</span>
+    </div>
+
+    <section class="fiscalSection">
+      <div class="reconTableHead">
+        <div>Cliente / mesa</div>
+        <div>Fecha</div>
+        <div>Numero</div>
+        <div>Estado</div>
+        <div>Acciones</div>
+      </div>
       <div id="reconList" class="fiscalList"></div>
+    </section>
+
+    <section class="fiscalSection">
+      <div class="fiscalSectionHead">
+        <div>
+          <h2>Exportaciones</h2>
+          <p>Usa este bloque cuando necesites sacar informacion, no para operar borradores.</p>
+        </div>
+      </div>
+      <div class="fiscalPresetRow">
+          <button id="expQuickToday" class="btn" type="button">Hoy</button>
+          <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
+          <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
+          <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
+          <button id="expQuickClear" class="btn" type="button">Limpiar</button>
+      </div>
+      <div class="row" id="expDayChips" style="gap:6px; flex-wrap:wrap;"></div>
+      <div class="fiscalExportGrid">
+        <div>
+          <div class="small">Fecha exportacion</div>
+          <input id="expDate" class="input" type="date"/>
+        </div>
+        <div>
+          <div class="small">Desde</div>
+          <input id="expFrom" class="input" type="date"/>
+        </div>
+        <div>
+          <div class="small">Hasta</div>
+          <input id="expTo" class="input" type="date"/>
+        </div>
+      </div>
+      <div class="exportTypeList">
+        <label class="exportTypeOption"><input type="radio" name="exportType" value="sales" checked/> Borradores</label>
+        <label class="exportTypeOption"><input type="radio" name="exportType" value="pending"/> Pendientes</label>
+        <label class="exportTypeOption"><input type="radio" name="exportType" value="pay"/> Medios de pago</label>
+        <label class="exportTypeOption"><input type="radio" name="exportType" value="close"/> Cierres</label>
+        <label class="exportTypeOption"><input type="radio" name="exportType" value="bonif"/> Bonificaciones</label>
+        <label class="exportTypeOption"><input type="radio" name="exportType" value="annul"/> Anulaciones</label>
+      </div>
+      <div class="buttonRow">
+        <button id="btnExportSelected" class="btn primary" type="button">Exportar</button>
+      </div>
+      <div class="mini" id="expSummary"></div>
+      <div class="mini" id="expGuardNote"></div>
     </section>
   </main>
 
@@ -722,11 +684,8 @@
     function updateExportGuard(){
       const range = getExportRange();
       const has = !!(range.from || range.to);
-      const ids = ["btnExpSales","btnExpPay","btnExpBonif","btnExpAnnul","btnExpClose","btnExpPending"];
-      ids.forEach(id=>{
-        const btn = $(id);
-        if (btn) btn.disabled = !has;
-      });
+      const btn = $("btnExportSelected");
+      if (btn) btn.disabled = !has;
       const note = $("expGuardNote");
       if (note) note.textContent = has ? "Exportar no cambia estados. Solo arma archivos de control." : "Elegi fecha o rango para habilitar exportaciones.";
       exportSummary(currentDb, range);
@@ -785,6 +744,8 @@
     }
 
     function updateReconScopeSummary(range, turn){
+      const el = $("reconScopeSummary");
+      if (!el) return;
       const bits = [];
       if (range.from && range.to && range.from === range.to) bits.push(`Fecha ${range.from}`);
       else if (range.from || range.to) bits.push(`Rango ${range.from || "..."} a ${range.to || "..."}`);
@@ -793,7 +754,7 @@
       if (status !== "all") bits.push(`Estado ${statusLabel(status)}`);
       const search = ($("reconSearch").value || "").trim();
       if (search) bits.push(`Busqueda "${search}"`);
-      $("reconScopeSummary").textContent = bits.join(" | ") || "Selecciona fecha o rango.";
+      el.textContent = bits.join(" | ") || "Selecciona fecha o rango.";
     }
 
     function renderTurns(db){
@@ -929,59 +890,71 @@
         if (search && !searchHay.includes(search)) return;
 
         const attachments = doc.attachments && doc.attachments.length
-          ? `<div class="small">Adjuntos: ${doc.attachments.length}</div>`
+          ? `<div class="reconSecondary">Adjuntos: ${doc.attachments.length}</div>`
           : "";
         const observations = doc.observations && doc.observations.length
-          ? `<div class="small">Obs: ${doc.observations.slice(-1)[0]}</div>`
+          ? `<div class="reconSecondary">Obs: ${doc.observations.slice(-1)[0]}</div>`
           : "";
 
         statsRows.push({ status });
         rows.push(`
-          <article class="reconCard">
-            <div class="reconCardTop">
-              <div class="reconMain">
-                <div class="reconTitle">${fmtDateTime(sale.at)} | ${formatDraftRef(doc)}</div>
-                <div class="reconSub">Cliente: ${receiver}</div>
-                <div class="reconSub">Mesa ${sale.tableId || "-"} | Pedido ${sale.ticketId || sale.id || "-"} | Medio ${sale.paymentMethod || "-"}</div>
-              </div>
+          <article class="reconRow">
+            <div class="reconCellMain">
+              <div class="reconPrimary">${receiver}</div>
+              <div class="reconSecondary">Mesa ${sale.tableId || "-"} | Pedido ${sale.ticketId || sale.id || "-"} | Medio ${sale.paymentMethod || "-"}</div>
+              ${observations}
+              ${attachments}
+            </div>
+            <div class="reconCellCompact">
+              <div>${fmtDateTime(sale.at)}</div>
+              <div class="reconSecondary">${fmtMoney(sale.total || 0, cur)}</div>
+            </div>
+            <div class="reconCellCompact">
+              <div>${formatDraftRef(doc)}</div>
+              <div class="reconSecondary">${formatOfficialRef(doc)}</div>
+              ${doc.cae ? `<div class="reconSecondary">CAE ${doc.cae}</div>` : ""}
+            </div>
+            <div class="reconCellCompact">
               <div class="badge2" style="${statusStyle(status)}">${statusLabel(status)}</div>
+              <div class="reconSecondary">Tipo ${shortDocType(doc.suggestedDocType) || "-"}</div>
             </div>
-            <div class="reconMetaGrid">
-              <div>
-                <div class="small">Total</div>
-                <div style="font-weight:900;">${fmtMoney(sale.total || 0, cur)}</div>
-              </div>
-              <div>
-                <div class="small">Tipo sugerido</div>
-                <div>${shortDocType(doc.suggestedDocType) || "-"}</div>
-              </div>
-              <div>
-                <div class="small">Comprobante oficial</div>
-                <div>${formatOfficialRef(doc)}</div>
-              </div>
-              <div>
-                <div class="small">CAE y adjuntos</div>
-                <div>${doc.cae ? `CAE ${doc.cae}${doc.caeDue ? ` | Vto ${doc.caeDue}` : ""}` : "Sin CAE cargado"}</div>
-                ${attachments}
-              </div>
-            </div>
-            ${observations}
             <div class="reconActions">
               <a class="btn" href="/print_fiscal.html?id=${encodeURIComponent(doc.id)}" target="_blank" rel="noopener">Ver borrador</a>
-              <button class="btn" type="button" data-emit="${String(sale.id||"")}">Marcar cargado</button>
-              <button class="btn" type="button" data-observe="${String(sale.id||"")}">Marcar observado</button>
+              <button class="btn" type="button" data-emit="${String(sale.id||"")}">Cargado</button>
+              <button class="btn" type="button" data-observe="${String(sale.id||"")}">Observado</button>
               <button class="btn" type="button" data-annul="${String(sale.id||"")}">Anulado</button>
               <button class="btn" type="button" data-reset="${String(sale.id||"")}">Pendiente</button>
-              <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar PDF</button>
-              <button class="btn" type="button" data-copy="${String(sale.id||"")}">Copiar resumen</button>
+              <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar</button>
+              <button class="btn" type="button" data-copy="${String(sale.id||"")}">Copiar</button>
             </div>
           </article>
         `);
       });
 
-      $("reconList").innerHTML = rows.join("") || '<div class="small">Sin borradores para mostrar.</div>';
+      $("reconList").innerHTML = rows.join("") || '<div class="small">Sin resultados para ese filtro.</div>';
       updateReconHeader(statsRows);
       updateReconScopeSummary(range, turn);
+    }
+
+    function clearReconFilters(){
+      $("reconDate").value = "";
+      $("reconFrom").value = "";
+      $("reconTo").value = "";
+      $("reconTurn").value = "";
+      $("reconStatus").value = "all";
+      $("reconSearch").value = "";
+      renderRecon(currentDb);
+    }
+
+    function exportSelected(){
+      const selected = document.querySelector('input[name="exportType"]:checked');
+      const key = selected ? selected.value : "sales";
+      if (key === "sales") return exportSales();
+      if (key === "pending") return exportPending();
+      if (key === "pay") return exportByPayment();
+      if (key === "close") return exportClosures();
+      if (key === "bonif") return exportBonifications();
+      if (key === "annul") return exportAnnulled();
     }
 
     function openEmitModal(saleId){
@@ -1135,6 +1108,8 @@
       $(id).addEventListener("change", ()=>renderRecon(currentDb));
     });
     $("reconSearch").addEventListener("input", ()=>renderRecon(currentDb));
+    $("btnRunSearch").addEventListener("click", ()=>renderRecon(currentDb));
+    $("btnClearSearch").addEventListener("click", clearReconFilters);
     $("reconDate").value = "";
     $("reconFrom").value = "";
     $("reconTo").value = "";
@@ -1363,12 +1338,7 @@
       downloadCsv(`pendientes_arca_${range.from || "all"}_${range.to || "all"}.csv`, csv);
     }
 
-    $("btnExpSales").addEventListener("click", exportSales);
-    $("btnExpPay").addEventListener("click", exportByPayment);
-    $("btnExpBonif").addEventListener("click", exportBonifications);
-    $("btnExpAnnul").addEventListener("click", exportAnnulled);
-    $("btnExpClose").addEventListener("click", exportClosures);
-    $("btnExpPending").addEventListener("click", exportPending);
+    $("btnExportSelected").addEventListener("click", exportSelected);
 
     if (onState) onState((db)=>{
       renderRecon(db);
