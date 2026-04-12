@@ -1244,6 +1244,12 @@
               </div>
               <div class="branchOptionList" id="branchList"></div>
             </section>
+            <section class="subSection">
+              <div class="subSectionHead">
+                <h3 class="subSectionTitle">Solicitudes de mozo</h3>
+              </div>
+              <div class="list" id="branchPendingRequests"></div>
+            </section>
           </div>
         </section>
       </section>
@@ -1390,6 +1396,7 @@
       const data = await api(`/api/restaurants/branches?restaurantId=${encodeURIComponent(state.branchRestaurantId)}`);
       state.branches = data.branches || [];
       renderBranchList();
+      renderPendingRequests("branchPendingRequests", state.branchRestaurantId);
       setMainPanel("branch");
     }
 
@@ -1654,6 +1661,44 @@
             </div>
             <div class="buttonRow">
               ${actionHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderPendingRequests(targetId, restaurantId) {
+      const box = $(targetId);
+      if (!box) return;
+      let items = Array.isArray(state.profile && state.profile.pendingRequests) ? state.profile.pendingRequests : [];
+      if (restaurantId) {
+        items = items.filter((item) => String(item.restaurantId || "") === String(restaurantId || ""));
+      }
+      if (!items.length) {
+        box.innerHTML = '<div class="emptyState">No hay solicitudes pendientes.</div>';
+        return;
+      }
+      box.innerHTML = items.map((item) => {
+        const user = item.user || {};
+        const label = escapeHtml(user.name || user.username || user.email || "Usuario");
+        const meta = [
+          item.restaurantName ? `Restaurante: ${escapeHtml(item.restaurantName)}` : "",
+          item.requestedAt ? `Pedido: ${new Date(Number(item.requestedAt)).toLocaleString("es-AR")}` : ""
+        ].filter(Boolean).join(" · ");
+        return `
+          <div class="itemCard">
+            <div class="itemTop">
+              <div>
+                <div class="itemTitle">${label}</div>
+                <div class="itemSub">${meta}</div>
+              </div>
+              <div class="itemMeta">
+                <span class="tag warn">Pendiente</span>
+              </div>
+            </div>
+            <div class="buttonRow">
+              <button class="btn primary" type="button" onclick="decideRequest('${escapeHtml(item.id)}', true)">Aceptar</button>
+              <button class="btn" type="button" onclick="decideRequest('${escapeHtml(item.id)}', false)">Rechazar</button>
             </div>
           </div>
         `;
@@ -2084,6 +2129,12 @@
 
     async function enterRestaurant(restaurantId, role) {
       try {
+        if (String(role || "") === "admin") {
+          const items = ((state.profile && state.profile.ownedRestaurants) || []);
+          const restaurant = items.find((item) => String(item.id || "") === String(restaurantId || ""));
+          await openBranchPanel(restaurantId, role, restaurant && restaurant.name ? restaurant.name : "");
+          return;
+        }
         const data = await api("/api/restaurants/enter", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
