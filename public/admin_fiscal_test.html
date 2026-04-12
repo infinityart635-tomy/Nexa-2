@@ -47,8 +47,7 @@
   <main class="wrap">
     <div class="row" style="margin-bottom:10px; gap:8px; flex-wrap:wrap;">
       <button class="btn viewTab active" type="button" data-view-tab="profile">Perfil</button>
-      <button class="btn viewTab" type="button" data-view-tab="recon">Pendientes ARCA</button>
-      <button class="btn viewTab" type="button" data-view-tab="exports">Exportaciones</button>
+      <button class="btn viewTab" type="button" data-view-tab="recon">Comprobantes</button>
     </div>
 
     <div data-view-panel="profile">
@@ -103,8 +102,8 @@
       <section class="panel">
         <div class="panelHead">
           <div>
-            <h2>Pendientes de cargar en ARCA</h2>
-            <p class="hint">Borradores internos, datos sugeridos y conciliacion manual posterior.</p>
+            <h2>Comprobantes</h2>
+            <p class="hint">Borradores internos, seguimiento manual en ARCA y exportaciones desde la misma vista.</p>
           </div>
           <div class="badge2">Borradores <strong id="reconCount">-</strong></div>
         </div>
@@ -153,47 +152,26 @@
           <div class="mini" id="turnLimitNote" style="margin-top:8px;"></div>
           <div class="mini" id="reconGuardNote" style="margin-top:4px;"></div>
           <div class="row" id="reconDayChips" style="margin-top:8px; gap:6px; flex-wrap:wrap;"></div>
-        </div>
-      </section>
-
-      <section class="panel" style="margin-top:12px;">
-        <div class="panelBody" id="reconList"></div>
-      </section>
-    </div>
-
-    <div data-view-panel="exports" style="display:none;">
-      <section class="panel">
-        <div class="panelHead">
-          <div>
-            <h2>Exportaciones</h2>
-            <p class="hint">CSV para contador, control interno y seguimiento de pendientes.</p>
-          </div>
-        </div>
-        <div class="panelBody">
-          <div class="badge2" style="display:inline-flex; align-items:center; gap:8px; margin-bottom:10px;">
-            <strong>Pasos:</strong>
-            <span>1) Elegi fecha o rango</span>
-            <span>2) Exporta</span>
-          </div>
+          <div class="hr"></div>
           <div class="row" style="margin-bottom:8px; flex-wrap:wrap;">
             <button id="expQuickToday" class="btn" type="button">Hoy</button>
             <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
             <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
             <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
-            <button id="expQuickClear" class="btn" type="button">Limpiar</button>
+            <button id="expQuickClear" class="btn" type="button">Limpiar exportacion</button>
           </div>
           <div class="row" id="expDayChips" style="margin-bottom:8px; gap:6px; flex-wrap:wrap;"></div>
           <div class="row" style="flex-wrap:wrap;">
             <div style="min-width:160px;">
-              <div class="small">Fecha</div>
+              <div class="small">Fecha exportacion</div>
               <input id="expDate" class="input" type="date"/>
             </div>
             <div style="min-width:160px;">
-              <div class="small">Desde</div>
+              <div class="small">Desde exportacion</div>
               <input id="expFrom" class="input" type="date"/>
             </div>
             <div style="min-width:160px;">
-              <div class="small">Hasta</div>
+              <div class="small">Hasta exportacion</div>
               <input id="expTo" class="input" type="date"/>
             </div>
           </div>
@@ -208,6 +186,10 @@
           <div class="mini" id="expSummary" style="margin-top:8px;"></div>
           <div class="mini" id="expGuardNote" style="margin-top:8px;"></div>
         </div>
+      </section>
+
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelBody" id="reconList"></div>
       </section>
     </div>
   </main>
