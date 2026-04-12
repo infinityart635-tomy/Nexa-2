@@ -1089,6 +1089,20 @@
               </section>
             </div>
 
+            <div class="commerceBottom">
+              <section class="subSection">
+                <div class="subSectionHead">
+                  <h3 class="subSectionTitle">Pedir acceso como mozo</h3>
+                </div>
+                <div class="msgBox" id="restaurantRequestMsg"></div>
+                <div class="searchRow">
+                  <input id="restaurantSearchInput" class="input" placeholder="Buscar restaurante por nombre"/>
+                  <button id="btnRestaurantSearch" class="btn primary" type="button">Buscar</button>
+                </div>
+                <div class="list" id="restaurantSearchResults"></div>
+              </section>
+            </div>
+
           </div>
         </section>
       </section>
@@ -1278,6 +1292,7 @@
       me: null,
       profile: null,
       restaurantState: null,
+      restaurantSearchResults: [],
       passwordVerified: false,
       deleteRestaurantId: "",
       trashedRestaurants: [],
@@ -1602,6 +1617,46 @@
       }).join("");
     }
 
+    function renderRestaurantSearchResults() {
+      const box = $("restaurantSearchResults");
+      const items = Array.isArray(state.restaurantSearchResults) ? state.restaurantSearchResults : [];
+      if (!items.length) {
+        box.innerHTML = '<div class="emptyState">Busca un restaurante para mandar solicitud como mozo.</div>';
+        return;
+      }
+      box.innerHTML = items.map((item) => {
+        const name = escapeHtml(item.name || "Restaurante");
+        const owner = escapeHtml(item.ownerName || "");
+        const membership = item.membership || null;
+        let actionHtml = `<button class="btn primary" type="button" onclick="requestMozoAccess('${escapeHtml(item.id)}')">Solicitar acceso</button>`;
+        let statusHtml = '<span class="tag">Disponible</span>';
+        if (membership && membership.role === "mozo" && membership.status === "pending") {
+          actionHtml = `<button class="btn" type="button" disabled>Solicitud enviada</button>`;
+          statusHtml = '<span class="tag warn">Pendiente</span>';
+        } else if (membership && membership.role === "mozo" && membership.status === "active") {
+          actionHtml = `<button class="btn" type="button" onclick="enterRestaurant('${escapeHtml(item.id)}','mozo')">Entrar como mozo</button>`;
+          statusHtml = '<span class="tag ok">Ya tienes acceso</span>';
+        } else if (membership && membership.role === "owner") {
+          actionHtml = `<button class="btn" type="button" onclick="enterRestaurant('${escapeHtml(item.id)}','admin')">Entrar</button>`;
+          statusHtml = '<span class="tag ok">Es tu restaurante</span>';
+        }
+        return `
+          <div class="itemCard">
+            <div class="itemTop">
+              <div>
+                <div class="itemTitle">${name}</div>
+                <div class="itemSub">Dueno: ${owner || "Sin dato"}</div>
+              </div>
+              <div class="itemMeta">${statusHtml}</div>
+            </div>
+            <div class="buttonRow">
+              ${actionHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
     function renderTrashedRestaurants() {
       const box = $("trashedRestaurants");
       const items = state.trashedRestaurants || [];
@@ -1770,6 +1825,7 @@
         renderSummary();
         fillAccountForm();
         renderOwnedRestaurants();
+        renderRestaurantSearchResults();
         renderTrashedRestaurants();
         renderFirstSteps();
       } catch (error) {
@@ -1806,6 +1862,37 @@
         await refreshProfile();
       } catch (error) {
         message("accountMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function searchRestaurants() {
+      const query = ($("restaurantSearchInput").value || "").trim();
+      try {
+        const data = await api(`/api/restaurants/search?q=${encodeURIComponent(query)}`);
+        state.restaurantSearchResults = data.restaurants || [];
+        renderRestaurantSearchResults();
+        if (!state.restaurantSearchResults.length) {
+          message("restaurantRequestMsg", "No encontramos restaurantes con ese nombre.", "error");
+        } else {
+          message("restaurantRequestMsg", "", "");
+        }
+      } catch (error) {
+        message("restaurantRequestMsg", errorText(error.message), "error");
+      }
+    }
+
+    async function requestMozoAccess(restaurantId) {
+      try {
+        await api("/api/restaurants/requestMozo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId })
+        });
+        message("restaurantRequestMsg", "Solicitud enviada.", "success");
+        await searchRestaurants();
+        await refreshProfile();
+      } catch (error) {
+        message("restaurantRequestMsg", errorText(error.message), "error");
       }
     }
 
@@ -2057,6 +2144,7 @@
     }
 
     $("btnSaveAccount").addEventListener("click", saveAccount);
+    $("btnRestaurantSearch").addEventListener("click", searchRestaurants);
     $("btnSaveFiscalAccount").addEventListener("click", saveFiscalAccount);
     $("btnOpenCreateRestaurant").addEventListener("click", () => setMainPanel("createRestaurant"));
     $("btnBackFromCreateRestaurant").addEventListener("click", () => setMainPanel("restaurants"));
@@ -2078,6 +2166,12 @@
     $("btnVerifyPassword").addEventListener("click", verifyPasswordSecurity);
     $("btnSavePassword").addEventListener("click", savePassword);
     $("createRestaurantName").addEventListener("input", updateCreateRestaurantPreview);
+    $("restaurantSearchInput").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchRestaurants();
+      }
+    });
     $("deleteRestaurantModal").addEventListener("click", (event) => {
       if (event.target === $("deleteRestaurantModal")) closeDeleteRestaurantModal();
     });
@@ -2086,6 +2180,7 @@
     });
 
     window.enterRestaurant = enterRestaurant;
+    window.requestMozoAccess = requestMozoAccess;
     window.toggleRestaurantDelete = toggleRestaurantDelete;
     window.trashRestaurant = trashRestaurant;
     window.restoreRestaurant = restoreRestaurant;
