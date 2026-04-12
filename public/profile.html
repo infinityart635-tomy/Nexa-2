@@ -2152,17 +2152,17 @@
 
     async function enterRestaurant(restaurantId, role) {
       try {
-        if (String(role || "") === "admin") {
-          const items = ((state.profile && state.profile.ownedRestaurants) || []);
-          const restaurant = items.find((item) => String(item.id || "") === String(restaurantId || ""));
-          await openBranchPanel(restaurantId, role, restaurant && restaurant.name ? restaurant.name : "");
-          return;
-        }
         const data = await api("/api/restaurants/enter", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ restaurantId, role })
         });
+        if (String(role || "") === "admin") {
+          const items = ((state.profile && state.profile.ownedRestaurants) || []);
+          const restaurant = items.find((item) => String(item.id || "") === String(restaurantId || ""));
+          await openBranchPanel(restaurantId, role, (restaurant && restaurant.name) ? restaurant.name : (data.restaurantName || ""));
+          return;
+        }
         if (!data.branchId) {
           await openBranchPanel(restaurantId, role, data.restaurantName || "");
           return;
