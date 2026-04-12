@@ -1621,7 +1621,10 @@
       const box = $("restaurantSearchResults");
       const items = Array.isArray(state.restaurantSearchResults) ? state.restaurantSearchResults : [];
       if (!items.length) {
-        box.innerHTML = '<div class="emptyState">Busca un restaurante para mandar solicitud como mozo.</div>';
+        const query = ($("restaurantSearchInput") && $("restaurantSearchInput").value || "").trim();
+        box.innerHTML = query
+          ? '<div class="emptyState">No encontramos restaurantes con ese nombre.</div>'
+          : '<div class="emptyState">Escribe un nombre y toca Buscar para encontrar un restaurante.</div>';
         return;
       }
       box.innerHTML = items.map((item) => {
@@ -1867,6 +1870,12 @@
 
     async function searchRestaurants() {
       const query = ($("restaurantSearchInput").value || "").trim();
+      if (!query) {
+        state.restaurantSearchResults = [];
+        renderRestaurantSearchResults();
+        message("restaurantRequestMsg", "", "");
+        return;
+      }
       try {
         const data = await api(`/api/restaurants/search?q=${encodeURIComponent(query)}`);
         state.restaurantSearchResults = data.restaurants || [];
