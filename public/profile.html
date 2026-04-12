@@ -134,6 +134,7 @@
       box-shadow: 0 0 0 3px rgba(120,240,190,.10), inset 0 1px 0 rgba(255,255,255,.03);
     }
     .fieldHint{font-size:12px; color:var(--muted); line-height:1.38;}
+    .fieldHint.strong{color:#d8e9de;}
     .list{display:grid; gap:10px; margin-top:12px;}
     .scrollList{
       max-height:320px;
@@ -483,6 +484,70 @@
       display:grid;
       gap:18px;
       align-content:start;
+    }
+    .accountStack{
+      display:grid;
+      gap:18px;
+    }
+    .accountHero{
+      display:grid;
+      gap:10px;
+      padding:16px;
+      border:1px solid rgba(120,240,190,.18);
+      border-radius:16px;
+      background:
+        radial-gradient(circle at top left, rgba(120,240,190,.12), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+    }
+    .accountHeroTitle{
+      font-size:18px;
+      line-height:1.15;
+      font-weight:900;
+    }
+    .hintPillRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .hintPill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      font-size:12px;
+    }
+    .fiscalMiniGrid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:10px;
+    }
+    .fiscalMiniStat{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:12px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:4px;
+    }
+    .fiscalMiniStat strong{
+      font-size:18px;
+      color:#f2fff8;
+    }
+    .fiscalLock{
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.025);
+      color:var(--muted);
+      line-height:1.45;
+    }
+    @media (max-width: 860px){
+      .fiscalMiniGrid{
+        grid-template-columns:1fr;
+      }
     }
     .backRow{
       display:flex;
@@ -854,29 +919,98 @@
 
     <section class="stack mainStack">
       <section class="profilePanel accountPanel" data-panel="account">
-        <section class="groupCard profileSection accountCard">
-          <div class="groupHead">
-            <div>
-              <div class="eyebrow">Cuenta</div>
-              <h2 class="groupTitle">Datos</h2>
+        <div class="accountStack">
+          <section class="groupCard profileSection accountCard">
+            <div class="groupHead">
+              <div>
+                <div class="eyebrow">Cuenta</div>
+                <h2 class="groupTitle">Datos</h2>
+              </div>
             </div>
-          </div>
-          <div class="msgBox" id="accountMsg"></div>
-          <div class="formGrid">
-            <div class="field full">
-              <label class="small" for="accountUsername">Nombre / usuario</label>
-              <input id="accountUsername" class="input" autocomplete="username" placeholder="Tu usuario"/>
+            <div class="msgBox" id="accountMsg"></div>
+            <div class="formGrid">
+              <div class="field full">
+                <label class="small" for="accountUsername">Nombre / usuario</label>
+                <input id="accountUsername" class="input" autocomplete="username" placeholder="Tu usuario"/>
+              </div>
+              <div class="field full">
+                <label class="small" for="accountEmail">Mail</label>
+                <input id="accountEmail" class="input" type="email" autocomplete="email" placeholder="mail@ejemplo.com"/>
+              </div>
             </div>
-            <div class="field full">
-              <label class="small" for="accountEmail">Mail</label>
-              <input id="accountEmail" class="input" type="email" autocomplete="email" placeholder="mail@ejemplo.com"/>
+            <div class="buttonRow">
+              <button id="btnSaveAccount" class="btn primary" type="button">Guardar</button>
+              <button id="btnOpenPasswordPanel" class="btn" type="button">Cambiar contrasena</button>
             </div>
-          </div>
-          <div class="buttonRow">
-            <button id="btnSaveAccount" class="btn primary" type="button">Guardar</button>
-            <button id="btnOpenPasswordPanel" class="btn" type="button">Cambiar contrasena</button>
-          </div>
-        </section>
+          </section>
+
+          <section class="groupCard profileSection">
+            <div class="groupHead">
+              <div>
+                <div class="eyebrow">Facturacion</div>
+                <h2 class="groupTitle">Perfil fiscal del comercio</h2>
+              </div>
+            </div>
+            <div class="accountHero">
+              <div class="accountHeroTitle">Los datos de pre-facturacion viven aca.</div>
+              <div class="fieldHint strong" id="fiscalAccountHint">Entra a un comercio para completar CUIT, razon social y punto de venta.</div>
+              <div class="hintPillRow">
+                <div class="hintPill">1. Cerras la venta en NEXA</div>
+                <div class="hintPill">2. Revisas el borrador</div>
+                <div class="hintPill">3. Cargas el comprobante oficial</div>
+              </div>
+              <div class="fiscalMiniGrid">
+                <div class="fiscalMiniStat">
+                  <span class="small">Comercio activo</span>
+                  <strong id="fiscalAccountCommerce">Sin comercio</strong>
+                </div>
+                <div class="fiscalMiniStat">
+                  <span class="small">Punto de venta</span>
+                  <strong id="fiscalAccountPos">-</strong>
+                </div>
+                <div class="fiscalMiniStat">
+                  <span class="small">Condicion IVA</span>
+                  <strong id="fiscalAccountIva">-</strong>
+                </div>
+              </div>
+            </div>
+            <div class="msgBox" id="fiscalAccountMsg"></div>
+            <div id="fiscalAccountLocked" class="fiscalLock" style="display:none;"></div>
+            <fieldset id="fiscalAccountFieldset" style="border:0; margin:0; padding:0; min-width:0;">
+              <div class="formGrid">
+                <div class="field">
+                  <label class="small" for="accountFiscalCuit">CUIT</label>
+                  <input id="accountFiscalCuit" class="input" placeholder="20-00000000-0"/>
+                </div>
+                <div class="field">
+                  <label class="small" for="accountFiscalRazon">Razon social / Nombre</label>
+                  <input id="accountFiscalRazon" class="input" placeholder="Mi Empresa S.A."/>
+                </div>
+                <div class="field full">
+                  <label class="small" for="accountFiscalDom">Domicilio comercial</label>
+                  <input id="accountFiscalDom" class="input" placeholder="Calle 123, Ciudad"/>
+                </div>
+                <div class="field">
+                  <label class="small" for="accountFiscalIva">Condicion frente al IVA</label>
+                  <select id="accountFiscalIva" class="input">
+                    <option value="Monotributo">Monotributo</option>
+                    <option value="Responsable Inscripto">Responsable Inscripto</option>
+                    <option value="Exento">Exento</option>
+                    <option value="Consumidor Final">Consumidor Final</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="small" for="accountFiscalPos">Punto de venta oficial</label>
+                  <input id="accountFiscalPos" class="input" placeholder="0001"/>
+                </div>
+              </div>
+              <div class="buttonRow">
+                <button id="btnSaveFiscalAccount" class="btn primary" type="button">Guardar perfil fiscal</button>
+                <a class="btn" href="/admin_fiscal_test.html">Abrir comprobantes</a>
+              </div>
+            </fieldset>
+          </section>
+        </div>
       </section>
 
       <section class="profilePanel passwordPanel" data-panel="password">
@@ -1345,6 +1479,53 @@
       return data;
     }
 
+    function currentFiscalSettings() {
+      const settings = state.restaurantState && state.restaurantState.settings ? state.restaurantState.settings : {};
+      return settings && settings.fiscal ? settings.fiscal : {};
+    }
+
+    function canEditFiscalProfile() {
+      const me = state.me || {};
+      return !!(me.restaurantId && me.role === "admin");
+    }
+
+    function fillFiscalAccountForm() {
+      const fiscal = currentFiscalSettings();
+      const company = fiscal && fiscal.company ? fiscal.company : {};
+      $("accountFiscalCuit").value = company.cuit || "";
+      $("accountFiscalRazon").value = company.razonSocial || "";
+      $("accountFiscalDom").value = company.domicilio || "";
+      $("accountFiscalIva").value = company.ivaCondicion || "Monotributo";
+      $("accountFiscalPos").value = fiscal.pos || "";
+      $("fiscalAccountPos").textContent = fiscal.pos || "-";
+      $("fiscalAccountIva").textContent = company.ivaCondicion || "-";
+    }
+
+    function renderFiscalAccountState() {
+      const me = state.me || {};
+      const locked = $("fiscalAccountLocked");
+      const fieldset = $("fiscalAccountFieldset");
+      const hint = $("fiscalAccountHint");
+      $("fiscalAccountCommerce").textContent = me.restaurantName || "Sin comercio";
+      fillFiscalAccountForm();
+      if (canEditFiscalProfile()) {
+        fieldset.disabled = false;
+        locked.style.display = "none";
+        locked.textContent = "";
+        hint.textContent = "Completa una vez estos datos del comercio y despues usa Comprobantes solo para operar borradores y cargas manuales.";
+        return;
+      }
+      fieldset.disabled = true;
+      locked.style.display = "block";
+      if (me.restaurantId && me.role === "mozo") {
+        locked.textContent = "Estas dentro de un comercio como mozo. Puedes ver los datos, pero solo un administrador puede modificarlos.";
+        hint.textContent = "Este perfil corresponde al comercio activo y se usa para completar la carga manual en ARCA.";
+      } else {
+        locked.textContent = "Abre uno de tus comercios como administrador para editar el perfil fiscal.";
+        hint.textContent = "Cuando entres a un comercio, aqui vas a tener CUIT, razon social, domicilio y punto de venta.";
+      }
+    }
+
     function fillAccountForm() {
       const user = state.profile && state.profile.user ? state.profile.user : {};
       const securityQuestion = (state.profile && state.profile.securityQuestion) || "";
@@ -1352,6 +1533,7 @@
       $("accountEmail").value = user.email || "";
       $("passwordRecoveryQuestion").value = securityQuestion || "No configurada";
       resetPasswordFlow();
+      fillFiscalAccountForm();
     }
 
     function renderSummary() {
@@ -1365,6 +1547,7 @@
         : "Cuenta";
       $("trashCountBadge").textContent = trashCount ? String(trashCount) : "";
       $("trashCountBadge").classList.toggle("show", trashCount > 0);
+      renderFiscalAccountState();
     }
 
     function renderOwnedRestaurants() {
@@ -1626,6 +1809,45 @@
       }
     }
 
+    function collectFiscalAccountPayload() {
+      return {
+        enabled: true,
+        provider: "manual",
+        environment: "manual",
+        pos: ($("accountFiscalPos").value || "").trim(),
+        company: {
+          cuit: ($("accountFiscalCuit").value || "").trim(),
+          razonSocial: ($("accountFiscalRazon").value || "").trim(),
+          domicilio: ($("accountFiscalDom").value || "").trim(),
+          ivaCondicion: ($("accountFiscalIva").value || "").trim(),
+        }
+      };
+    }
+
+    async function saveFiscalAccount() {
+      if (!canEditFiscalProfile()) {
+        message("fiscalAccountMsg", "Abre un comercio como administrador para guardar este perfil.", "error");
+        return;
+      }
+      const fiscal = collectFiscalAccountPayload();
+      if (!fiscal.company.cuit) return message("fiscalAccountMsg", "Escribe el CUIT.", "error");
+      if (!fiscal.company.razonSocial) return message("fiscalAccountMsg", "Escribe la razon social.", "error");
+      if (!fiscal.company.domicilio) return message("fiscalAccountMsg", "Escribe el domicilio comercial.", "error");
+      if (!fiscal.pos) return message("fiscalAccountMsg", "Escribe el punto de venta.", "error");
+      try {
+        await api("/api/account/fiscal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fiscal })
+        });
+        await loadRestaurantStateForChecklist();
+        renderFiscalAccountState();
+        message("fiscalAccountMsg", "Perfil fiscal guardado.", "success");
+      } catch (error) {
+        message("fiscalAccountMsg", errorText(error.message), "error");
+      }
+    }
+
     async function verifyPasswordSecurity() {
       const profile = state.profile || {};
       const question = String(profile.securityQuestion || "");
@@ -1835,6 +2057,7 @@
     }
 
     $("btnSaveAccount").addEventListener("click", saveAccount);
+    $("btnSaveFiscalAccount").addEventListener("click", saveFiscalAccount);
     $("btnOpenCreateRestaurant").addEventListener("click", () => setMainPanel("createRestaurant"));
     $("btnBackFromCreateRestaurant").addEventListener("click", () => setMainPanel("restaurants"));
     $("btnCreateRestaurant").addEventListener("click", createRestaurant);

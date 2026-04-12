@@ -6,6 +6,207 @@
   <meta name="theme-color" content="#121212"/>
   <title>NEXA - Comprobantes</title>
   <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .fiscalWrap{
+      display:grid;
+      gap:14px;
+    }
+    .fiscalHero{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      padding:18px;
+      background:
+        radial-gradient(circle at top left, rgba(255,170,110,.12), transparent 34%),
+        linear-gradient(180deg, rgba(28,29,35,.98), rgba(18,19,24,.98));
+      display:grid;
+      gap:12px;
+    }
+    .fiscalHeroTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+    .fiscalHeroTitle{
+      margin:0;
+      font-size:28px;
+      line-height:1.02;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .fiscalHeroSub{
+      margin:6px 0 0;
+      color:var(--muted);
+      max-width:760px;
+      line-height:1.45;
+    }
+    .fiscalStepRow,
+    .fiscalStatGrid,
+    .fiscalQuickLinks{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .fiscalStep,
+    .fiscalQuickLink{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:999px;
+      padding:8px 12px;
+      background:rgba(255,255,255,.03);
+      font-size:12px;
+    }
+    .fiscalQuickLink{
+      text-decoration:none;
+      color:var(--text);
+    }
+    .fiscalQuickLink:hover{
+      border-color:rgba(120,220,255,.28);
+    }
+    .fiscalStat{
+      min-width:160px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      padding:12px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:4px;
+    }
+    .fiscalStat strong{
+      font-size:22px;
+      line-height:1;
+    }
+    .fiscalGrid{
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);
+      gap:14px;
+      align-items:start;
+    }
+    .fiscalSection{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:rgba(255,255,255,.02);
+      padding:14px;
+      display:grid;
+      gap:12px;
+    }
+    .fiscalSectionHead{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .fiscalSectionHead h2{
+      margin:0;
+      font-size:18px;
+      line-height:1.1;
+    }
+    .fiscalSectionHead p{
+      margin:4px 0 0;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .fiscalFilterGrid{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:10px;
+    }
+    .fiscalFieldWide{
+      grid-column:span 2;
+    }
+    .fiscalActionGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .fiscalSummaryBar{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      padding:12px 14px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:rgba(255,255,255,.02);
+    }
+    .fiscalList{
+      display:grid;
+      gap:10px;
+    }
+    .reconCard{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      padding:14px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:12px;
+    }
+    .reconCardTop,
+    .reconMetaGrid,
+    .reconActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+    .reconMetaGrid > div{
+      min-width:130px;
+      flex:1;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:8px;
+      padding:10px;
+      background:rgba(255,255,255,.015);
+    }
+    .reconMain{
+      flex:1 1 320px;
+    }
+    .reconTitle{
+      font-size:17px;
+      font-weight:900;
+      line-height:1.2;
+    }
+    .reconSub{
+      margin-top:4px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .reconActions{
+      justify-content:flex-end;
+    }
+    .reconActions .btn{
+      flex:0 0 auto;
+    }
+    @media (max-width: 1020px){
+      .fiscalGrid{
+        grid-template-columns:minmax(0,1fr);
+      }
+    }
+    @media (max-width: 900px){
+      .fiscalFilterGrid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      .fiscalFieldWide{
+        grid-column:span 2;
+      }
+      .fiscalActionGrid{
+        grid-template-columns:minmax(0,1fr);
+      }
+    }
+    @media (max-width: 640px){
+      .fiscalFilterGrid{
+        grid-template-columns:minmax(0,1fr);
+      }
+      .fiscalFieldWide{
+        grid-column:span 1;
+      }
+      .fiscalHeroTitle{
+        font-size:22px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="top">
@@ -44,154 +245,153 @@
     </div>
   </header>
 
-  <main class="wrap">
-    <div class="row" style="margin-bottom:10px; gap:8px; flex-wrap:wrap;">
-      <button class="btn viewTab active" type="button" data-view-tab="profile">Perfil</button>
-      <button class="btn viewTab" type="button" data-view-tab="recon">Comprobantes</button>
-    </div>
-
-    <div data-view-panel="profile">
-      <section class="card">
-        <div style="font-weight:900; letter-spacing:.18em; text-transform:uppercase;">Perfil de pre-facturacion</div>
-        <p class="hint" style="margin-top:8px;">Este modulo prepara los datos para cargar despues en ARCA. No emite comprobantes oficiales.</p>
-        <div class="badge2" style="margin-top:8px; display:inline-flex; align-items:center; gap:6px;">
-          <strong>Modo manual:</strong> la venta genera un borrador interno y luego el dueno carga el comprobante oficial en ARCA.
+  <main class="wrap fiscalWrap">
+    <section class="fiscalHero">
+      <div class="fiscalHeroTop">
+        <div>
+          <h1 class="fiscalHeroTitle">Comprobantes</h1>
+          <p class="fiscalHeroSub">Revisa borradores, controla que se cargaron en ARCA y exporta la informacion desde una sola vista. El perfil fiscal del comercio ahora vive en Perfil.</p>
         </div>
+        <div class="fiscalQuickLinks">
+          <a class="fiscalQuickLink" href="/profile.html">Abrir perfil fiscal</a>
+          <a class="fiscalQuickLink" href="/admin_caja_test.html">Ver caja y cierres</a>
+        </div>
+      </div>
+      <div class="fiscalStepRow">
+        <div class="fiscalStep">1. Filtra por fecha o turno</div>
+        <div class="fiscalStep">2. Abre el borrador y valida datos</div>
+        <div class="fiscalStep">3. Marca estado segun lo cargado en ARCA</div>
+      </div>
+      <div class="fiscalStatGrid">
+        <div class="fiscalStat">
+          <span class="small">Borradores visibles</span>
+          <strong id="reconCount">0</strong>
+        </div>
+        <div class="fiscalStat">
+          <span class="small">Pendientes</span>
+          <strong id="statPending">0</strong>
+        </div>
+        <div class="fiscalStat">
+          <span class="small">Cargados</span>
+          <strong id="statLoaded">0</strong>
+        </div>
+        <div class="fiscalStat">
+          <span class="small">Observados</span>
+          <strong id="statObserved">0</strong>
+        </div>
+      </div>
+    </section>
 
-        <div class="row" style="margin-top:10px; flex-wrap:wrap;">
-          <div style="min-width:220px; flex:1;">
-            <div class="small">CUIT</div>
-            <input id="fCuit" class="input" placeholder="20-00000000-0"/>
+    <section class="fiscalGrid">
+      <section class="fiscalSection">
+        <div class="fiscalSectionHead">
+          <div>
+            <h2>Buscar borradores</h2>
+            <p>Usa una fecha corta para trabajar un dia puntual o un rango para conciliaciones.</p>
           </div>
-          <div style="min-width:240px; flex:1;">
-            <div class="small">Razon social / Nombre</div>
-            <input id="fRazon" class="input" placeholder="Mi Empresa S.A."/>
+        </div>
+        <div class="fiscalFilterGrid">
+          <div>
+            <div class="small">Fecha</div>
+            <input id="reconDate" class="input" type="date"/>
           </div>
-          <div style="min-width:240px; flex:1;">
-            <div class="small">Domicilio comercial</div>
-            <input id="fDom" class="input" placeholder="Calle 123, Ciudad"/>
+          <div>
+            <div class="small">Desde</div>
+            <input id="reconFrom" class="input" type="date"/>
           </div>
-          <div style="min-width:240px; flex:1;">
-            <div class="small">Condicion frente al IVA</div>
-            <select id="fRegimen" class="input">
-              <option value="Monotributo">Monotributo</option>
-              <option value="Responsable Inscripto">Responsable Inscripto</option>
-              <option value="Exento">Exento</option>
-              <option value="Consumidor Final">Consumidor Final</option>
+          <div>
+            <div class="small">Hasta</div>
+            <input id="reconTo" class="input" type="date"/>
+          </div>
+          <div>
+            <div class="small">Turno</div>
+            <select id="reconTurn" class="input">
+              <option value="">Todos</option>
             </select>
           </div>
-          <div style="min-width:220px;">
-            <div class="small">Punto de venta oficial (opcional)</div>
-            <input id="fPos" class="input" placeholder="0001"/>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="mini">
-          <strong>Flujo:</strong> NEXA cierra la venta, genera un borrador para carga, el dueno emite en ARCA y despues completa aqui tipo oficial, punto de venta, numero, CAE y constancia.
-        </div>
-
-        <div class="row" style="margin-top:12px; justify-content:flex-end;">
-          <button id="btnSave" class="btn primary" type="button">Guardar perfil</button>
-        </div>
-      </section>
-    </div>
-
-    <div data-view-panel="recon" style="display:none;">
-      <section class="panel">
-        <div class="panelHead">
           <div>
-            <h2>Comprobantes</h2>
-            <p class="hint">Borradores internos, seguimiento manual en ARCA y exportaciones desde la misma vista.</p>
+            <div class="small">Estado</div>
+            <select id="reconStatus" class="input">
+              <option value="all">Todos</option>
+              <option value="pendiente_carga">Pendiente de carga</option>
+              <option value="cargado_arca">Cargado en ARCA</option>
+              <option value="observado">Observado</option>
+              <option value="anulado">Anulado</option>
+              <option value="sin_facturar">Sin facturar</option>
+            </select>
           </div>
-          <div class="badge2">Borradores <strong id="reconCount">-</strong></div>
+          <div class="fiscalFieldWide">
+            <div class="small">Buscar</div>
+            <input id="reconSearch" class="input" placeholder="Cliente, mesa, borrador, numero oficial o CAE"/>
+          </div>
         </div>
-        <div class="panelBody">
-          <div class="badge2" style="display:inline-flex; align-items:center; gap:8px; margin-bottom:10px;">
-            <strong>Pasos:</strong>
-            <span>1) Elegi fecha o rango</span>
-            <span>2) Revisa el borrador</span>
-            <span>3) Marca como cargado en ARCA</span>
-          </div>
-          <div class="row" style="flex-wrap:wrap;">
-            <div style="min-width:160px;">
-              <div class="small">Fecha</div>
-              <input id="reconDate" class="input" type="date"/>
-            </div>
-            <div style="min-width:160px;">
-              <div class="small">Desde</div>
-              <input id="reconFrom" class="input" type="date"/>
-            </div>
-            <div style="min-width:160px;">
-              <div class="small">Hasta</div>
-              <input id="reconTo" class="input" type="date"/>
-            </div>
-            <div style="min-width:220px;">
-              <div class="small">Turno (opcional)</div>
-              <select id="reconTurn" class="input">
-                <option value="">Todos</option>
-              </select>
-            </div>
-            <div style="min-width:180px;">
-              <div class="small">Estado</div>
-              <select id="reconStatus" class="input">
-                <option value="all">Todos</option>
-                <option value="pendiente_carga">Pendiente de carga</option>
-                <option value="cargado_arca">Cargado en ARCA</option>
-                <option value="observado">Observado</option>
-                <option value="anulado">Anulado</option>
-                <option value="sin_facturar">Sin facturar</option>
-              </select>
-            </div>
-            <div style="flex:1; min-width:220px;">
-              <div class="small">Buscar</div>
-              <input id="reconSearch" class="input" placeholder="Cliente, mesa, borrador, numero o CAE"/>
-            </div>
-          </div>
-          <div class="mini" id="turnLimitNote" style="margin-top:8px;"></div>
-          <div class="mini" id="reconGuardNote" style="margin-top:4px;"></div>
-          <div class="row" id="reconDayChips" style="margin-top:8px; gap:6px; flex-wrap:wrap;"></div>
-          <div class="hr"></div>
-          <div class="row" style="margin-bottom:8px; flex-wrap:wrap;">
-            <button id="expQuickToday" class="btn" type="button">Hoy</button>
-            <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
-            <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
-            <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
-            <button id="expQuickClear" class="btn" type="button">Limpiar exportacion</button>
-          </div>
-          <div class="row" id="expDayChips" style="margin-bottom:8px; gap:6px; flex-wrap:wrap;"></div>
-          <div class="row" style="flex-wrap:wrap;">
-            <div style="min-width:160px;">
-              <div class="small">Fecha exportacion</div>
-              <input id="expDate" class="input" type="date"/>
-            </div>
-            <div style="min-width:160px;">
-              <div class="small">Desde exportacion</div>
-              <input id="expFrom" class="input" type="date"/>
-            </div>
-            <div style="min-width:160px;">
-              <div class="small">Hasta exportacion</div>
-              <input id="expTo" class="input" type="date"/>
-            </div>
-          </div>
-          <div class="row" style="margin-top:12px; flex-wrap:wrap;">
-            <button id="btnExpSales" class="btn" type="button">Exportar borradores</button>
-            <button id="btnExpPay" class="btn" type="button">Exportar por medio de pago</button>
-            <button id="btnExpBonif" class="btn" type="button">Exportar bonificaciones</button>
-            <button id="btnExpAnnul" class="btn" type="button">Exportar anulaciones</button>
-            <button id="btnExpClose" class="btn" type="button">Exportar cierre caja/turno</button>
-            <button id="btnExpPending" class="btn" type="button">Exportar pendientes de carga</button>
-          </div>
-          <div class="mini" id="expSummary" style="margin-top:8px;"></div>
-          <div class="mini" id="expGuardNote" style="margin-top:8px;"></div>
-        </div>
+        <div class="mini" id="turnLimitNote"></div>
+        <div class="mini" id="reconGuardNote"></div>
+        <div class="row" id="reconDayChips" style="gap:6px; flex-wrap:wrap;"></div>
       </section>
 
-      <section class="panel" style="margin-top:12px;">
-        <div class="panelBody" id="reconList"></div>
+      <section class="fiscalSection">
+        <div class="fiscalSectionHead">
+          <div>
+            <h2>Exportaciones</h2>
+            <p>Arma el rango y exporta solo lo que necesitas para control, cierres o carga manual.</p>
+          </div>
+        </div>
+        <div class="row" style="gap:8px; flex-wrap:wrap;">
+          <button id="expQuickToday" class="btn" type="button">Hoy</button>
+          <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
+          <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
+          <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
+          <button id="expQuickClear" class="btn" type="button">Limpiar</button>
+        </div>
+        <div class="row" id="expDayChips" style="gap:6px; flex-wrap:wrap;"></div>
+        <div class="fiscalFilterGrid">
+          <div>
+            <div class="small">Fecha exportacion</div>
+            <input id="expDate" class="input" type="date"/>
+          </div>
+          <div>
+            <div class="small">Desde</div>
+            <input id="expFrom" class="input" type="date"/>
+          </div>
+          <div>
+            <div class="small">Hasta</div>
+            <input id="expTo" class="input" type="date"/>
+          </div>
+        </div>
+        <div class="fiscalActionGrid">
+          <button id="btnExpSales" class="btn" type="button">Exportar borradores</button>
+          <button id="btnExpPending" class="btn" type="button">Exportar pendientes</button>
+          <button id="btnExpPay" class="btn" type="button">Exportar medios de pago</button>
+          <button id="btnExpClose" class="btn" type="button">Exportar cierres</button>
+          <button id="btnExpBonif" class="btn" type="button">Exportar bonificaciones</button>
+          <button id="btnExpAnnul" class="btn" type="button">Exportar anulaciones</button>
+        </div>
+        <div class="mini" id="expSummary"></div>
+        <div class="mini" id="expGuardNote"></div>
       </section>
-    </div>
+    </section>
+
+    <section class="fiscalSummaryBar">
+      <div>
+        <div class="small">Vista actual</div>
+        <div id="reconScopeSummary">Selecciona fecha o rango.</div>
+      </div>
+      <div>
+        <div class="small">Ayuda rapida</div>
+        <div>Usa "Marcar cargado" solo cuando ya exista el comprobante oficial.</div>
+      </div>
+    </section>
+
+    <section class="fiscalSection">
+      <div class="fiscalSectionHead">
+        <div>
+          <h2>Listado operativo</h2>
+          <p>Cada tarjeta resume el borrador, el receptor, el estado y las acciones disponibles.</p>
+        </div>
+      </div>
+      <div id="reconList" class="fiscalList"></div>
+    </section>
   </main>
 
   <div class="modalOverlay" id="emitModal" style="display:none;">
@@ -256,7 +456,6 @@
     const $ = (id)=>document.getElementById(id);
     if (connect) connect("admin", "Comprobantes");
 
-    let currentFiscal = {};
     let currentDb = null;
     let currentSaleId = null;
     let pendingAttachSaleId = null;
@@ -567,52 +766,35 @@
       return Math.max(0, subtotal - discountAmount);
     }
 
-    function fillForm(f){
-      const fiscal = f || {};
-      currentFiscal = fiscal;
-      const c = fiscal.company || {};
-      $("fCuit").value = c.cuit || "";
-      $("fRazon").value = c.razonSocial || "";
-      $("fDom").value = c.domicilio || "";
-      $("fRegimen").value = c.ivaCondicion || "Monotributo";
-      $("fPos").value = fiscal.pos || "";
-    }
-
-    function collectForm(){
-      const fiscal = {
-        enabled: true,
-        provider: "manual",
-        environment: "manual",
-        pos: $("fPos").value,
-        company: {
-          cuit: $("fCuit").value,
-          razonSocial: $("fRazon").value,
-          domicilio: $("fDom").value,
-          ivaCondicion: $("fRegimen").value
-        }
+    function updateReconHeader(rows){
+      const counts = {
+        pending: 0,
+        loaded: 0,
+        observed: 0,
       };
-
-      return { fiscal };
+      rows.forEach(item=>{
+        if (!item || !item.status) return;
+        if (item.status === STATUS.pending) counts.pending += 1;
+        if (item.status === STATUS.loaded) counts.loaded += 1;
+        if (item.status === STATUS.observed) counts.observed += 1;
+      });
+      $("reconCount").textContent = String(rows.length);
+      $("statPending").textContent = String(counts.pending);
+      $("statLoaded").textContent = String(counts.loaded);
+      $("statObserved").textContent = String(counts.observed);
     }
 
-    function setActiveView(key){
-      document.querySelectorAll("[data-view-panel]").forEach(el=>{
-        el.style.display = (el.getAttribute("data-view-panel") === key) ? "" : "none";
-      });
-      document.querySelectorAll("[data-view-tab]").forEach(btn=>{
-        btn.classList.toggle("active", btn.getAttribute("data-view-tab") === key);
-      });
+    function updateReconScopeSummary(range, turn){
+      const bits = [];
+      if (range.from && range.to && range.from === range.to) bits.push(`Fecha ${range.from}`);
+      else if (range.from || range.to) bits.push(`Rango ${range.from || "..."} a ${range.to || "..."}`);
+      if (turn && turn.shift) bits.push(`Turno ${turn.shift}`);
+      const status = $("reconStatus").value || "all";
+      if (status !== "all") bits.push(`Estado ${statusLabel(status)}`);
+      const search = ($("reconSearch").value || "").trim();
+      if (search) bits.push(`Busqueda "${search}"`);
+      $("reconScopeSummary").textContent = bits.join(" | ") || "Selecciona fecha o rango.";
     }
-
-    document.querySelectorAll("[data-view-tab]").forEach(btn=>{
-      btn.addEventListener("click", ()=>setActiveView(btn.getAttribute("data-view-tab")));
-    });
-
-    $("btnSave").addEventListener("click", ()=>{
-      if (!sendAction) return;
-      sendAction("settings:update", collectForm());
-      if (toast) toast("Perfil guardado");
-    });
 
     function renderTurns(db){
       const select = $("reconTurn");
@@ -700,7 +882,8 @@
       if (!hasRange) {
         if (guard) guard.textContent = "Elegi fecha o rango para listar borradores y evitar cruces.";
         $("reconList").innerHTML = '<div class="small">Selecciona fecha o rango.</div>';
-        $("reconCount").textContent = "0";
+        updateReconHeader([]);
+        updateReconScopeSummary(range, null);
         return;
       }
       if (guard) guard.textContent = "Cargado en ARCA solo registra el comprobante oficial. El borrador interno nunca reemplaza al documento oficial.";
@@ -731,6 +914,7 @@
       sales.sort((a,b)=>Number(b.at||0) - Number(a.at||0));
 
       const rows = [];
+      const statsRows = [];
       sales.forEach(sale=>{
         if (!sale) return;
         const doc = docBySaleId.get(String(sale.id || "")) || null;
@@ -751,42 +935,53 @@
           ? `<div class="small">Obs: ${doc.observations.slice(-1)[0]}</div>`
           : "";
 
+        statsRows.push({ status });
         rows.push(`
-          <div class="card" style="margin:0 0 10px 0;">
-            <div class="row" style="align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-              <div style="min-width:260px; flex:1;">
-                <div style="font-weight:900;">${fmtDateTime(sale.at)} | ${formatDraftRef(doc)}</div>
-                <div class="small">Cliente: ${receiver}</div>
-                <div class="small">Mesa ${sale.tableId || "-"} | Pedido ${sale.ticketId || sale.id || "-"} | Medio ${sale.paymentMethod || "-"}</div>
-                <div class="small">Tipo sugerido: ${shortDocType(doc.suggestedDocType)} | Oficial: ${formatOfficialRef(doc)}</div>
-                ${doc.cae ? `<div class="small">CAE: ${doc.cae}${doc.caeDue ? ` | Vto ${doc.caeDue}` : ""}</div>` : ""}
-                ${attachments}
-                ${observations}
+          <article class="reconCard">
+            <div class="reconCardTop">
+              <div class="reconMain">
+                <div class="reconTitle">${fmtDateTime(sale.at)} | ${formatDraftRef(doc)}</div>
+                <div class="reconSub">Cliente: ${receiver}</div>
+                <div class="reconSub">Mesa ${sale.tableId || "-"} | Pedido ${sale.ticketId || sale.id || "-"} | Medio ${sale.paymentMethod || "-"}</div>
               </div>
+              <div class="badge2" style="${statusStyle(status)}">${statusLabel(status)}</div>
+            </div>
+            <div class="reconMetaGrid">
               <div>
                 <div class="small">Total</div>
                 <div style="font-weight:900;">${fmtMoney(sale.total || 0, cur)}</div>
               </div>
               <div>
-                <div class="small">Estado</div>
-                <div class="badge2" style="${statusStyle(status)}">${statusLabel(status)}</div>
+                <div class="small">Tipo sugerido</div>
+                <div>${shortDocType(doc.suggestedDocType) || "-"}</div>
               </div>
-              <div class="row" style="gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                <a class="btn" href="/print_fiscal.html?id=${encodeURIComponent(doc.id)}" target="_blank" rel="noopener">Ver borrador</a>
-                <button class="btn" type="button" data-emit="${String(sale.id||"")}">Marcar cargado</button>
-                <button class="btn" type="button" data-observe="${String(sale.id||"")}">Marcar observado</button>
-                <button class="btn" type="button" data-annul="${String(sale.id||"")}">Anulado</button>
-                <button class="btn" type="button" data-reset="${String(sale.id||"")}">Pendiente</button>
-                <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar PDF</button>
-                <button class="btn" type="button" data-copy="${String(sale.id||"")}">Copiar resumen</button>
+              <div>
+                <div class="small">Comprobante oficial</div>
+                <div>${formatOfficialRef(doc)}</div>
+              </div>
+              <div>
+                <div class="small">CAE y adjuntos</div>
+                <div>${doc.cae ? `CAE ${doc.cae}${doc.caeDue ? ` | Vto ${doc.caeDue}` : ""}` : "Sin CAE cargado"}</div>
+                ${attachments}
               </div>
             </div>
-          </div>
+            ${observations}
+            <div class="reconActions">
+              <a class="btn" href="/print_fiscal.html?id=${encodeURIComponent(doc.id)}" target="_blank" rel="noopener">Ver borrador</a>
+              <button class="btn" type="button" data-emit="${String(sale.id||"")}">Marcar cargado</button>
+              <button class="btn" type="button" data-observe="${String(sale.id||"")}">Marcar observado</button>
+              <button class="btn" type="button" data-annul="${String(sale.id||"")}">Anulado</button>
+              <button class="btn" type="button" data-reset="${String(sale.id||"")}">Pendiente</button>
+              <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar PDF</button>
+              <button class="btn" type="button" data-copy="${String(sale.id||"")}">Copiar resumen</button>
+            </div>
+          </article>
         `);
       });
 
       $("reconList").innerHTML = rows.join("") || '<div class="small">Sin borradores para mostrar.</div>';
-      $("reconCount").textContent = String(rows.length);
+      updateReconHeader(statsRows);
+      updateReconScopeSummary(range, turn);
     }
 
     function openEmitModal(saleId){
@@ -1176,7 +1371,6 @@
     $("btnExpPending").addEventListener("click", exportPending);
 
     if (onState) onState((db)=>{
-      fillForm((db.settings || {}).fiscal || {});
       renderRecon(db);
       renderDateChips(db, "expDayChips", (val)=>{
         if (typeof val === "string") {

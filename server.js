@@ -4414,6 +4414,27 @@ if (url.pathname === "/api/auth/profile") {
   }), "application/json; charset=utf-8");
 }
 
+if (url.pathname === "/api/account/fiscal" && req.method === "POST") {
+  const ses = requireRole(req, res, "admin");
+  if (!ses) return;
+  let body = "";
+  req.on("data", chunk => {
+    body += chunk;
+    if (body.length > 1e6) req.destroy();
+  });
+  req.on("end", () => {
+    try {
+      const payload = body ? JSON.parse(body) : {};
+      updateSettings({ fiscal: payload && payload.fiscal ? payload.fiscal : {} });
+      broadcastState();
+      send(res, 200, JSON.stringify({ ok: true, fiscal: DB.settings && DB.settings.fiscal ? DB.settings.fiscal : {} }), "application/json; charset=utf-8");
+    } catch (error) {
+      send(res, 400, JSON.stringify({ error: "invalid_json" }), "application/json; charset=utf-8");
+    }
+  });
+  return;
+}
+
 if (url.pathname === "/api/cash/status") {
   const ses = requireRole(req, res, "mozo");
   if(!ses) return;
