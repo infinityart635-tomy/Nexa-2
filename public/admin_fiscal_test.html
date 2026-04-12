@@ -455,30 +455,7 @@
               <p>Usalo solo cuando necesites sacar archivos.</p>
             </div>
           </div>
-          <div class="fiscalSectionHead">
-            <div class="fiscalPresetRow">
-              <button id="expQuickToday" class="btn" type="button">Hoy</button>
-              <button id="expQuickYesterday" class="btn" type="button">Ayer</button>
-              <button id="expQuickLastClose" class="btn" type="button">Ultimo cierre</button>
-              <button id="expQuickLast7" class="btn" type="button">Ultimos 7 dias</button>
-              <button id="expQuickClear" class="btn" type="button">Limpiar</button>
-            </div>
-          </div>
-          <div class="row" id="expDayChips" style="gap:6px; flex-wrap:wrap;"></div>
-          <div class="fiscalExportGrid">
-            <div>
-              <div class="small">Fecha exportacion</div>
-              <input id="expDate" class="input" type="date"/>
-            </div>
-            <div>
-              <div class="small">Desde</div>
-              <input id="expFrom" class="input" type="date"/>
-            </div>
-            <div>
-              <div class="small">Hasta</div>
-              <input id="expTo" class="input" type="date"/>
-            </div>
-          </div>
+          <div class="mini">Usa el mismo periodo que elegiste en "Buscar borradores".</div>
           <div class="exportTypeList">
             <label class="exportTypeOption"><input type="radio" name="exportType" value="sales" checked/> Borradores</label>
             <label class="exportTypeOption"><input type="radio" name="exportType" value="pending"/> Pendientes</label>
@@ -744,12 +721,7 @@
     }
 
     function getExportRange(){
-      const from = ($("expFrom").value || "").trim();
-      const to = ($("expTo").value || "").trim();
-      if (from || to) return { from, to };
-      const single = ($("expDate").value || "").trim();
-      if (single) return { from: single, to: single };
-      return { from: "", to: "" };
+      return getReconRange();
     }
 
     function addDays(dateKey, days){
@@ -821,7 +793,7 @@
     function ensureExportRange(){
       const range = getExportRange();
       if (!range.from && !range.to) {
-        if (toast) toast("Elegi fecha o rango para exportar");
+        if (toast) toast("Elegi un periodo en Buscar borradores");
         return null;
       }
       return range;
@@ -848,7 +820,7 @@
       const btn = $("btnExportSelected");
       if (btn) btn.disabled = !has;
       const note = $("expGuardNote");
-      if (note) note.textContent = has ? "Exportar no cambia estados. Solo arma archivos de control." : "Elegi fecha o rango para habilitar exportaciones.";
+      if (note) note.textContent = has ? "Exportar no cambia estados. Usa el mismo periodo del buscador." : "Primero elegi un periodo en Buscar borradores.";
       exportSummary(currentDb, range);
     }
 
@@ -1274,54 +1246,6 @@
     $("reconFrom").value = "";
     $("reconTo").value = "";
     syncReconPresetUi();
-    $("expDate").value = "";
-    $("expFrom").value = "";
-    $("expTo").value = "";
-    $("expDate").addEventListener("change", ()=>{
-      if ($("expDate").value) { $("expFrom").value = ""; $("expTo").value = ""; }
-      updateExportGuard();
-    });
-    $("expFrom").addEventListener("change", ()=>{
-      if ($("expFrom").value || $("expTo").value) $("expDate").value = "";
-      updateExportGuard();
-    });
-    $("expTo").addEventListener("change", ()=>{
-      if ($("expFrom").value || $("expTo").value) $("expDate").value = "";
-      updateExportGuard();
-    });
-
-    $("expQuickToday").addEventListener("click", ()=>{
-      $("expDate").value = ymdLocal();
-      $("expFrom").value = "";
-      $("expTo").value = "";
-      updateExportGuard();
-    });
-    $("expQuickYesterday").addEventListener("click", ()=>{
-      $("expDate").value = addDays(ymdLocal(), -1);
-      $("expFrom").value = "";
-      $("expTo").value = "";
-      updateExportGuard();
-    });
-    $("expQuickLastClose").addEventListener("click", ()=>{
-      const key = getLatestClosedDateKey(currentDb);
-      $("expDate").value = key || ymdLocal();
-      $("expFrom").value = "";
-      $("expTo").value = "";
-      updateExportGuard();
-    });
-    $("expQuickLast7").addEventListener("click", ()=>{
-      const today = ymdLocal();
-      $("expDate").value = "";
-      $("expFrom").value = addDays(today, -6);
-      $("expTo").value = today;
-      updateExportGuard();
-    });
-    $("expQuickClear").addEventListener("click", ()=>{
-      $("expDate").value = "";
-      $("expFrom").value = "";
-      $("expTo").value = "";
-      updateExportGuard();
-    });
     updateExportGuard();
 
     function exportSales(){
@@ -1503,18 +1427,6 @@
 
     if (onState) onState((db)=>{
       renderRecon(db);
-      renderDateChips(db, "expDayChips", (val)=>{
-        if (typeof val === "string") {
-          $("expDate").value = val;
-          $("expFrom").value = "";
-          $("expTo").value = "";
-        } else if (val && val.from && val.to) {
-          $("expDate").value = "";
-          $("expFrom").value = val.from;
-          $("expTo").value = val.to;
-        }
-        updateExportGuard();
-      });
       updateExportGuard();
       if (!autoGenerated && sendAction) {
         autoGenerated = true;
