@@ -19,18 +19,24 @@ function tipoDocFromReceiver(docType) {
 
 function buildArcaQrUrl(doc) {
   try {
-    if (!doc || !doc.cae) return "";
+    const status = String(doc && doc.status || "").trim().toLowerCase();
+    if (!doc || !doc.cae || status !== "cargado_arca") return "";
+    const docType = String(doc.officialDocType || doc.docType || "").trim();
+    const pos = String(doc.officialPos || doc.pos || "").trim();
+    const number = Number(doc.officialNumber || doc.number || 0);
+    const issueDate = String(doc.officialIssuedAt || doc.issueDate || "").trim();
+    if (!docType || !pos || !number || !issueDate) return "";
     const cuit = Number(String((doc.company && doc.company.cuit) || "").replace(/\D/g, ""));
-    const ptoVta = Number(String(doc.pos || "0").replace(/\D/g, ""));
-    const tipoCmp = tipoCmpFromDocType(doc.docType);
-    const nroCmp = Number(doc.number || 0);
+    const ptoVta = Number(String(pos || "0").replace(/\D/g, ""));
+    const tipoCmp = tipoCmpFromDocType(docType);
+    const nroCmp = Number(number || 0);
     const importe = Number(doc.total || 0);
     const tipoDocRec = tipoDocFromReceiver(doc.receiverDocType);
     const nroDocRec = Number(String(doc.receiverDocNumber || "").replace(/\D/g, "")) || 0;
 
     const payload = {
       ver: 1,
-      fecha: String(doc.issueDate || "").slice(0, 10),
+      fecha: String(issueDate || "").slice(0, 10),
       cuit,
       ptoVta,
       tipoCmp,

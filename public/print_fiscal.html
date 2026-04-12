@@ -1,10 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="theme-color" content="#ffffff"/>
-  <title>Ticket fiscal</title>
+  <title>Borrador para ARCA</title>
   <link rel="stylesheet" href="/style.css"/>
   <style>
     :root{ --ticket-w: 80mm; }
@@ -15,6 +15,7 @@
       margin: 0 auto;
       padding: 16px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      position: relative;
     }
     .h{font-weight:900; font-size:16px; text-align:center;}
     .sub{text-align:center; margin-top:2px}
@@ -24,6 +25,28 @@
     .qr{display:flex; justify-content:center; margin-top:10px;}
     table{width:100%; border-collapse:collapse; margin-top:10px;}
     td{padding:4px 0; border-bottom:1px dashed rgba(0,0,0,.25);}
+    .banner{
+      margin-top:10px;
+      border:2px solid rgba(160,20,20,.6);
+      padding:10px 12px;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#7b1010;
+      background:rgba(255,230,230,.75);
+    }
+    .watermark{
+      position:absolute;
+      inset:120px 0 auto 0;
+      text-align:center;
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.18em;
+      color:rgba(160,20,20,.14);
+      transform:rotate(-16deg);
+      pointer-events:none;
+    }
     @page{ size: var(--ticket-w) auto; margin: 6mm; }
     @media print{
       body{margin:0;}
@@ -41,7 +64,7 @@
 
     <div class="hr noPrint"></div>
 
-    <div id="content">Cargando…</div>
+    <div id="content">Cargando...</div>
   </div>
 
   <script>
@@ -58,6 +81,15 @@
       catch{ return "$"+Math.round(v); }
     }
     function pad(n, w){ return String(n||"").padStart(w,"0"); }
+    function shortType(v){
+      const up = String(v || "").toUpperCase();
+      if (up === "FACTURA_A") return "A";
+      if (up === "FACTURA_B") return "B";
+      if (up === "FACTURA_C") return "C";
+      if (up === "NOTA_CREDITO") return "NC";
+      if (up === "NOTA_DEBITO") return "ND";
+      return up || "-";
+    }
 
     function autoPrintSoon(){ setTimeout(()=>window.print(), 400); }
 
@@ -66,25 +98,30 @@
       .then(data=>{
         const d = data.doc;
         const settings = data.settings || {};
+        const payload = data.summary && data.summary.payload ? data.summary.payload : {};
+        const items = Array.isArray(payload.items) ? payload.items : (Array.isArray(d && d.items) ? d.items : []);
         const wmm = settings.printing && settings.printing.ticketWidthMm ? Number(settings.printing.ticketWidthMm) : 80;
         const root = document.documentElement;
         if(root) root.style.setProperty("--ticket-w", (wmm === 58 ? "58mm" : "80mm"));
-        if(!d){ $("content").textContent = "No existe el comprobante."; return; }
+        if(!d){ $("content").textContent = "No existe el borrador."; return; }
 
         const c = d.company || {};
-        const num = `${pad(d.pos||"0001",4)}-${pad(d.number||0,8)}`;
+        const draftRef = `${esc(d.draftSeries || "BORR")}-${esc(pad(d.draftNumber || 0, 6))}`;
+        const officialReady = !!(d.status === "cargado_arca" && d.officialDocType && d.officialPos && d.officialNumber);
+        const officialRef = officialReady ? `${shortType(d.officialDocType)} ${pad(d.officialPos||"",4)}-${pad(d.officialNumber||0,8)}` : "";
         const rec = d.receiverName || "Consumidor final";
         const recDoc = d.receiverDocNumber ? `${d.receiverDocType||""} ${d.receiverDocNumber}` : "";
         const cae = d.cae || "";
         const caeDue = d.caeDue || "";
         const total = money(d.total||0);
+        const qrImg = officialReady && cae ? `<img alt="QR" src="/api/arcaQrSvg?id=${encodeURIComponent(d.id)}" style="width:160px; height:160px;"/>` : "";
 
-        const rows = (d.items||[]).map(it=>{
+        const rows = items.map(it=>{
           const mods = (it.modifiers||[]).map(m=>{
             const tag = (String(m.kind||"")==="remove") ? `Sin ${m.optionName}` : m.optionName;
             const price = Number(m.price||0);
             return price>0 ? `${tag} (+${money(price)})` : String(tag);
-          }).join(" · ");
+          }).join(" | ");
           return `
             <tr>
               <td style="width:42px; vertical-align:top;"><strong>${esc(it.qty||0)}x</strong></td>
@@ -97,26 +134,36 @@
           `;
         }).join("");
 
-        const qrImg = (cae) ? `<img alt="QR" src="/api/arcaQrSvg?id=${encodeURIComponent(d.id)}" style="width:160px; height:160px;"/>` : "";
-
-        const officialName = c.razonSocial || settings.restaurantName || "Comprobante fiscal";
+        const officialName = c.razonSocial || settings.restaurantName || "Borrador para ARCA";
         const headerName = settings.ownerDisplayName ? `${officialName} - ${settings.ownerDisplayName}` : officialName;
+        const title = officialReady ? "Comprobante conciliado" : "Borrador para carga en ARCA";
 
         $("content").innerHTML = `
-          <div class="h">${esc(headerName)}</div>
+          ${officialReady ? "" : `<div class="watermark">NO VALIDO COMO FACTURA</div>`}
+          <div class="h">${esc(title)}</div>
+          <div class="sub muted">${esc(headerName)}</div>
           <div class="sub muted">${esc(c.domicilio || "")}</div>
-          <div class="sub muted">CUIT: ${esc(c.cuit || "—")} · IVA: ${esc(c.ivaCondicion || "—")}</div>
-          <div class="sub muted">IIBB: ${esc(c.iibb || "—")} · Inicio: ${esc(c.inicioActividades || "—")}</div>
+          <div class="sub muted">CUIT: ${esc(c.cuit || "-")} | IVA: ${esc(c.ivaCondicion || "-")}</div>
+
+          ${officialReady ? "" : `<div class="banner">No valido como factura</div>`}
 
           <div class="hr"></div>
 
-          <div class="h">${esc(d.docType || "DOC")} · ${esc(num)}</div>
-          <div class="sub muted">Fecha: ${esc(d.issueDate || "")} · Estado: ${esc(d.status || "pendiente")}</div>
+          <div class="mini">Borrador interno: <strong>${draftRef}</strong></div>
+          <div class="mini">Fecha venta: <strong>${esc(d.issueDate || "")}</strong> | Estado: <strong>${esc(d.status || "pendiente_carga")}</strong></div>
+          <div class="mini">Tipo sugerido: <strong>${esc(shortType(d.suggestedDocType || "FACTURA_C"))}</strong></div>
+
+          ${officialReady ? `
+            <div class="hr"></div>
+            <div class="h">${esc(shortType(d.officialDocType || ""))} ${esc(officialRef)}</div>
+            <div class="sub muted">Fecha oficial: ${esc(d.officialIssuedAt || "-")}</div>
+          ` : ""}
 
           <div class="hr"></div>
 
-          <div class="mini">Receptor: <strong>${esc(rec)}</strong> ${recDoc?`· ${esc(recDoc)}`:""}</div>
+          <div class="mini">Receptor: <strong>${esc(rec)}</strong> ${recDoc?`| ${esc(recDoc)}`:""}</div>
           ${d.receiverIva ? `<div class="mini">IVA receptor: ${esc(d.receiverIva)}</div>` : ``}
+          ${d.receiverAddress ? `<div class="mini">Domicilio receptor: ${esc(d.receiverAddress)}</div>` : ``}
 
           <table>${rows || "<tr><td class='muted'>Sin items</td></tr>"}</table>
 
@@ -124,24 +171,22 @@
 
           <div class="line" style="font-weight:900;"><span>TOTAL</span><span>${esc(total)}</span></div>
 
-          ${cae ? `
+          ${officialReady ? `
             <div class="hr"></div>
-            <div class="mini">CAE: <strong>${esc(cae)}</strong></div>
-            <div class="mini">Vto. CAE: <strong>${esc(caeDue || "—")}</strong></div>
-            <div class="qr">${qrImg}</div>
-            <div class="sub muted">Escanea para validar</div>
+            <div class="mini">CAE: <strong>${esc(cae || "-")}</strong></div>
+            <div class="mini">Vto. CAE: <strong>${esc(caeDue || "-")}</strong></div>
+            ${qrImg ? `<div class="qr">${qrImg}</div><div class="sub muted">QR ARCA</div>` : ``}
           ` : `
             <div class="hr"></div>
-            <div class="muted mini">Sin CAE. Puedes marcar emitido desde Fiscal.</div>
+            <div class="muted mini">Usa este borrador para transcribir los datos en ARCA y luego vuelve a cargar el numero oficial, el CAE y la constancia.</div>
           `}
         `;
 
         autoPrintSoon();
       })
       .catch(()=>{
-        $("content").textContent = "Error cargando comprobante.";
+        $("content").textContent = "Error cargando borrador.";
       });
   </script>
 </body>
 </html>
-

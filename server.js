@@ -166,6 +166,128 @@ function slugify(s) {
     .slice(0, 48) || "item";
 }
 
+const PREBILL_STATUS = {
+  PENDING: "pendiente_carga",
+  LOADED: "cargado_arca",
+  OBSERVED: "observado",
+  CANCELED: "anulado",
+  UNBILLED: "sin_facturar",
+};
+
+function normalizePreBillingStatus(value, fallback = PREBILL_STATUS.PENDING) {
+  const raw = String(value || "").trim().toLowerCase();
+  if (!raw) return fallback;
+  if (raw === "pendiente" || raw === "pending" || raw === "draft") return PREBILL_STATUS.PENDING;
+  if (raw === "emitido" || raw === "issued" || raw === "cargado" || raw === "cargado_arca" || raw === "conciliado") return PREBILL_STATUS.LOADED;
+  if (raw === "observado" || raw === "rechazado" || raw === "error") return PREBILL_STATUS.OBSERVED;
+  if (raw === "anulado" || raw === "cancelado" || raw === "cancelled") return PREBILL_STATUS.CANCELED;
+  if (raw === "sin_facturar" || raw === "no_fiscal") return PREBILL_STATUS.UNBILLED;
+  return fallback;
+}
+
+function normalizeDraftSeries(value) {
+  return String(value || "BORR")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 8) || "BORR";
+}
+
+function normalizeDocType(value, fallback = "") {
+  const clean = String(value || fallback || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_]/g, "")
+    .slice(0, 32);
+  return clean || String(fallback || "").trim().toUpperCase();
+}
+
+function normalizePositiveInt(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+}
+
+function normalizeDateOnly(value, fallback = "") {
+  const text = String(value || "").trim();
+  if (!text) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  const dt = new Date(text);
+  return Number.isNaN(dt.getTime()) ? fallback : ymd(dt.getTime());
+}
+
+function normalizeOptionalPos(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return "";
+  return digits.padStart(4, "0").slice(-4);
+}
+
+function nextDraftNumber(series = "BORR") {
+  const cleanSeries = normalizeDraftSeries(series);
+  if (!DB.settings.fiscal) DB.settings.fiscal = {};
+  if (!DB.settings.fiscal.counters) DB.settings.fiscal.counters = {};
+  const key = `draft:${cleanSeries}`;
+  const cur = Number(DB.settings.fiscal.counters[key] || 0);
+  const next = Math.max(0, cur) + 1;
+  DB.settings.fiscal.counters[key] = next;
+  return next;
+}
+
+function getSuggestedDocType(fiscal, fiscalType, receiver = {}) {
+  const map = fiscal && fiscal.docTypeByFiscalType ? fiscal.docTypeByFiscalType : {};
+  const preferred = map[String(fiscalType || "").trim()] || map.manual || "FACTURA_C";
+  const receiverDoc = String(receiver.receiverDocType || receiver.docType || "").trim().toUpperCase();
+  if (receiverDoc === "CUIT" && preferred === "FACTURA_C") return "FACTURA_A";
+  return normalizeDocType(preferred, "FACTURA_C");
+}
+
+function ensurePreBillingDocShape(doc) {
+  if (!doc || typeof doc !== "object") return doc;
+  const legacyStatus = String(doc.status || "").trim().toLowerCase();
+  const fallbackStatus = legacyStatus === "no_fiscal" ? PREBILL_STATUS.UNBILLED : PREBILL_STATUS.PENDING;
+  doc.status = normalizePreBillingStatus(doc.status, fallbackStatus);
+  doc.provider = "manual";
+  doc.environment = "manual";
+  doc.suggestedDocType = normalizeDocType(doc.suggestedDocType || doc.docType || "FACTURA_C", "FACTURA_C");
+  doc.draftSeries = normalizeDraftSeries(doc.draftSeries || doc.internalSeries || doc.series || "BORR");
+  doc.draftNumber = normalizePositiveInt(doc.draftNumber ?? doc.internalNumber, 0);
+  if (!doc.draftNumber && !doc.cae && !doc.officialNumber && Number(doc.number || 0) > 0) {
+    doc.draftNumber = normalizePositiveInt(doc.number, 0);
+  }
+  doc.officialDocType = normalizeDocType(doc.officialDocType || (doc.status === PREBILL_STATUS.LOADED ? doc.docType : ""), "");
+  doc.officialPos = normalizeOptionalPos(doc.officialPos || (doc.status === PREBILL_STATUS.LOADED ? doc.pos : ""));
+  doc.officialNumber = normalizePositiveInt(doc.officialNumber || (doc.status === PREBILL_STATUS.LOADED ? doc.number : 0), 0);
+  doc.officialIssuedAt = normalizeDateOnly(doc.officialIssuedAt || (doc.status === PREBILL_STATUS.LOADED ? doc.issueDate : ""), "");
+  doc.cae = String(doc.cae || "").replace(/\D/g, "").slice(0, 14);
+  doc.caeDue = normalizeDateOnly(doc.caeDue || doc.caeDueDate || "", "");
+  doc.receiverAddress = String(doc.receiverAddress || "").slice(0, 160);
+  doc.paymentMethod = String(doc.paymentMethod || "").slice(0, 40);
+  doc.notes = String(doc.notes || "").slice(0, 240);
+  if (!Array.isArray(doc.observations)) doc.observations = [];
+  if (!Array.isArray(doc.attachments)) doc.attachments = [];
+  doc.docType = doc.officialDocType || "";
+  doc.pos = doc.officialPos || "";
+  doc.number = doc.officialNumber || 0;
+  doc.qrUrl = buildArcaQrUrl(doc);
+  return doc;
+}
+
+function buildSaleFiscalMeta(doc) {
+  ensurePreBillingDocShape(doc);
+  return {
+    docId: doc.id,
+    suggestedDocType: doc.suggestedDocType || "",
+    draftSeries: doc.draftSeries || "",
+    draftNumber: doc.draftNumber || 0,
+    officialDocType: doc.officialDocType || "",
+    officialPos: doc.officialPos || "",
+    officialNumber: doc.officialNumber || 0,
+    officialIssuedAt: doc.officialIssuedAt || "",
+    cae: doc.cae || "",
+    caeDue: doc.caeDue || "",
+    status: doc.status || PREBILL_STATUS.PENDING,
+  };
+}
+
 async function removeStoredImage(url) {
   if (!url || typeof url !== "string") return;
   if (!url.startsWith("/images/")) return;
@@ -744,9 +866,10 @@ settings: {
     ticketWidthMm: 80
   },
   fiscal: {
-    enabled: false,
-    provider: "manual",          // manual | wsfev1
-    environment: "homologacion", // homologacion | produccion
+    enabled: true,
+    provider: "manual",
+    environment: "manual",
+    draftSeries: "BORR",
     pos: "0001",
     company: {
       cuit: "",
@@ -940,9 +1063,10 @@ if (!db.settings.cash) db.settings.cash = defaults.settings.cash;
 if (db.settings.cash.dayCloseCutoffHour === undefined) db.settings.cash.dayCloseCutoffHour = defaults.settings.cash.dayCloseCutoffHour;
 
 if (!db.settings.fiscal) db.settings.fiscal = defaults.settings.fiscal;
-if (db.settings.fiscal.enabled === undefined) db.settings.fiscal.enabled = false;
+if (db.settings.fiscal.enabled === undefined) db.settings.fiscal.enabled = true;
 if (!db.settings.fiscal.provider) db.settings.fiscal.provider = "manual";
-if (!db.settings.fiscal.environment) db.settings.fiscal.environment = "homologacion";
+if (!db.settings.fiscal.environment) db.settings.fiscal.environment = "manual";
+if (!db.settings.fiscal.draftSeries) db.settings.fiscal.draftSeries = defaults.settings.fiscal.draftSeries;
 if (!db.settings.fiscal.pos) db.settings.fiscal.pos = "0001";
 if (!db.settings.fiscal.company) db.settings.fiscal.company = defaults.settings.fiscal.company;
 if (!db.settings.fiscal.docTypeByFiscalType) db.settings.fiscal.docTypeByFiscalType = defaults.settings.fiscal.docTypeByFiscalType;
@@ -951,6 +1075,7 @@ if (!db.settings.fiscal.docTypeByFiscalType.manual) db.settings.fiscal.docTypeBy
     if (!db.settings.fiscal.providerConfig) db.settings.fiscal.providerConfig = defaults.settings.fiscal.providerConfig;
 
 if (!Array.isArray(db.fiscalDocs)) db.fiscalDocs = [];
+db.fiscalDocs.forEach(ensurePreBillingDocShape);
 if (!Array.isArray(db.customerRequests)) db.customerRequests = [];
 
 
@@ -1078,9 +1203,10 @@ function normalizeRestaurantWorkspaceData(workspace, menu){
   if (!db.settings.cash) db.settings.cash = cloneJson(base.settings.cash, { dayCloseCutoffHour: 2 });
   if (db.settings.cash.dayCloseCutoffHour === undefined) db.settings.cash.dayCloseCutoffHour = base.settings.cash.dayCloseCutoffHour;
   if (!db.settings.fiscal) db.settings.fiscal = cloneJson(base.settings.fiscal, {});
-  if (db.settings.fiscal.enabled === undefined) db.settings.fiscal.enabled = false;
+  if (db.settings.fiscal.enabled === undefined) db.settings.fiscal.enabled = true;
   if (!db.settings.fiscal.provider) db.settings.fiscal.provider = "manual";
-  if (!db.settings.fiscal.environment) db.settings.fiscal.environment = "homologacion";
+  if (!db.settings.fiscal.environment) db.settings.fiscal.environment = "manual";
+  if (!db.settings.fiscal.draftSeries) db.settings.fiscal.draftSeries = base.settings.fiscal.draftSeries || "BORR";
   if (!db.settings.fiscal.pos) db.settings.fiscal.pos = "0001";
   if (!db.settings.fiscal.company) db.settings.fiscal.company = cloneJson(base.settings.fiscal.company, {});
   if (!db.settings.fiscal.docTypeByFiscalType) db.settings.fiscal.docTypeByFiscalType = cloneJson(base.settings.fiscal.docTypeByFiscalType, {});
@@ -1095,6 +1221,7 @@ function normalizeRestaurantWorkspaceData(workspace, menu){
   if (!Array.isArray(db.tickets)) db.tickets = [];
   if (!Array.isArray(db.sales)) db.sales = [];
   if (!Array.isArray(db.fiscalDocs)) db.fiscalDocs = [];
+  db.fiscalDocs.forEach(ensurePreBillingDocShape);
   if (!Array.isArray(db.customerRequests)) db.customerRequests = [];
   if (!Array.isArray(db.dayClosures)) db.dayClosures = [];
   if (!Array.isArray(db.periodClosures)) db.periodClosures = [];
@@ -1681,6 +1808,7 @@ function refreshTicketKitchenAndTables(ticket, prevKitchenStatus) {
 
   DB.updatedAt = now();
   scheduleSave();
+  return ticket;
 }
 
 function updateItemsKitchenStatus(ticket, fromSet, toStatus) {
@@ -2278,110 +2406,68 @@ function normalizePos(pos) {
   return s.padStart(4, "0").slice(-4);
 }
 
-function nextFiscalNumber(pos, docType) {
-  const p = normalizePos(pos);
-  const k = `${p}:${String(docType || "DOC").toUpperCase()}`;
-  const cur = Number((DB.settings.fiscal && DB.settings.fiscal.counters && DB.settings.fiscal.counters[k]) || 0);
-  const next = Math.max(0, cur) + 1;
-  if (!DB.settings.fiscal.counters) DB.settings.fiscal.counters = {};
-  DB.settings.fiscal.counters[k] = next;
-  return next;
-}
+function buildPreBillingDocFromSale(sale, opts = {}) {
+  if (!sale || !sale.id) return null;
+  const fiscal = DB.settings.fiscal || {};
+  const fiscalType = String(sale.fiscalType || "no_fiscal");
+  const includeAll = opts.includeAll !== false;
+  if (!includeAll && fiscalType === "no_fiscal") return null;
 
-  function createFiscalDocForSale(sale, ticket) {
-    const fiscal = DB.settings.fiscal || {};
-    const fiscalType = String(sale.fiscalType || "no_fiscal");
-    if (!fiscal.enabled || fiscalType === "no_fiscal") return null;
-
-  const docType = String((ticket && ticket.fiscal && ticket.fiscal.docType) || (fiscal.docTypeByFiscalType && fiscal.docTypeByFiscalType[fiscalType]) || "FACTURA_C");
-  const pos = normalizePos(fiscal.pos);
-  const number = nextFiscalNumber(pos, docType);
-
-  const receiverDocType = (ticket && ticket.fiscal && ticket.fiscal.receiverDocType) ? String(ticket.fiscal.receiverDocType) : "DNI";
-  const receiverDocNumber = (ticket && ticket.fiscal && ticket.fiscal.receiverDocNumber) ? String(ticket.fiscal.receiverDocNumber) : "";
-  const receiverName = (ticket && ticket.fiscal && ticket.fiscal.receiverName) ? String(ticket.fiscal.receiverName) : (ticket.customerName || "");
-  const receiverIva = (ticket && ticket.fiscal && ticket.fiscal.receiverIva) ? String(ticket.fiscal.receiverIva) : "";
+  const ticket = opts.ticket || null;
+  const receiver = (ticket && ticket.fiscal && typeof ticket.fiscal === "object")
+    ? ticket.fiscal
+    : (sale.receiver && typeof sale.receiver === "object" ? sale.receiver : {});
+  const suggestedDocType = getSuggestedDocType(fiscal, fiscalType, receiver);
+  const draftSeries = normalizeDraftSeries(fiscal.draftSeries || "BORR");
+  const status = fiscalType === "no_fiscal" ? PREBILL_STATUS.UNBILLED : PREBILL_STATUS.PENDING;
 
   const doc = {
     id: uid(),
     saleId: sale.id,
+    ticketId: String((ticket && ticket.id) || sale.ticketId || ""),
     at: now(),
-    issueDate: ymd(),
-    status: "pendiente", // pendiente|emitido|anulado
-    provider: String(fiscal.provider || "manual"),
-    environment: String(fiscal.environment || "homologacion"),
-    fiscalType,
-    docType,
-    pos,
-    number,
+    issueDate: sale.dateKey || ymd(sale.at),
+    status,
+    provider: "manual",
+    environment: "manual",
+    fiscalType: fiscalType === "no_fiscal" ? "manual" : fiscalType,
+    suggestedDocType,
+    draftSeries,
+    draftNumber: nextDraftNumber(draftSeries),
+    officialDocType: "",
+    officialPos: "",
+    officialNumber: 0,
+    officialIssuedAt: "",
     cae: "",
     caeDue: "",
     total: Number(sale.total || 0),
     currency: String(DB.settings.currency || "ARS"),
     company: { ...(fiscal.company || {}) },
-    receiverDocType,
-    receiverDocNumber,
-    receiverName,
-    receiverIva,
+    receiverDocType: String(receiver.receiverDocType || receiver.docType || ""),
+    receiverDocNumber: String(receiver.receiverDocNumber || receiver.docNumber || ""),
+    receiverName: String(receiver.receiverName || receiver.name || sale.customerName || ""),
+    receiverIva: String(receiver.receiverIva || receiver.iva || ""),
+    receiverAddress: String(receiver.receiverAddress || receiver.address || sale.customerAddress || (ticket && ticket.customerAddress) || ""),
+    paymentMethod: String(sale.paymentMethod || ""),
+    notes: "",
     observations: [],
+    attachments: [],
     qrUrl: "",
   };
 
+  ensurePreBillingDocShape(doc);
   DB.fiscalDocs.unshift(doc);
   scheduleSave();
-    emitFiscalDocumentAsync(doc, sale, ticket);
-    return doc;
-  }
+  return doc;
+}
 
-  function createFiscalDocFromSale(sale, opts = {}) {
-    if (!sale || !sale.id) return null;
-    const fiscal = DB.settings.fiscal || {};
-    const fiscalType = String(sale.fiscalType || "no_fiscal");
-    const includeAll = opts.includeAll !== false;
-    if (!includeAll && fiscalType === "no_fiscal") return null;
+function createFiscalDocForSale(sale, ticket) {
+  return buildPreBillingDocFromSale(sale, { ticket, includeAll: false });
+}
 
-    const receiver = sale.receiver || {};
-    const docType = String(receiver.docType
-      || (fiscal.docTypeByFiscalType && fiscal.docTypeByFiscalType[fiscalType])
-      || (fiscal.docTypeByFiscalType && fiscal.docTypeByFiscalType.manual)
-      || "FACTURA_C");
-    const pos = normalizePos(fiscal.pos);
-    const number = nextFiscalNumber(pos, docType);
-
-    const receiverDocType = receiver.receiverDocType ? String(receiver.receiverDocType) : "";
-    const receiverDocNumber = receiver.receiverDocNumber ? String(receiver.receiverDocNumber) : "";
-    const receiverName = receiver.receiverName ? String(receiver.receiverName) : (sale.customerName || "");
-    const receiverIva = receiver.receiverIva ? String(receiver.receiverIva) : "";
-
-    const doc = {
-      id: uid(),
-      saleId: sale.id,
-      at: now(),
-      issueDate: sale.dateKey || ymd(sale.at),
-      status: "pendiente",
-      provider: "manual",
-      environment: "manual",
-      fiscalType: (fiscalType === "no_fiscal") ? "manual" : fiscalType,
-      docType,
-      pos,
-      number,
-      cae: "",
-      caeDue: "",
-      total: Number(sale.total || 0),
-      currency: String(DB.settings.currency || "ARS"),
-      company: { ...(fiscal.company || {}) },
-      receiverDocType,
-      receiverDocNumber,
-      receiverName,
-      receiverIva,
-      observations: [],
-      qrUrl: "",
-    };
-
-    DB.fiscalDocs.unshift(doc);
-    scheduleSave();
-    return doc;
-  }
+function createFiscalDocFromSale(sale, opts = {}) {
+  return buildPreBillingDocFromSale(sale, opts);
+}
 
 function ensureFiscalDocForSale(saleId, opts = {}) {
   const id = String(saleId || "");
@@ -2389,11 +2475,12 @@ function ensureFiscalDocForSale(saleId, opts = {}) {
   const sale = (DB.sales || []).find(s => String(s.id || "") === id);
   if (!sale) return null;
   const existing = (DB.fiscalDocs || []).find(d => String(d.saleId || "") === id);
-  if (existing) return existing;
-  const doc = createFiscalDocFromSale(sale, opts);
+  if (existing) return ensurePreBillingDocShape(existing);
+  const ticket = (DB.tickets || []).find(t => t && String(t.id || "") === String(sale.ticketId || "")) || null;
+  const doc = createFiscalDocFromSale(sale, { ...opts, ticket });
   if (doc) {
     sale.fiscalDocId = doc.id;
-    sale.fiscal = { docId: doc.id, docType: doc.docType, pos: doc.pos, number: doc.number, status: doc.status };
+    sale.fiscal = buildSaleFiscalMeta(doc);
     DB.updatedAt = now();
     scheduleSave();
   }
@@ -2427,14 +2514,14 @@ async function appendFiscalAttachment(doc, attachment) {
     // oldest first for numbering
     sales.sort((a, b) => Number(a.at || 0) - Number(b.at || 0));
     let created = 0;
-    sales.forEach(sale => {
-      if (!sale || !sale.id) return;
-      if (existing.has(String(sale.id))) return;
+  sales.forEach(sale => {
+    if (!sale || !sale.id) return;
+    if (existing.has(String(sale.id))) return;
       const doc = createFiscalDocFromSale(sale, { includeAll });
       if (doc) {
         existing.add(String(sale.id));
         sale.fiscalDocId = doc.id;
-        sale.fiscal = { docId: doc.id, docType: doc.docType, pos: doc.pos, number: doc.number, status: doc.status };
+        sale.fiscal = buildSaleFiscalMeta(doc);
         created += 1;
       }
     });
@@ -2448,15 +2535,22 @@ async function appendFiscalAttachment(doc, attachment) {
 async function markFiscalDocIssued(docId, patch = {}) {
   const doc = (DB.fiscalDocs || []).find(d => d.id === docId);
   if (!doc) return;
-  if (typeof patch.docType === "string") doc.docType = patch.docType.slice(0, 32);
-  if (patch.pos !== undefined) doc.pos = normalizePos(patch.pos);
-  if (patch.number !== undefined) {
-    const num = Number(patch.number);
-    if (Number.isFinite(num) && num > 0) doc.number = Math.floor(num);
+  ensurePreBillingDocShape(doc);
+  if (patch.suggestedDocType !== undefined) {
+    doc.suggestedDocType = normalizeDocType(patch.suggestedDocType || "", doc.suggestedDocType || "FACTURA_C");
   }
+  const officialDocType = patch.officialDocType !== undefined ? patch.officialDocType : patch.docType;
+  if (officialDocType !== undefined) doc.officialDocType = normalizeDocType(officialDocType || "", "");
+  const officialPos = patch.officialPos !== undefined ? patch.officialPos : patch.pos;
+  if (officialPos !== undefined) doc.officialPos = normalizeOptionalPos(officialPos);
+  const officialNumber = patch.officialNumber !== undefined ? patch.officialNumber : patch.number;
+  if (officialNumber !== undefined) doc.officialNumber = normalizePositiveInt(officialNumber, 0);
+  const officialIssuedAt = patch.officialIssuedAt !== undefined ? patch.officialIssuedAt : patch.issueDate;
+  if (officialIssuedAt !== undefined) doc.officialIssuedAt = normalizeDateOnly(officialIssuedAt, "");
   if (typeof patch.cae === "string") doc.cae = patch.cae.replace(/\D/g, "").slice(0, 14);
-  if (typeof patch.caeDue === "string") doc.caeDue = patch.caeDue.slice(0, 10);
-  if (typeof patch.status === "string") doc.status = patch.status.slice(0, 16);
+  if (typeof patch.caeDue === "string") doc.caeDue = normalizeDateOnly(patch.caeDue, "");
+  if (patch.notes !== undefined) doc.notes = String(patch.notes || "").slice(0, 240);
+  if (patch.status !== undefined) doc.status = normalizePreBillingStatus(patch.status, doc.status);
 
   if (patch.observations) {
     const list = Array.isArray(patch.observations) ? patch.observations : [patch.observations];
@@ -2478,6 +2572,21 @@ async function markFiscalDocIssued(docId, patch = {}) {
     }
   }
 
+  if (doc.status === PREBILL_STATUS.LOADED) {
+    if (!doc.officialDocType) doc.officialDocType = doc.suggestedDocType || "FACTURA_C";
+    if (!doc.officialIssuedAt) doc.officialIssuedAt = ymd();
+  }
+  if (doc.status === PREBILL_STATUS.PENDING || doc.status === PREBILL_STATUS.UNBILLED) {
+    doc.officialDocType = "";
+    doc.officialPos = "";
+    doc.officialNumber = 0;
+    doc.officialIssuedAt = "";
+    doc.cae = "";
+    doc.caeDue = "";
+  }
+  doc.docType = doc.officialDocType || "";
+  doc.pos = doc.officialPos || "";
+  doc.number = doc.officialNumber || 0;
   doc.qrUrl = buildArcaQrUrl(doc);
   doc.updatedAt = now();
 
@@ -2485,7 +2594,7 @@ async function markFiscalDocIssued(docId, patch = {}) {
   const sale = (DB.sales || []).find(s => s.id === doc.saleId);
   if (sale) {
     sale.fiscalDocId = doc.id;
-    sale.fiscal = { docId: doc.id, docType: doc.docType, pos: doc.pos, number: doc.number, cae: doc.cae, caeDue: doc.caeDue, status: doc.status };
+    sale.fiscal = buildSaleFiscalMeta(doc);
   }
   const ticket = (DB.tickets || []).find(t => t.id === (sale ? sale.ticketId : ""));
   if (ticket) ticket.fiscalDocId = doc.id;
@@ -2504,37 +2613,14 @@ function appendFiscalObservation(doc, value) {
 }
 
 function emitFiscalDocumentAsync(doc, sale, ticket) {
-  const fiscal = (DB.settings && DB.settings.fiscal) ? DB.settings.fiscal : {};
-  const provider = getFiscalProvider(fiscal);
-  if (!provider || typeof provider.emitFiscalDoc !== "function") return;
-  provider.emitFiscalDoc({ doc, sale, ticket, fiscal })
-    .then(result => {
-      if (!result) return;
-      const patch = {
-        status: result.status,
-        cae: result.cae,
-        caeDue: result.caeDue,
-        observations: result.observations,
-        providerResponse: result.providerResponse,
-      };
-      Promise.resolve(markFiscalDocIssued(doc.id, patch))
-        .then(() => {
-          if (typeof broadcastState === "function") broadcastState();
-        })
-        .catch(err => {
-          updateFiscalDocWithError(doc, err);
-        });
-    })
-    .catch(err => {
-      updateFiscalDocWithError(doc, err);
-    });
+  return null;
 }
 
 function updateFiscalDocWithError(doc, err) {
   if (!doc) return;
-  const message = err && err.message ? String(err.message).trim() : "Error en proveedor fiscal";
+  const message = err && err.message ? String(err.message).trim() : "Observacion en el borrador de facturacion";
   appendFiscalObservation(doc, message);
-  doc.status = "error";
+  doc.status = PREBILL_STATUS.OBSERVED;
   doc.providerResponse = { error: message };
   doc.updatedAt = now();
   DB.updatedAt = now();
@@ -2632,13 +2718,12 @@ function closeTicket(ticketId, payload = {}) {
     }
   }
 
-  // NUEVO v8: documento fiscal (modo fiscal real)
-  const fiscal = DB.settings.fiscal || {};
-  if (fiscal && fiscal.enabled && fiscalType !== "no_fiscal") {
+  // Borrador interno para carga posterior en ARCA
+  if (fiscalType !== "no_fiscal") {
     const doc = createFiscalDocForSale(sale, ticket);
     if (doc) {
       sale.fiscalDocId = doc.id;
-      sale.fiscal = { docId: doc.id, docType: doc.docType, pos: doc.pos, number: doc.number, status: doc.status };
+      sale.fiscal = buildSaleFiscalMeta(doc);
       ticket.fiscalDocId = doc.id;
     }
   }
@@ -2661,6 +2746,7 @@ function closeTicket(ticketId, payload = {}) {
 
   DB.updatedAt = now();
   scheduleSave();
+  return sale;
 }
 
 
@@ -2671,7 +2757,7 @@ function setTableReceived(tableId, received) {
   table.updatedAt = now();
   DB.updatedAt = now();
   scheduleSave();
-  return sale;
+  return table;
 }
 
 function cashOpenForDate(dateKey, openingCash = 0, note = "") {
@@ -2947,9 +3033,10 @@ function updateSettings(patch = {}) {
   if (patch.fiscal && typeof patch.fiscal === "object") {
     if (!DB.settings.fiscal) DB.settings.fiscal = {};
     const f = DB.settings.fiscal;
-    if (patch.fiscal.enabled !== undefined) f.enabled = !!patch.fiscal.enabled;
-    if (patch.fiscal.provider !== undefined) f.provider = String(patch.fiscal.provider || "manual").slice(0, 16);
-    if (patch.fiscal.environment !== undefined) f.environment = String(patch.fiscal.environment || "homologacion").slice(0, 16);
+    f.enabled = patch.fiscal.enabled === undefined ? true : !!patch.fiscal.enabled;
+    f.provider = "manual";
+    f.environment = "manual";
+    if (patch.fiscal.draftSeries !== undefined) f.draftSeries = normalizeDraftSeries(patch.fiscal.draftSeries);
     if (patch.fiscal.pos !== undefined) f.pos = normalizePos(patch.fiscal.pos);
     if (patch.fiscal.company && typeof patch.fiscal.company === "object") {
       if (!f.company) f.company = {};
@@ -2969,23 +3056,6 @@ function updateSettings(patch = {}) {
     }
     if (patch.fiscal.counters && typeof patch.fiscal.counters === "object") {
       f.counters = { ...(f.counters || {}), ...(patch.fiscal.counters || {}) };
-    }
-    if (patch.fiscal.providerConfig && typeof patch.fiscal.providerConfig === "object") {
-      if (!f.providerConfig) f.providerConfig = {};
-      const cfg = patch.fiscal.providerConfig;
-      if (cfg.endpointHomologacion !== undefined) f.providerConfig.endpointHomologacion = String(cfg.endpointHomologacion || "").slice(0, 250);
-      if (cfg.endpointProduccion !== undefined) f.providerConfig.endpointProduccion = String(cfg.endpointProduccion || "").slice(0, 250);
-      if (cfg.endpoint !== undefined) f.providerConfig.endpoint = String(cfg.endpoint || "").slice(0, 250);
-      if (cfg.timeoutMs !== undefined) {
-        const timeout = Number(cfg.timeoutMs);
-        f.providerConfig.timeoutMs = Number.isFinite(timeout) && timeout > 0 ? timeout : f.providerConfig.timeoutMs || 15000;
-      }
-      if (cfg.bearerToken !== undefined) f.providerConfig.bearerToken = String(cfg.bearerToken || "").slice(0, 250);
-      if (cfg.certificatePem !== undefined) f.providerConfig.certificatePem = String(cfg.certificatePem || "").slice(0, 12000);
-      if (cfg.privateKeyPem !== undefined) f.providerConfig.privateKeyPem = String(cfg.privateKeyPem || "").slice(0, 12000);
-      if (cfg.pfxBase64 !== undefined) f.providerConfig.pfxBase64 = String(cfg.pfxBase64 || "").slice(0, 12000);
-      if (cfg.passphrase !== undefined) f.providerConfig.passphrase = String(cfg.passphrase || "").slice(0, 120);
-      if (cfg.rejectUnauthorized !== undefined) f.providerConfig.rejectUnauthorized = !!cfg.rejectUnauthorized;
     }
   }
 
@@ -4884,6 +4954,7 @@ if (url.pathname === "/api/fiscalDoc") {
   const id = String(url.searchParams.get("id") || "");
   const doc = (DB.fiscalDocs || []).find(d => d.id === id);
   if (!doc) return send(res, 404, JSON.stringify({ error: "not_found" }), "application/json; charset=utf-8");
+  ensurePreBillingDocShape(doc);
   const sale = (DB.sales || []).find(s => s.id === doc.saleId);
   const ticket = sale ? (DB.tickets || []).find(t => t.id === sale.ticketId) : null;
   const payload = buildFiscalDocPayload(doc, sale || null, ticket || null);
@@ -4910,6 +4981,7 @@ if (url.pathname === "/api/arcaQrSvg") {
   const id = String(url.searchParams.get("id") || "");
   const doc = (DB.fiscalDocs || []).find(d => d.id === id);
   if (!doc) return send(res, 404, "Not found");
+  ensurePreBillingDocShape(doc);
   if (!doc.qrUrl) doc.qrUrl = buildArcaQrUrl(doc);
   if (!doc.qrUrl) return send(res, 400, "Missing QR data");
   QRCode.toString(doc.qrUrl, { type: "svg", margin: 1, width: 220 }, (err, svg) => {

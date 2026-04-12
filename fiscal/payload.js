@@ -27,9 +27,13 @@ function buildDocument(doc) {
     id: doc.id,
     saleId: doc.saleId,
     ticketId: doc.ticketId,
-    docType: safeString(doc.docType),
-    pos: safeString(doc.pos),
-    number: safeNumber(doc.number),
+    suggestedDocType: safeString(doc.suggestedDocType),
+    draftSeries: safeString(doc.draftSeries),
+    draftNumber: safeNumber(doc.draftNumber),
+    officialDocType: safeString(doc.officialDocType || doc.docType),
+    officialPos: safeString(doc.officialPos || doc.pos),
+    officialNumber: safeNumber(doc.officialNumber || doc.number),
+    officialIssuedAt: safeString(doc.officialIssuedAt),
     fiscalType: safeString(doc.fiscalType),
     total: safeNumber(doc.total),
     currency: safeString(doc.currency),
@@ -47,6 +51,7 @@ function buildReceiver(doc) {
     docNumber: safeString(doc.receiverDocNumber),
     name: safeString(doc.receiverName),
     iva: safeString(doc.receiverIva),
+    address: safeString(doc.receiverAddress),
   };
 }
 
@@ -112,26 +117,32 @@ function formatFiscalDocText(payload) {
   const sale = payload.sale || {};
   const ticket = payload.ticket || {};
   const lines = [];
-  lines.push(`Comprobante: ${doc.docType || "N/A"} ${padNumber(doc.pos, 4)}-${padNumber(doc.number, 8)}`);
-  lines.push(`Fecha: ${doc.issueDate || "N/A"} · Estado: ${doc.status || "pendiente"}`);
+  lines.push(`Borrador: ${doc.draftSeries || "BORR"}-${padNumber(doc.draftNumber, 6)}`);
+  lines.push(`Fecha venta: ${doc.issueDate || "N/A"} | Estado: ${doc.status || "pendiente_carga"}`);
+  lines.push(`Tipo sugerido: ${doc.suggestedDocType || "-"}`);
+  if (doc.officialDocType || doc.officialPos || doc.officialNumber) {
+    lines.push(`Comprobante oficial: ${doc.officialDocType || "N/A"} ${padNumber(doc.officialPos, 4)}-${padNumber(doc.officialNumber, 8)}`);
+  }
+  if (doc.officialIssuedAt) lines.push(`Fecha oficial: ${doc.officialIssuedAt}`);
   lines.push(`Total: ${formatCurrency(doc.total, doc.currency)}`);
   if (doc.observations && doc.observations.length) {
     lines.push(`Observaciones: ${doc.observations.join(" | ")}`);
   }
   if (comp.razonSocial) {
-    lines.push(`Emisor: ${comp.razonSocial} · CUIT ${comp.cuit} · IVA ${comp.ivaCondicion}`);
+    lines.push(`Emisor: ${comp.razonSocial} | CUIT ${comp.cuit} | IVA ${comp.ivaCondicion}`);
   }
-  lines.push(`Receptor: ${rec.docType || "Consumidor final"} ${rec.docNumber || ""} · ${rec.name || "-"}`);
+  lines.push(`Receptor: ${rec.docType || "Consumidor final"} ${rec.docNumber || ""} | ${rec.name || "-"}`);
   if (rec.iva) lines.push(`IVA receptor: ${rec.iva}`);
+  if (rec.address) lines.push(`Domicilio receptor: ${rec.address}`);
   if (sale.paymentMethod) lines.push(`Forma de pago: ${sale.paymentMethod}`);
-  if (ticket.channel) lines.push(`Canal: ${ticket.channel} · Mesa: ${ticket.tableId || "-"}`);
+  if (ticket.channel) lines.push(`Canal: ${ticket.channel} | Mesa: ${ticket.tableId || "-"}`);
   const items = Array.isArray(payload.items) ? payload.items : [];
   if (items.length) {
     lines.push("Items:");
     items.forEach(item => {
       const unit = formatCurrency(item.unitPrice);
       const total = formatCurrency(item.total);
-      lines.push(`  • ${item.qty} x ${item.name || "Ítem"} @ ${unit} = ${total}`);
+      lines.push(`  - ${item.qty} x ${item.name || "Item"} @ ${unit} = ${total}`);
     });
   }
   return lines.join("\n");

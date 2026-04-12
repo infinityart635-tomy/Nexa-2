@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
@@ -163,7 +163,7 @@
         <div class="navGroup">
           <div class="navLabel">Gestion</div>
           <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
-          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_fiscal_test.html">Comprobantes</a>
           
         
             <a class="pill" href="/admin_stats.html">Estadisticas</a></div>
@@ -518,8 +518,8 @@
         return `
           <div class="historyItem">
             <div style="flex:1; min-width:0;">
-              <div><strong>${escapeHtml(shift)}</strong> · ${escapeHtml(cashier)}</div>
-              <div class="historyMeta">Apertura: ${escapeHtml(opened)} · Cierre: ${escapeHtml(when)}</div>
+              <div><strong>${escapeHtml(shift)}</strong> Â· ${escapeHtml(cashier)}</div>
+              <div class="historyMeta">Apertura: ${escapeHtml(opened)} Â· Cierre: ${escapeHtml(when)}</div>
               <div class="historyMeta">No efectivo declarado: ${money(nonCashTotal)}</div>
             </div>
             <div style="text-align:right;">
@@ -874,6 +874,7 @@ if(onState){
   </script>
 </body>
 </html>
+
 
 
 

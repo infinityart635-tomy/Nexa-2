@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="theme-color" content="#121212"/>
-  <title>NEXA - Fiscal</title>
+  <title>NEXA - Comprobantes</title>
   <link rel="stylesheet" href="/style.css"/>
 </head>
 <body>
@@ -13,7 +13,7 @@
       <div class="brand">
         <div>
           <h1>NEXA</h1>
-          <p>Fiscal</p>
+          <p>Pre-facturacion y carga manual</p>
         </div>
       </div>
       <nav class="megaNav">
@@ -33,7 +33,7 @@
         <div class="navGroup">
           <div class="navLabel">Gestion</div>
           <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
-          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_fiscal_test.html">Comprobantes</a>
           <a class="pill" href="/admin_stats.html">Estadisticas</a>
         </div>
         <div class="navGroup navProfile navPerfil">
@@ -46,17 +46,17 @@
 
   <main class="wrap">
     <div class="row" style="margin-bottom:10px; gap:8px; flex-wrap:wrap;">
-      <button class="btn viewTab active" type="button" data-view-tab="profile">Perfil del emisor</button>
-      <button class="btn viewTab" type="button" data-view-tab="recon">Conciliacion</button>
+      <button class="btn viewTab active" type="button" data-view-tab="profile">Perfil</button>
+      <button class="btn viewTab" type="button" data-view-tab="recon">Pendientes ARCA</button>
       <button class="btn viewTab" type="button" data-view-tab="exports">Exportaciones</button>
     </div>
 
     <div data-view-panel="profile">
       <section class="card">
-        <div style="font-weight:900; letter-spacing:.18em; text-transform:uppercase;">Perfil del emisor</div>
-        <p class="hint" style="margin-top:8px;">Datos minimos para emitir. Se carga una sola vez.</p>
+        <div style="font-weight:900; letter-spacing:.18em; text-transform:uppercase;">Perfil de pre-facturacion</div>
+        <p class="hint" style="margin-top:8px;">Este modulo prepara los datos para cargar despues en ARCA. No emite comprobantes oficiales.</p>
         <div class="badge2" style="margin-top:8px; display:inline-flex; align-items:center; gap:6px;">
-          <strong>IMPORTANTE:</strong> Este sistema NO emite comprobantes fiscales. Sirve para control, conciliacion y reportes.
+          <strong>Modo manual:</strong> la venta genera un borrador interno y luego el dueno carga el comprobante oficial en ARCA.
         </div>
 
         <div class="row" style="margin-top:10px; flex-wrap:wrap;">
@@ -73,21 +73,28 @@
             <input id="fDom" class="input" placeholder="Calle 123, Ciudad"/>
           </div>
           <div style="min-width:240px; flex:1;">
-            <div class="small">Regimen simple</div>
+            <div class="small">Condicion frente al IVA</div>
             <select id="fRegimen" class="input">
               <option value="Monotributo">Monotributo</option>
               <option value="Responsable Inscripto">Responsable Inscripto</option>
               <option value="Exento">Exento</option>
+              <option value="Consumidor Final">Consumidor Final</option>
             </select>
           </div>
           <div style="min-width:220px;">
-            <div class="small">Punto de venta (opcional)</div>
+            <div class="small">Punto de venta oficial (opcional)</div>
             <input id="fPos" class="input" placeholder="0001"/>
           </div>
         </div>
 
+        <div class="hr"></div>
+
+        <div class="mini">
+          <strong>Flujo:</strong> NEXA cierra la venta, genera un borrador para carga, el dueno emite en ARCA y despues completa aqui tipo oficial, punto de venta, numero, CAE y constancia.
+        </div>
+
         <div class="row" style="margin-top:12px; justify-content:flex-end;">
-          <button id="btnSave" class="btn primary" type="button">Guardar configuracion</button>
+          <button id="btnSave" class="btn primary" type="button">Guardar perfil</button>
         </div>
       </section>
     </div>
@@ -96,17 +103,17 @@
       <section class="panel">
         <div class="panelHead">
           <div>
-            <h2>Conciliacion de ventas</h2>
-            <p class="hint">Relaciona ventas con el comprobante fiscal emitido en otro sistema.</p>
+            <h2>Pendientes de cargar en ARCA</h2>
+            <p class="hint">Borradores internos, datos sugeridos y conciliacion manual posterior.</p>
           </div>
-          <div class="badge2">Ventas <strong id="reconCount">-</strong></div>
+          <div class="badge2">Borradores <strong id="reconCount">-</strong></div>
         </div>
         <div class="panelBody">
           <div class="badge2" style="display:inline-flex; align-items:center; gap:8px; margin-bottom:10px;">
             <strong>Pasos:</strong>
             <span>1) Elegi fecha o rango</span>
-            <span>2) Marca emitidos/anulados</span>
-            <span>3) Exporta</span>
+            <span>2) Revisa el borrador</span>
+            <span>3) Marca como cargado en ARCA</span>
           </div>
           <div class="row" style="flex-wrap:wrap;">
             <div style="min-width:160px;">
@@ -122,23 +129,25 @@
               <input id="reconTo" class="input" type="date"/>
             </div>
             <div style="min-width:220px;">
-              <div class="small">Turno</div>
+              <div class="small">Turno (opcional)</div>
               <select id="reconTurn" class="input">
                 <option value="">Todos</option>
               </select>
             </div>
             <div style="min-width:180px;">
-              <div class="small">Estado fiscal</div>
+              <div class="small">Estado</div>
               <select id="reconStatus" class="input">
                 <option value="all">Todos</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="emitido">Emitido</option>
+                <option value="pendiente_carga">Pendiente de carga</option>
+                <option value="cargado_arca">Cargado en ARCA</option>
+                <option value="observado">Observado</option>
                 <option value="anulado">Anulado</option>
+                <option value="sin_facturar">Sin facturar</option>
               </select>
             </div>
             <div style="flex:1; min-width:220px;">
               <div class="small">Buscar</div>
-              <input id="reconSearch" class="input" placeholder="Mesa, pedido, CAE o nro"/>
+              <input id="reconSearch" class="input" placeholder="Cliente, mesa, borrador, numero o CAE"/>
             </div>
           </div>
           <div class="mini" id="turnLimitNote" style="margin-top:8px;"></div>
@@ -157,7 +166,7 @@
         <div class="panelHead">
           <div>
             <h2>Exportaciones</h2>
-            <p class="hint">CSV para contador y control interno.</p>
+            <p class="hint">CSV para contador, control interno y seguimiento de pendientes.</p>
           </div>
         </div>
         <div class="panelBody">
@@ -189,12 +198,12 @@
             </div>
           </div>
           <div class="row" style="margin-top:12px; flex-wrap:wrap;">
-            <button id="btnExpSales" class="btn" type="button">Exportar ventas</button>
+            <button id="btnExpSales" class="btn" type="button">Exportar borradores</button>
             <button id="btnExpPay" class="btn" type="button">Exportar por medio de pago</button>
             <button id="btnExpBonif" class="btn" type="button">Exportar bonificaciones</button>
             <button id="btnExpAnnul" class="btn" type="button">Exportar anulaciones</button>
             <button id="btnExpClose" class="btn" type="button">Exportar cierre caja/turno</button>
-            <button id="btnExpPending" class="btn" type="button">Exportar pendientes de emitir</button>
+            <button id="btnExpPending" class="btn" type="button">Exportar pendientes de carga</button>
           </div>
           <div class="mini" id="expSummary" style="margin-top:8px;"></div>
           <div class="mini" id="expGuardNote" style="margin-top:8px;"></div>
@@ -206,39 +215,53 @@
   <div class="modalOverlay" id="emitModal" style="display:none;">
     <div class="modal" style="width:min(720px, 100%);">
       <div class="modalHeader">
-        <h3 id="emitTitle">Marcar emitido</h3>
+        <h3 id="emitTitle">Cargar datos oficiales</h3>
         <button class="btn" type="button" id="btnEmitClose">Cerrar</button>
       </div>
       <div class="hr"></div>
 
       <div class="row" style="flex-wrap:wrap;">
         <div style="min-width:180px; flex:1;">
-          <div class="small">Tipo</div>
+          <div class="small">Tipo oficial</div>
           <select id="eTipo" class="input">
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
-            <option value="CF">CF</option>
             <option value="NC">NC</option>
             <option value="ND">ND</option>
           </select>
         </div>
         <div style="min-width:160px; flex:1;">
-          <div class="small">PtoVta</div>
+          <div class="small">PtoVta oficial</div>
           <input id="ePos" class="input" placeholder="0001"/>
         </div>
         <div style="min-width:180px; flex:1;">
-          <div class="small">Nro</div>
+          <div class="small">Numero oficial</div>
           <input id="eNro" class="input" placeholder="00000001"/>
+        </div>
+        <div style="min-width:180px; flex:1;">
+          <div class="small">Fecha oficial</div>
+          <input id="eFecha" class="input" type="date"/>
         </div>
         <div style="min-width:220px; flex:1;">
           <div class="small">CAE (opcional)</div>
           <input id="eCae" class="input" placeholder="61123000000000"/>
         </div>
+        <div style="min-width:180px; flex:1;">
+          <div class="small">Vencimiento CAE</div>
+          <input id="eCaeDue" class="input" type="date"/>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:240px;">
+          <div class="small">Observacion interna</div>
+          <input id="eObs" class="input" placeholder="Dato manual, referencia o nota"/>
+        </div>
       </div>
 
       <div class="modalFooter">
-        <button id="btnEmitSave" class="btn primary" type="button">Guardar</button>
+        <button id="btnEmitSave" class="btn primary" type="button">Guardar carga oficial</button>
       </div>
     </div>
   </div>
@@ -249,12 +272,21 @@
   <script>
     const { connect, onState, sendAction, toast, money } = window.RestoApp || {};
     const $ = (id)=>document.getElementById(id);
-    if (connect) connect("admin", "Fiscal");
+    if (connect) connect("admin", "Comprobantes");
 
     let currentFiscal = {};
     let currentDb = null;
     let currentSaleId = null;
     let pendingAttachSaleId = null;
+    let autoGenerated = false;
+
+    const STATUS = {
+      pending: "pendiente_carga",
+      loaded: "cargado_arca",
+      observed: "observado",
+      canceled: "anulado",
+      unbilled: "sin_facturar",
+    };
 
     function ymdLocal(d){
       const dt = d ? new Date(d) : new Date();
@@ -307,10 +339,80 @@
       if (up === "A") return "FACTURA_A";
       if (up === "B") return "FACTURA_B";
       if (up === "C") return "FACTURA_C";
-      if (up === "CF") return "FACTURA_C";
       if (up === "NC") return "NOTA_CREDITO";
       if (up === "ND") return "NOTA_DEBITO";
       return up;
+    }
+
+    function normalizeStatus(value){
+      const raw = String(value || "").trim().toLowerCase();
+      if (raw === "pendiente" || raw === "pending") return STATUS.pending;
+      if (raw === "emitido" || raw === "cargado" || raw === "conciliado") return STATUS.loaded;
+      if (raw === "observado" || raw === "error" || raw === "rechazado") return STATUS.observed;
+      if (raw === "anulado" || raw === "cancelado") return STATUS.canceled;
+      if (raw === "sin_facturar" || raw === "no_fiscal") return STATUS.unbilled;
+      return raw || STATUS.pending;
+    }
+
+    function normalizeDoc(raw){
+      if (!raw) return null;
+      const status = normalizeStatus(raw.status);
+      const officialDocType = String(raw.officialDocType || (status === STATUS.loaded ? raw.docType || "" : "")).trim();
+      const officialPos = String(raw.officialPos || (status === STATUS.loaded ? raw.pos || "" : "")).trim();
+      const officialNumber = Number(raw.officialNumber || (status === STATUS.loaded ? raw.number || 0 : 0)) || 0;
+      return {
+        ...raw,
+        status,
+        suggestedDocType: String(raw.suggestedDocType || raw.docType || "FACTURA_C").trim(),
+        draftSeries: String(raw.draftSeries || raw.internalSeries || "BORR").trim() || "BORR",
+        draftNumber: Number(raw.draftNumber || raw.internalNumber || 0) || 0,
+        officialDocType,
+        officialPos,
+        officialNumber,
+        officialIssuedAt: String(raw.officialIssuedAt || "").trim(),
+        receiverAddress: String(raw.receiverAddress || "").trim(),
+        notes: String(raw.notes || "").trim(),
+        observations: Array.isArray(raw.observations) ? raw.observations : [],
+        attachments: Array.isArray(raw.attachments) ? raw.attachments : [],
+      };
+    }
+
+    function formatDraftRef(doc){
+      const series = doc && doc.draftSeries ? doc.draftSeries : "BORR";
+      const number = doc && doc.draftNumber ? doc.draftNumber : 0;
+      return `${series}-${String(number).padStart(6, "0")}`;
+    }
+
+    function formatOfficialRef(doc){
+      if (!doc || !doc.officialDocType || !doc.officialPos || !doc.officialNumber) return "-";
+      return `${shortDocType(doc.officialDocType)} ${String(doc.officialPos).padStart(4, "0")}-${String(doc.officialNumber).padStart(8, "0")}`;
+    }
+
+    function docsBySale(db){
+      const map = new Map();
+      (db && db.fiscalDocs || []).forEach(raw=>{
+        const doc = normalizeDoc(raw);
+        if (doc && doc.saleId) map.set(String(doc.saleId), doc);
+      });
+      return map;
+    }
+
+    function statusLabel(value){
+      if (value === STATUS.pending) return "Pendiente de carga";
+      if (value === STATUS.loaded) return "Cargado en ARCA";
+      if (value === STATUS.observed) return "Observado";
+      if (value === STATUS.canceled) return "Anulado";
+      if (value === STATUS.unbilled) return "Sin facturar";
+      return value || "-";
+    }
+
+    function statusStyle(value){
+      if (value === STATUS.loaded) return "border-color:rgba(80,220,120,.5); color:#bff6cf;";
+      if (value === STATUS.pending) return "border-color:rgba(255,210,120,.45); color:#ffe1a4;";
+      if (value === STATUS.observed) return "border-color:rgba(255,150,120,.45); color:#ffc0a4;";
+      if (value === STATUS.canceled) return "border-color:rgba(255,120,140,.45); color:#ffc1cc;";
+      if (value === STATUS.unbilled) return "border-color:rgba(255,255,255,.22); color:#d7d7dc;";
+      return "";
     }
 
     function toCsv(rows, headers){
@@ -426,13 +528,12 @@
       if (!summary || !db) return;
       if (!range.from && !range.to) { summary.textContent = ""; return; }
       const sales = filterSalesByRange(db, range);
-      const docBySaleId = {};
-      (db.fiscalDocs || []).forEach(d=>{ if (d && d.saleId) docBySaleId[String(d.saleId)] = d; });
+      const docBySaleId = docsBySale(db);
       let pending = 0;
       sales.forEach(s=>{
-        const doc = docBySaleId[String(s.id || "")];
-        const st = String((doc && doc.status) || "pendiente").toLowerCase();
-        if (st === "pendiente") pending += 1;
+        const doc = docBySaleId.get(String(s.id || ""));
+        const st = doc ? doc.status : STATUS.pending;
+        if (st === STATUS.pending) pending += 1;
       });
       summary.textContent = `Ventas en rango: ${sales.length} · Pendientes: ${pending}`;
     }
@@ -446,7 +547,7 @@
         if (btn) btn.disabled = !has;
       });
       const note = $("expGuardNote");
-      if (note) note.textContent = has ? "Exportar no cambia estados fiscales. Primero concilia." : "Elegi fecha o rango para habilitar exportaciones.";
+      if (note) note.textContent = has ? "Exportar no cambia estados. Solo arma archivos de control." : "Elegi fecha o rango para habilitar exportaciones.";
       exportSummary(currentDb, range);
     }
 
@@ -497,6 +598,9 @@
 
     function collectForm(){
       const fiscal = {
+        enabled: true,
+        provider: "manual",
+        environment: "manual",
         pos: $("fPos").value,
         company: {
           cuit: $("fCuit").value,
@@ -506,9 +610,6 @@
         }
       };
 
-      if (currentFiscal.enabled !== undefined) fiscal.enabled = !!currentFiscal.enabled;
-      if (currentFiscal.provider !== undefined) fiscal.provider = currentFiscal.provider;
-      if (currentFiscal.environment !== undefined) fiscal.environment = currentFiscal.environment;
       return { fiscal };
     }
 
@@ -528,7 +629,7 @@
     $("btnSave").addEventListener("click", ()=>{
       if (!sendAction) return;
       sendAction("settings:update", collectForm());
-      if (toast) toast("Configuracion guardada");
+      if (toast) toast("Perfil guardado");
     });
 
     function renderTurns(db){
@@ -571,11 +672,13 @@
       return turns.find(t=>t && String(t.id||"") === id) || null;
     }
 
-    function buildSummaryForSale(sale){
+    function buildSummaryForSale(sale, doc){
       const cur = (currentDb && currentDb.settings && currentDb.settings.currency) || "ARS";
       const lines = [];
       const dt = fmtDateTime(sale.at);
       lines.push(`Venta ${sale.id || ""}`.trim());
+      if (doc) lines.push(`Borrador: ${formatDraftRef(doc)}`);
+      if (doc && doc.suggestedDocType) lines.push(`Tipo sugerido: ${doc.suggestedDocType}`);
       lines.push(`Fecha: ${dt}`);
       lines.push(`Mesa: ${sale.tableId || "-"}`);
       lines.push(`Total: ${fmtMoney(sale.total || 0, cur)}`);
@@ -595,10 +698,7 @@
     function renderRecon(db){
       if (!db) return;
       currentDb = db;
-      const docBySaleId = {};
-      (db.fiscalDocs || []).forEach(d=>{
-        if (d && d.saleId) docBySaleId[String(d.saleId)] = d;
-      });
+      const docBySaleId = docsBySale(db);
       renderDateChips(db, "reconDayChips", (val)=>{
         if (typeof val === "string") {
           $("reconDate").value = val;
@@ -616,12 +716,12 @@
       const hasRange = !!(range.from || range.to);
       const guard = $("reconGuardNote");
       if (!hasRange) {
-        if (guard) guard.textContent = "Elegi fecha o rango para ver ventas y evitar errores. Emitido aqui no emite, solo confirma.";
+        if (guard) guard.textContent = "Elegi fecha o rango para listar borradores y evitar cruces.";
         $("reconList").innerHTML = '<div class="small">Selecciona fecha o rango.</div>';
         $("reconCount").textContent = "0";
         return;
       }
-      if (guard) guard.textContent = "Emitido aqui no emite, solo confirma. Exportar no cambia estados. Anular no revierte ventas.";
+      if (guard) guard.textContent = "Cargado en ARCA solo registra el comprobante oficial. El borrador interno nunca reemplaza al documento oficial.";
       const statusFilter = ($("reconStatus").value || "all").trim().toLowerCase();
       const search = ($("reconSearch").value || "").trim().toLowerCase();
       const turn = getSelectedTurn(db);
@@ -651,59 +751,51 @@
       const rows = [];
       sales.forEach(sale=>{
         if (!sale) return;
-        const doc = docBySaleId[String(sale.id || "")] || null;
-        const status = String((doc && doc.status) || "pendiente").toLowerCase();
+        const doc = docBySaleId.get(String(sale.id || "")) || null;
+        if (!doc) return;
+        const status = doc.status || STATUS.pending;
         if (statusFilter !== "all" && status !== statusFilter) return;
-        const pos = doc ? String(doc.pos || "") : "";
-        const number = doc ? String(doc.number || "") : "";
-        const refNum = (pos || number) ? `${String(pos||"").padStart(4,"0")}-${String(number||"").padStart(8,"0")}` : "-";
+        const receiver = `${doc.receiverName || sale.customerName || "Consumidor final"} ${doc.receiverDocNumber ? `| ${doc.receiverDocType || ""} ${doc.receiverDocNumber}` : ""}`;
         const searchHay = [
           sale.tableId, sale.ticketId, sale.id, sale.paymentMethod,
-          doc ? doc.docType : "", pos, number, doc ? doc.cae : ""
+          formatDraftRef(doc), formatOfficialRef(doc), doc.cae || "", doc.suggestedDocType || "", receiver
         ].join(" ").toLowerCase();
         if (search && !searchHay.includes(search)) return;
 
-        const actionButtons = (() => {
-          if (status === "pendiente") {
-            return `
-              <button class="btn" type="button" data-emit="${String(sale.id||"")}">Confirmar emitido (ya emitido afuera)</button>
-              <button class="btn" type="button" data-annul="${String(sale.id||"")}">Marcar anulado (solo fiscal)</button>
-            `;
-          }
-          return `
-            <button class="btn" type="button" data-edit="${String(sale.id||"")}">Editar fiscal</button>
-            <button class="btn" type="button" data-reset="${String(sale.id||"")}">Volver a pendiente</button>
-          `;
-        })();
+        const attachments = doc.attachments && doc.attachments.length
+          ? `<div class="small">Adjuntos: ${doc.attachments.length}</div>`
+          : "";
+        const observations = doc.observations && doc.observations.length
+          ? `<div class="small">Obs: ${doc.observations.slice(-1)[0]}</div>`
+          : "";
 
         rows.push(`
           <div class="card" style="margin:0 0 10px 0;">
-            <div class="row" style="align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-              <div style="min-width:220px;">
-                <div style="font-weight:900;">${fmtDateTime(sale.at)}</div>
-                <div class="small">Mesa ${sale.tableId || "-"} ?? Pedido ${sale.ticketId || sale.id || "-"}</div>
+            <div class="row" style="align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <div style="min-width:260px; flex:1;">
+                <div style="font-weight:900;">${fmtDateTime(sale.at)} | ${formatDraftRef(doc)}</div>
+                <div class="small">Cliente: ${receiver}</div>
+                <div class="small">Mesa ${sale.tableId || "-"} | Pedido ${sale.ticketId || sale.id || "-"} | Medio ${sale.paymentMethod || "-"}</div>
+                <div class="small">Tipo sugerido: ${shortDocType(doc.suggestedDocType)} | Oficial: ${formatOfficialRef(doc)}</div>
+                ${doc.cae ? `<div class="small">CAE: ${doc.cae}${doc.caeDue ? ` | Vto ${doc.caeDue}` : ""}</div>` : ""}
+                ${attachments}
+                ${observations}
               </div>
-              <div class="row" style="gap:12px; align-items:center; flex-wrap:wrap;">
-                <div>
-                  <div class="small">Total</div>
-                  <div style="font-weight:900;">${fmtMoney(sale.total || 0, cur)}</div>
-                </div>
-                <div>
-                  <div class="small">Medio</div>
-                  <div class="small">${sale.paymentMethod || "-"}</div>
-                </div>
-                <div>
-                  <div class="small">Fiscal</div>
-                  <div class="badge2" style="${statusStyle(status)}">${statusLabel(status)}</div>
-                </div>
-                <div>
-                  <div class="small">Ref</div>
-                  <div class="small">${doc ? (shortDocType(doc.docType) || "-") : "-"} ?? ${refNum}${doc && doc.cae ? ` ?? CAE ${doc.cae}` : ""}</div>
-                </div>
+              <div>
+                <div class="small">Total</div>
+                <div style="font-weight:900;">${fmtMoney(sale.total || 0, cur)}</div>
+              </div>
+              <div>
+                <div class="small">Estado</div>
+                <div class="badge2" style="${statusStyle(status)}">${statusLabel(status)}</div>
               </div>
               <div class="row" style="gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                ${actionButtons}
-                <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar comprobante</button>
+                <a class="btn" href="/print_fiscal.html?id=${encodeURIComponent(doc.id)}" target="_blank" rel="noopener">Ver borrador</a>
+                <button class="btn" type="button" data-emit="${String(sale.id||"")}">Marcar cargado</button>
+                <button class="btn" type="button" data-observe="${String(sale.id||"")}">Marcar observado</button>
+                <button class="btn" type="button" data-annul="${String(sale.id||"")}">Anulado</button>
+                <button class="btn" type="button" data-reset="${String(sale.id||"")}">Pendiente</button>
+                <button class="btn" type="button" data-attach="${String(sale.id||"")}">Adjuntar PDF</button>
                 <button class="btn" type="button" data-copy="${String(sale.id||"")}">Copiar resumen</button>
               </div>
             </div>
@@ -711,19 +803,22 @@
         `);
       });
 
-      $("reconList").innerHTML = rows.join("") || '<div class="small">Sin ventas para mostrar.</div>';
+      $("reconList").innerHTML = rows.join("") || '<div class="small">Sin borradores para mostrar.</div>';
       $("reconCount").textContent = String(rows.length);
     }
 
     function openEmitModal(saleId){
       currentSaleId = String(saleId || "");
-      const doc = (currentDb && currentDb.fiscalDocs || []).find(d=>d && String(d.saleId||"") === currentSaleId) || null;
+      const doc = docsBySale(currentDb).get(currentSaleId) || null;
       const posDefault = (currentDb && currentDb.settings && currentDb.settings.fiscal && currentDb.settings.fiscal.pos) || "0001";
-      $("eTipo").value = doc && doc.docType ? shortDocType(doc.docType) : "C";
-      $("ePos").value = doc && doc.pos ? String(doc.pos) : String(posDefault || "");
-      $("eNro").value = doc && doc.number ? String(doc.number) : "";
+      $("eTipo").value = doc && doc.officialDocType ? shortDocType(doc.officialDocType) : shortDocType(doc && doc.suggestedDocType ? doc.suggestedDocType : "FACTURA_C");
+      $("ePos").value = doc && doc.officialPos ? String(doc.officialPos) : String(posDefault || "");
+      $("eNro").value = doc && doc.officialNumber ? String(doc.officialNumber) : "";
+      $("eFecha").value = doc && doc.officialIssuedAt ? String(doc.officialIssuedAt) : ymdLocal();
       $("eCae").value = doc && doc.cae ? String(doc.cae) : "";
-      $("emitTitle").textContent = `Confirmar emitido (ya emitido afuera) - ${currentSaleId}`;
+      $("eCaeDue").value = doc && doc.caeDue ? String(doc.caeDue) : "";
+      $("eObs").value = doc && doc.notes ? String(doc.notes) : "";
+      $("emitTitle").textContent = `Cargar datos oficiales - ${currentSaleId}`;
       $("emitModal").style.display = "flex";
     }
 
@@ -737,7 +832,7 @@
 
     function saleShortInfo(sale){
       if (!sale) return "";
-      return `Venta ${sale.id || ""} ?? ${fmtDateTime(sale.at)} ?? Mesa ${sale.tableId || "-"} ?? Total ${fmtMoney(sale.total || 0, (currentDb && currentDb.settings && currentDb.settings.currency) || "ARS")}`;
+      return `Venta ${sale.id || ""} | ${fmtDateTime(sale.at)} | Mesa ${sale.tableId || "-"} | Total ${fmtMoney(sale.total || 0, (currentDb && currentDb.settings && currentDb.settings.currency) || "ARS")}`;
     }
 
     $("btnEmitSave").addEventListener("click", ()=>{
@@ -745,23 +840,30 @@
       const tipo = String($("eTipo").value || "").trim();
       const pos = String($("ePos").value || "").trim();
       const nro = String($("eNro").value || "").trim();
+      const fecha = String($("eFecha").value || "").trim();
       const cae = String($("eCae").value || "").trim();
+      const caeDue = String($("eCaeDue").value || "").trim();
+      const notes = String($("eObs").value || "").trim();
       if (!tipo) return toast ? toast("Selecciona tipo") : null;
       if (!/^\d{1,4}$/.test(pos)) return toast ? toast("PtoVta invalido") : null;
       if (!/^\d{1,9}$/.test(nro)) return toast ? toast("Nro invalido") : null;
+      if (!fecha) return toast ? toast("Fecha oficial invalida") : null;
       if (cae && !/^\d{6,20}$/.test(cae)) return toast ? toast("CAE invalido") : null;
       const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === currentSaleId) || null;
-      const ok = confirm(`Marcar como emitido?\n${saleShortInfo(sale)}`);
+      const ok = confirm(`Marcar como cargado en ARCA?\n${saleShortInfo(sale)}`);
       if (!ok) return;
       const patch = {
-        status: "emitido",
-        docType: fullDocType(tipo),
-        pos,
-        number: nro,
-        cae
+        status: STATUS.loaded,
+        officialDocType: fullDocType(tipo),
+        officialPos: pos,
+        officialNumber: nro,
+        officialIssuedAt: fecha,
+        cae,
+        caeDue,
+        notes
       };
       sendAction("fiscal:markSale", { saleId: currentSaleId, patch, includeAll: true });
-      if (toast) toast("Actualizado");
+      if (toast) toast("Carga oficial guardada");
       closeEmitModal();
     });
 
@@ -798,21 +900,29 @@
       if (emitId) return openEmitModal(emitId);
       const editId = t.getAttribute("data-edit");
       if (editId) return openEmitModal(editId);
+      const observeId = t.getAttribute("data-observe");
+      if (observeId && sendAction) {
+        const note = prompt("Observacion del borrador:", "");
+        if (note === null) return;
+        sendAction("fiscal:markSale", { saleId: observeId, patch: { status: STATUS.observed, observations: note }, includeAll: true });
+        if (toast) toast("Marcado como observado");
+        return;
+      }
       const annulId = t.getAttribute("data-annul");
       if (annulId && sendAction) {
         const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === String(annulId));
-        const ok = confirm(`Marcar como anulado? (solo fiscal)\n${saleShortInfo(sale)}`);
+        const ok = confirm(`Marcar como anulado? (solo seguimiento del comprobante)\n${saleShortInfo(sale)}`);
         if (!ok) return;
-        sendAction("fiscal:markSale", { saleId: annulId, patch: { status: "anulado" }, includeAll: true });
+        sendAction("fiscal:markSale", { saleId: annulId, patch: { status: STATUS.canceled }, includeAll: true });
         if (toast) toast("Marcado como anulado");
         return;
       }
       const resetId = t.getAttribute("data-reset");
       if (resetId && sendAction) {
         const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === String(resetId));
-        const ok = confirm(`Volver a pendiente?\n${saleShortInfo(sale)}`);
+        const ok = confirm(`Volver a pendiente de carga?\n${saleShortInfo(sale)}`);
         if (!ok) return;
-        sendAction("fiscal:markSale", { saleId: resetId, patch: { status: "pendiente" }, includeAll: true });
+        sendAction("fiscal:markSale", { saleId: resetId, patch: { status: STATUS.pending }, includeAll: true });
         if (toast) toast("Estado reiniciado");
         return;
       }
@@ -825,8 +935,9 @@
       const copyId = t.getAttribute("data-copy");
       if (copyId) {
         const sale = (currentDb && currentDb.sales || []).find(s=>s && String(s.id||"") === String(copyId));
+        const doc = docsBySale(currentDb).get(String(copyId));
         if (!sale) return;
-        const text = buildSummaryForSale(sale);
+        const text = buildSummaryForSale(sale, doc || {});
         navigator.clipboard?.writeText(text).then(()=>{ if (toast) toast("Resumen copiado"); });
       }
     });
@@ -905,15 +1016,10 @@
       const range = ensureExportRange();
       if (!range) return;
       const sales = filterSalesByRange(currentDb, range);
-      const docBySaleId = {};
-      (currentDb.fiscalDocs || []).forEach(d=>{
-        if (d && d.saleId) docBySaleId[String(d.saleId)] = d;
-      });
+      const docBySaleId = docsBySale(currentDb);
       const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
       const rows = sales.map(s=>{
-        const doc = docBySaleId[String(s.id || "")] || null;
-        const pos = doc ? String(doc.pos || "") : "";
-        const number = doc ? String(doc.number || "") : "";
+        const doc = docBySaleId.get(String(s.id || "")) || null;
         return [
           s.dateKey || "",
           fmtDateTime(s.at),
@@ -921,15 +1027,15 @@
           s.ticketId || s.id || "",
           fmtMoney(s.total || 0, cur),
           s.paymentMethod || "",
-          doc ? (doc.status || "pendiente") : "pendiente",
-          doc ? shortDocType(doc.docType) : "",
-          pos,
-          number,
+          doc ? statusLabel(doc.status) : statusLabel(STATUS.pending),
+          doc ? shortDocType(doc.suggestedDocType) : "",
+          doc ? formatDraftRef(doc) : "",
+          doc ? formatOfficialRef(doc) : "",
           doc ? (doc.cae || "") : ""
         ];
       });
-      const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Total","Medio","Estado fiscal","Tipo","PtoVta","Nro","CAE"]);
-      downloadCsv(`ventas_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Total","Medio","Estado","Tipo sugerido","Borrador","Oficial","CAE"]);
+      downloadCsv(`pre_facturacion_${range.from || "all"}_${range.to || "all"}.csv`, csv);
     }
 
     function exportByPayment(){
@@ -1058,26 +1164,26 @@
       const range = ensureExportRange();
       if (!range) return;
       const sales = filterSalesByRange(currentDb, range);
-      const docBySaleId = {};
-      (currentDb.fiscalDocs || []).forEach(d=>{
-        if (d && d.saleId) docBySaleId[String(d.saleId)] = d;
-      });
+      const docBySaleId = docsBySale(currentDb);
       const cur = (currentDb.settings && currentDb.settings.currency) || "ARS";
       const rows = sales.filter(s=>{
-        const doc = docBySaleId[String(s.id || "")];
-        return !doc || String(doc.status || "pendiente") === "pendiente";
+        const doc = docBySaleId.get(String(s.id || ""));
+        return !doc || doc.status === STATUS.pending;
       }).map(s=>{
+        const doc = docBySaleId.get(String(s.id || ""));
         return [
           s.dateKey || "",
           fmtDateTime(s.at),
           s.tableId || "",
           s.ticketId || s.id || "",
+          doc ? formatDraftRef(doc) : "",
+          doc ? shortDocType(doc.suggestedDocType) : "",
           fmtMoney(s.total || 0, cur),
           s.paymentMethod || "",
         ];
       });
-      const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Total","Medio"]);
-      downloadCsv(`pendientes_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Borrador","Tipo sugerido","Total","Medio"]);
+      downloadCsv(`pendientes_arca_${range.from || "all"}_${range.to || "all"}.csv`, csv);
     }
 
     $("btnExpSales").addEventListener("click", exportSales);
@@ -1103,6 +1209,10 @@
         updateExportGuard();
       });
       updateExportGuard();
+      if (!autoGenerated && sendAction) {
+        autoGenerated = true;
+        sendAction("fiscal:generateFromSales", { includeAll: true });
+      }
     });
   </script>
 </body>

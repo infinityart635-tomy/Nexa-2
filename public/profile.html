@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
@@ -814,7 +814,7 @@
         <div class="navGroup restaurantOnlyNav">
           <div class="navLabel">Gestion</div>
           <a class="pill" href="/admin_caja_test.html">Caja/Cierre</a>
-          <a class="pill" href="/admin_fiscal_test.html">Fiscal</a>
+          <a class="pill" href="/admin_fiscal_test.html">Comprobantes</a>
           <a class="pill" href="/admin_stats.html">Estadisticas</a>
         </div>
         <div class="navGroup navProfile navPerfil restaurantOnlyNav">
@@ -837,7 +837,7 @@
             <button id="btnViewAccount" class="btn profileNavBtn" type="button">Datos de la cuenta</button>
             <button id="btnViewFirstSteps" class="btn profileNavBtn warm" type="button">Primeros pasos</button>
             <button id="btnViewRestaurants" class="btn profileNavBtn emphasis active" type="button">Restaurantes</button>
-            <button id="btnViewTrash" class="btn profileNavBtn dangerish iconOnlyBtn" type="button" title="Papelera" aria-label="Papelera"><span class="trashIcon">🗑</span><span class="navBadge" id="trashCountBadge"></span></button>
+            <button id="btnViewTrash" class="btn profileNavBtn dangerish iconOnlyBtn" type="button" title="Papelera" aria-label="Papelera"><span class="trashIcon">ðŸ—‘</span><span class="navBadge" id="trashCountBadge"></span></button>
           </div>
 
           <div class="msgBox" id="sideMsg"></div>
@@ -1017,17 +1017,17 @@
               <div class="wizardStep active">
                 <div class="wizardStepNum">1</div>
                 <div class="wizardStepTitle">Nombre</div>
-                <div class="wizardStepText">Elegí cómo se va a llamar tu restaurante dentro del sistema.</div>
+                <div class="wizardStepText">ElegÃ­ cÃ³mo se va a llamar tu restaurante dentro del sistema.</div>
               </div>
               <div class="wizardStep active">
                 <div class="wizardStepNum">2</div>
-                <div class="wizardStepTitle">Revisión</div>
-                <div class="wizardStepText">Confirmás el nombre y ves qué queda listo apenas lo creás.</div>
+                <div class="wizardStepTitle">RevisiÃ³n</div>
+                <div class="wizardStepText">ConfirmÃ¡s el nombre y ves quÃ© queda listo apenas lo creÃ¡s.</div>
               </div>
               <div class="wizardStep active">
                 <div class="wizardStepNum">3</div>
                 <div class="wizardStepTitle">Siguiente etapa</div>
-                <div class="wizardStepText">Después podés entrar y completar carta, caja, fiscal y demás módulos.</div>
+                <div class="wizardStepText">DespuÃ©s podÃ©s entrar y completar carta, caja, fiscal y demÃ¡s mÃ³dulos.</div>
               </div>
             </div>
 
@@ -1035,7 +1035,7 @@
               <div class="field full">
                 <label class="small" for="createRestaurantName">Nombre del restaurante</label>
                 <input id="createRestaurantName" class="input" placeholder="Ej: Maxirest Centro"/>
-                <div class="fieldHint">Usá un nombre claro. Si ya existe uno igual, el sistema no lo va a dejar crear.</div>
+                <div class="fieldHint">UsÃ¡ un nombre claro. Si ya existe uno igual, el sistema no lo va a dejar crear.</div>
               </div>
             </div>
 
@@ -1048,8 +1048,8 @@
                   <span>Tu restaurante queda registrado a tu nombre y aparece en la lista de tus restaurantes.</span>
                 </div>
                 <div class="wizardInfoCard">
-                  <strong>Lo configuras después</strong>
-                  <span>Cuando quieras podés entrar para cargar productos, QR, caja, fiscal y permisos del equipo.</span>
+                  <strong>Lo configuras despuÃ©s</strong>
+                  <span>Cuando quieras podÃ©s entrar para cargar productos, QR, caja, fiscal y permisos del equipo.</span>
                 </div>
               </div>
             </div>
@@ -1176,7 +1176,7 @@
     }
 
     function restaurantEmojiSeed(value) {
-      const emojis = ["🍽️", "🍕", "🍔", "🍣", "🍜", "🌮", "🥩", "🍝", "🍗", "🥘", "🍤", "🥪"];
+      const emojis = ["ðŸ½ï¸", "ðŸ•", "ðŸ”", "ðŸ£", "ðŸœ", "ðŸŒ®", "ðŸ¥©", "ðŸ", "ðŸ—", "ðŸ¥˜", "ðŸ¤", "ðŸ¥ª"];
       const text = String(value || "");
       let hash = 0;
       for (let i = 0; i < text.length; i++) hash = ((hash * 31) + text.charCodeAt(i)) >>> 0;
@@ -1874,3 +1874,4 @@
   </script>
 </body>
 </html>
+
