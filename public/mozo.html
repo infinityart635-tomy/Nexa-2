@@ -274,9 +274,12 @@
       <section class="card col">
         <div id="mobileTables" class="mobilePanel">
           <div class="row mobileStatusRow" style="align-items:flex-end;">
-  <div style="flex:1">
-    <div class="small">Tu nombre (para registrar acciones)</div>
+  <div id="mozoNameBlock" style="flex:1">
+    <div id="mozoNameLabel" class="small">Tu nombre (para registrar acciones)</div>
     <input id="mozoName" class="input" placeholder="Ej: Juan" autocomplete="name"/>
+    <div id="mozoNameCurrent" class="badge2" style="display:none; width:max-content; max-width:100%;">
+      Mozo <strong id="mozoNameCurrentText"></strong>
+    </div>
   </div>
   <div class="badge2">Estado <strong id="wsStatus">??</strong></div>
   <div class="badge2">Caja <strong id="cashTurnStatus">-</strong></div>
@@ -698,10 +701,14 @@ const LOGIN_NAME_KEY = "nexa_pc_name";
       }
     }
 
-    const loginName = (localStorage.getItem(LOGIN_NAME_KEY) || "").trim();
+    let loginName = (localStorage.getItem(LOGIN_NAME_KEY) || "").trim();
+    let authMozoName = "";
+    function getSessionMozoName(){
+      return (authMozoName || loginName || "").trim();
+    }
     function getMozoName(){
       const input = ($("mozoName").value || "").trim();
-      return (loginName || input);
+      return getSessionMozoName() || input;
     }
     function getMozoNameOrDefault(){
       return getMozoName() || "Mozo";
@@ -723,15 +730,47 @@ const LOGIN_NAME_KEY = "nexa_pc_name";
       const ids = ["btnOpen","btnOpen2","btnSendKitchen","btnSendKitchen2","btnCharge","btnCharge2","btnMarkReceived","btnClearSelection","btnMoveTable","btnCancel","btnNewTicket","btnMyTickets","btnApplyDiscount","btnFloorTools","btnAddFloor","btnRemoveFloor","btnApplyTableFloor","btnMenuCancel","btnMenuDetails"];
       ids.forEach(id=>{ const el=$(id); if(el) el.disabled = blocked; });
       const q = $("q"); if(q) q.disabled = blocked;
-      const nameInput = $("mozoName"); if(nameInput && loginName) nameInput.disabled = true;
+      const nameInput = $("mozoName"); if(nameInput && getSessionMozoName()) nameInput.disabled = true;
       document.querySelectorAll(".chip").forEach(ch => ch.classList.toggle("disabled", blocked));
       document.querySelectorAll(".catIcon").forEach(ch => ch.classList.toggle("disabled", blocked));
+    }
+
+    function applyMozoNameUI(){
+      const sessionName = getSessionMozoName();
+      const label = $("mozoNameLabel");
+      const input = $("mozoName");
+      const current = $("mozoNameCurrent");
+      const currentText = $("mozoNameCurrentText");
+      if(!input) return;
+      if(sessionName){
+        input.value = sessionName;
+        input.disabled = true;
+        input.style.display = "none";
+        if(label) label.textContent = "Usuario";
+        if(current) current.style.display = "inline-flex";
+        if(currentText) currentText.textContent = sessionName;
+        try{ localStorage.setItem(LOGIN_NAME_KEY, sessionName); }catch(e){}
+      } else {
+        input.disabled = false;
+        input.style.display = "";
+        if(label) label.textContent = "Tu nombre (para registrar acciones)";
+        if(current) current.style.display = "none";
+        if(currentText) currentText.textContent = "";
+      }
+      applyPresentismoGate();
     }
 
     async function setupRoleUI(){
       try{
         const me = await fetch('/api/auth/me', {cache:'no-store'}).then(r=>r.json());
         const isAdmin = (me && me.role === 'admin');
+        const sessionName = String((me && (me.name || me.username || (me.user && me.user.name) || "")) || "").trim();
+        if(sessionName){
+          authMozoName = sessionName;
+          loginName = sessionName;
+          applyMozoNameUI();
+          setName(sessionName);
+        }
         const el = document.getElementById('adminLinks');
         if(el) el.style.display = isAdmin ? '' : 'none';
         const navMozoLink = document.getElementById('navMozoLink');
@@ -1168,8 +1207,9 @@ const LOGIN_NAME_KEY = "nexa_pc_name";
       connect("mozo", n || "Mozo");
     }
 
-    $("mozoName").value = loginName || (localStorage.getItem(LS_NAME) || "");
-    setName($("mozoName").value.trim());
+    $("mozoName").value = getSessionMozoName() || (localStorage.getItem(LS_NAME) || "");
+    applyMozoNameUI();
+    setName(getMozoNameOrDefault());
 applyPresentismoGate();
     $("mozoName").addEventListener("input", ()=>setName($("mozoName").value.trim()));
 

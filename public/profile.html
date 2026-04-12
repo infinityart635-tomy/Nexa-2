@@ -1351,6 +1351,17 @@
       el.className = "msgBox" + (text ? " show" : "") + (kind ? ` ${kind}` : "");
     }
 
+    function flashMessage(elId, text, kind, ms = 5000) {
+      message(elId, text, kind);
+      if (!text) return;
+      const el = $(elId);
+      if (!el) return;
+      if (el._flashTimer) clearTimeout(el._flashTimer);
+      el._flashTimer = setTimeout(() => {
+        if (el.textContent === text) message(elId, "", "");
+      }, ms);
+    }
+
     function renderPasswordSteps() {
       $("passwordVerifyStep").classList.toggle("active", !state.passwordVerified);
       $("passwordChangeStep").classList.toggle("active", !!state.passwordVerified);
@@ -1464,7 +1475,7 @@
       if (error === "already_member") return "Ya tienes acceso activo como mozo en ese restaurante.";
       if (error === "request_pending") return "Ya hay una solicitud pendiente para ese restaurante.";
       if (error === "request_not_found") return "No se encontro la solicitud.";
-      if (error === "invalid_request") return "La solicitud ya no esta pendiente.";
+      if (error === "invalid_request") return "La solicitud ya fue resuelta.";
       if (error === "forbidden") return "No tienes permiso para entrar con ese rol.";
       if (error === "bad_role") return "Ese rol no es valido para entrar.";
       if (error === "missing_name") return "Escribe tu nombre.";
@@ -2115,14 +2126,26 @@
 
     async function decideRequest(requestId, approve) {
       try {
-        await api("/api/restaurants/requestDecision", {
+        const data = await api("/api/restaurants/requestDecision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ requestId, approve })
         });
-        message("sideMsg", approve ? "Solicitud aceptada." : "Solicitud rechazada.", "success");
-        await refreshProfile();
+        if (state.profile) state.profile.pendingRequests = data.pendingRequests || [];
+        renderPendingRequests("branchPendingRequests", state.branchRestaurantId);
+        flashMessage("sideMsg", approve ? "Solicitud aceptada." : "Solicitud rechazada.", "success", 5000);
+        renderSummary();
       } catch (error) {
+        if (error.message === "invalid_request" || error.message === "request_not_found") {
+          if (state.profile) {
+            const current = Array.isArray(state.profile.pendingRequests) ? state.profile.pendingRequests : [];
+            state.profile.pendingRequests = current.filter((item) => String(item.id || "") !== String(requestId || ""));
+          }
+          renderPendingRequests("branchPendingRequests", state.branchRestaurantId);
+          flashMessage("sideMsg", approve ? "Solicitud aceptada." : "Solicitud rechazada.", "success", 5000);
+          renderSummary();
+          return;
+        }
         message("sideMsg", errorText(error.message), "error");
       }
     }
