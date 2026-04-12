@@ -115,6 +115,10 @@
     .fiscalRangeRow[hidden]{
       display:none !important;
     }
+    .input.invalid{
+      border-color:rgba(255,110,110,.42) !important;
+      box-shadow:0 0 0 2px rgba(255,110,110,.12);
+    }
     .fiscalExportGrid{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -383,11 +387,11 @@
           </div>
           <div id="reconCustomRange" class="fiscalRangeRow" hidden>
             <div>
-              <div class="small">Desde</div>
+              <div class="small">Desde (inclusive)</div>
               <input id="reconFrom" class="input" type="date"/>
             </div>
             <div>
-              <div class="small">Hasta</div>
+              <div class="small">Hasta (inclusive)</div>
               <input id="reconTo" class="input" type="date"/>
             </div>
           </div>
@@ -418,6 +422,7 @@
             <button id="btnRunSearch" class="btn primary" type="button">Buscar</button>
             <button id="btnClearSearch" class="btn" type="button">Limpiar</button>
           </div>
+          <div class="mini" id="reconRangeSummary"></div>
           <div class="mini" id="turnLimitNote"></div>
           <div class="mini" id="reconGuardNote"></div>
           <div class="row" id="reconDayChips" style="gap:6px; flex-wrap:wrap;"></div>
@@ -641,9 +646,56 @@
       return { from: "", to: "" };
     }
 
+    function describeReconRange(range){
+      if (!range || (!range.from && !range.to)) return "Sin periodo activo.";
+      if (range.from && range.to && range.from === range.to) return `Buscando solo el ${range.from}.`;
+      return `Buscando del ${range.from || "..."} al ${range.to || "..."}.`;
+    }
+
+    function reconRangeIsValid(){
+      const preset = ($("reconPreset").value || "").trim();
+      const fromInput = $("reconFrom");
+      const toInput = $("reconTo");
+      fromInput.classList.remove("invalid");
+      toInput.classList.remove("invalid");
+      if (preset !== "custom") return { ok: true, message: "" };
+      const from = (fromInput.value || "").trim();
+      const to = (toInput.value || "").trim();
+      if (!from && !to) return { ok: false, message: "En personalizado, elegi al menos una fecha." };
+      if (from && !to) {
+        toInput.value = from;
+        return { ok: true, message: "Se tomo el mismo dia en Desde y Hasta." };
+      }
+      if (!from && to) {
+        fromInput.value = to;
+        return { ok: true, message: "Se tomo el mismo dia en Desde y Hasta." };
+      }
+      if (to < from) {
+        fromInput.classList.add("invalid");
+        toInput.classList.add("invalid");
+        return { ok: false, message: "Hasta no puede ser anterior a Desde." };
+      }
+      return { ok: true, message: "" };
+    }
+
+    function updateReconRangeUi(){
+      const validation = reconRangeIsValid();
+      const summary = $("reconRangeSummary");
+      const btn = $("btnRunSearch");
+      const range = getReconRange();
+      if (summary) {
+        summary.textContent = validation.ok
+          ? `${describeReconRange(range)}${validation.message ? ` ${validation.message}` : ""}`
+          : validation.message;
+      }
+      if (btn) btn.disabled = !validation.ok;
+      return validation;
+    }
+
     function syncReconPresetUi(){
       const custom = ($("reconPreset").value || "") === "custom";
       $("reconCustomRange").hidden = !custom;
+      updateReconRangeUi();
     }
 
     function shortDocType(v){
@@ -1346,13 +1398,21 @@
         $("reconFrom").value = "";
         $("reconTo").value = "";
       }
+      updateReconRangeUi();
     });
-    $("btnRunSearch").addEventListener("click", ()=>renderRecon(currentDb));
+    $("reconFrom").addEventListener("change", ()=>updateReconRangeUi());
+    $("reconTo").addEventListener("change", ()=>updateReconRangeUi());
+    $("btnRunSearch").addEventListener("click", ()=>{
+      const validation = updateReconRangeUi();
+      if (!validation.ok) return;
+      renderRecon(currentDb);
+    });
     $("btnClearSearch").addEventListener("click", clearReconFilters);
     $("reconPreset").value = "today";
     $("reconFrom").value = "";
     $("reconTo").value = "";
     syncReconPresetUi();
+    updateReconRangeUi();
     updateExportGuard();
 
     function exportSales(){
