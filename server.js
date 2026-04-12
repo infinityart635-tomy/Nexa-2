@@ -98,7 +98,7 @@ function applyDefaultTableLayout(tables, layout = DEFAULT_TABLE_LAYOUT) {
     t.h = pos.h;
     t.shape = "square";
     t.locked = false;
-    t.zone = "SalИn";
+    t.zone = "SalÃƒÆ’Ã†â€™Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“n";
     t.updatedAt = now();
   }
 }
@@ -711,7 +711,7 @@ function buildSampleMenuCategories() {
   return [
     { id: "entradas", title: "Entradas", hint: "", items: [
       { name: "Empanada de carne", desc: "", price: 0 },
-      { name: "Empanada de jamÃ³n y queso", desc: "", price: 0 },
+      { name: "Empanada de jamon y queso", desc: "", price: 0 },
     ]},
     { id: "principales", title: "Platos principales", hint: "", items: [
       { name: "Milanesa napolitana con patatas", desc: "", price: 0 },
@@ -736,11 +736,11 @@ function normalizeMenuDocument(parsed) {
 
 function loadMenuFromFile() {
   if (!fs.existsSync(MENU_FILE)) {
-    // Menú base de ejemplo
+    // MenÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº base de ejemplo
     const sample = [
       { id: "entradas", title: "Entradas", hint: "", items: [
         { name: "Empanada de carne", desc: "", price: 0 },
-        { name: "Empanada de jamón y queso", desc: "", price: 0 },
+        { name: "Empanada de jamÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n y queso", desc: "", price: 0 },
       ]},
       { id: "principales", title: "Platos principales", hint: "", items: [
         { name: "Milanesa napolitana con patatas", desc: "", price: 0 },
@@ -757,7 +757,7 @@ function loadMenuFromFile() {
 
   const parsed = safeJsonParse(fs.readFileSync(MENU_FILE, "utf8"), []);
   // Soporta dos formatos:
-  // 1) Array de categorías (formato legacy)
+  // 1) Array de categorÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as (formato legacy)
   // 2) Objeto { currency, categories: [...] }
   if (Array.isArray(parsed)) {
     return { currency: "ARS", categories: parsed };
@@ -785,7 +785,7 @@ async function loadMenu() {
     await STORAGE.saveDocument("menu", initialMenu);
     return normalizeMenuDocument(initialMenu);
   } catch (e) {
-    console.log("⚠️ No pude cargar menu desde PostgreSQL, usando archivo local:", e.message);
+    console.log("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â No pude cargar menu desde PostgreSQL, usando archivo local:", e.message);
     return loadMenuFromFile();
   }
 }
@@ -809,7 +809,7 @@ function initDbFromMenu(menu) {
         descriptionEn: String(it.desc_en || it.descriptionEn || "").slice(0, 240),
         price: Number(it.price || 0),
         categoryId: String(cat.id || slugify(cat.title)),
-        categoryTitle: String(cat.title || "Categoría"),
+        categoryTitle: String(cat.title || "CategorÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a"),
         categoryTitleEn: String(cat.title_en || cat.titleEn || "").slice(0, 80),
         active: true,
         sectorId: "general",
@@ -839,7 +839,7 @@ function initDbFromMenu(menu) {
       y: pos.y,
       w: pos.w,
       h: pos.h,
-      zone: "SalИn",
+      zone: "SalÃƒÆ’Ã†â€™Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“n",
       updatedAt: now(),
     });
   }
@@ -885,7 +885,7 @@ settings: {
       controlador_fiscal: "TICKET_FISCAL",
       manual: "FACTURA_C"
     },
-    // códigos AFIP/ARCA (tipoCmp) para QR / WSFE (ajustable desde /admin_fiscal.html)
+    // cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digos AFIP/ARCA (tipoCmp) para QR / WSFE (ajustable desde /admin_fiscal.html)
     tipoCmpByDocType: {
       FACTURA_A: 1,
       FACTURA_B: 6,
@@ -975,8 +975,8 @@ function loadDbFromFile(menu) {
       return db;
     }
     const db = safeJsonParse(fs.readFileSync(DB_FILE, "utf8"), null);
-    if (!db || typeof db !== "object") throw new Error("DB inválida");
-    // migraciones mínimas
+    if (!db || typeof db !== "object") throw new Error("DB invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lida");
+    // migraciones mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimas
     if (!db.version) db.version = 4; // legacy
     if (db.version < 5) db.version = 5;
     if (!db.settings) db.settings = { restaurantName: "RESTO", currency: menu.currency || "ARS", taxRate: 0, footerText: "" };
@@ -993,7 +993,7 @@ function loadDbFromFile(menu) {
       }
       if (t.w === undefined) t.w = DEFAULT_TABLE_LAYOUT.baseW;
       if (t.h === undefined) t.h = DEFAULT_TABLE_LAYOUT.baseH;
-      if (t.zone === undefined) t.zone = "SalИn";
+      if (t.zone === undefined) t.zone = "SalÃƒÆ’Ã†â€™Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“n";
       if (!t.shape) t.shape = "square";
       if (t.capacity === undefined) t.capacity = 4;
       if (t.locked === undefined) t.locked = false;
@@ -1024,7 +1024,7 @@ if (!Array.isArray(db.periodClosures)) db.periodClosures = [];
     if (!db.accounts) db.accounts = initDbFromMenu(menu).accounts;
 // --- NUEVO v8: settings / fiscales / sectores / modificadores ---
 const defaults = initDbFromMenu(menu);
-// Backfill traducciones del menú si ya hay productos guardados
+// Backfill traducciones del menÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº si ya hay productos guardados
 if (Array.isArray(db.products) && Array.isArray(defaults.products)) {
   const byId = new Map(defaults.products.map(p => [String(p.id), p]));
   db.products.forEach(p => {
@@ -1086,7 +1086,7 @@ for (const p of (db.products || [])) {
   if (p.prodCost === undefined) p.prodCost = 0;
 }
 
-// Migración: items con lineId/modificadores (tickets y sales)
+// MigraciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n: items con lineId/modificadores (tickets y sales)
 const ensureLineItems = (items) => {
   if (!Array.isArray(items)) return [];
   for (const it of items) {
@@ -1119,7 +1119,7 @@ for (const s of (db.sales || [])) {
     db.updatedAt = now();
     return db;
   } catch (e) {
-    console.log("⚠️ No pude cargar db.json, recreando:", e.message);
+    console.log("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â No pude cargar db.json, recreando:", e.message);
     const db = initDbFromMenu(menu);
     atomicWriteJson(DB_FILE, db);
     return db;
@@ -1247,7 +1247,7 @@ function normalizeRestaurantWorkspaceData(workspace, menu){
     }
     if (t.w === undefined) t.w = DEFAULT_TABLE_LAYOUT.baseW;
     if (t.h === undefined) t.h = DEFAULT_TABLE_LAYOUT.baseH;
-    if (t.zone === undefined) t.zone = "SalÐ˜n";
+    if (t.zone === undefined) t.zone = "SalÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œn";
     if (!t.shape) t.shape = "square";
     if (t.capacity === undefined) t.capacity = 4;
     if (t.locked === undefined) t.locked = false;
@@ -1368,11 +1368,11 @@ function loadRootDbFromFile(menu){
       return root;
     }
     const raw = safeJsonParse(fs.readFileSync(DB_FILE, "utf8"), null);
-    if (!raw || typeof raw !== "object") throw new Error("DB invÃ¡lida");
+    if (!raw || typeof raw !== "object") throw new Error("DB invalida");
     if (isRootDbShape(raw)) return normalizeRootDb(raw, menu);
     return wrapLegacyWorkspaceAsRoot(loadDbFromFile(menu), menu);
   }catch(e){
-    console.log("âš ï¸ No pude cargar db.json, recreando root:", e.message);
+    console.log("Aviso: no pude cargar db.json, recreando root:", e.message);
     const root = wrapLegacyWorkspaceAsRoot(initDbFromMenu(menu), menu);
     atomicWriteJson(DB_FILE, root);
     return root;
@@ -1398,7 +1398,7 @@ async function loadRootDb(menu){
     await STORAGE.saveDocument("root_db", initialRoot);
     return initialRoot;
   } catch (e) {
-    console.log("⚠️ No pude cargar root desde PostgreSQL, usando archivo local:", e.message);
+    console.log("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â No pude cargar root desde PostgreSQL, usando archivo local:", e.message);
     return loadRootDbFromFile(menu);
   }
 }
@@ -1479,7 +1479,7 @@ function scheduleSave() {
     try {
       /* legacy save path handled via persistRootDb */
     } catch (e) {
-      console.log("⚠️ Error guardando db.json:", e.message);
+      console.log("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Error guardando db.json:", e.message);
     }
   }, 250);
 }
@@ -1665,7 +1665,7 @@ function computeItemFromSelections(product, selections) {
     const gid = String(g.id || "");
     const chosen = Array.isArray(sel[gid]) ? sel[gid].map(String) : [];
     const opts = Array.isArray(g.options) ? g.options : [];
-    // Si no elige nada y hay defaults, aplica defaults SOLO si no llegó nada desde UI.
+    // Si no elige nada y hay defaults, aplica defaults SOLO si no llegÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ nada desde UI.
     const effective = (chosen.length === 0 && sel[gid] === undefined)
       ? opts.filter(o => o && o.default).map(o => String(o.id))
       : chosen;
@@ -1851,7 +1851,7 @@ function addItemLineInner(ticketId, productId, delta, selections = null, depth =
     }
   }
 
-  // buscar línea existente igual (mismo producto + mismos modificadores)
+  // buscar lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nea existente igual (mismo producto + mismos modificadores)
   const matches = ticket.items.filter(x => x.productId === productId && sameModifiers(x.modifiers, computed.modifiers));
   let existing = null;
   if (d > 0) {
@@ -2093,7 +2093,7 @@ function setTicketDiscount(ticketId, discount) {
   scheduleSave();
 }
 
-// ------------------ Costes (coste de producción) ------------------
+// ------------------ Costes (coste de producciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n) ------------------
 function computeRecipeCost(productId) {
   const recipes = (DB.inventory && DB.inventory.recipes) ? DB.inventory.recipes : {};
   const rec = recipes[String(productId || "")];
@@ -2990,7 +2990,7 @@ function updateSettings(patch = {}) {
     }
   }
 
-  // impresión (sugerencias por sector)
+  // impresiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (sugerencias por sector)
   if (patch.printing && typeof patch.printing === "object") {
     if (!DB.settings.printing) DB.settings.printing = { sectorPrinters: {} };
     if (patch.printing.sectorPrinters && typeof patch.printing.sectorPrinters === "object") {
@@ -3235,7 +3235,7 @@ function setTableLayout(tableId, patch = {}) {
   if (patch.y !== undefined && allowMove) t.y = Number(patch.y || 0);
   if (patch.w !== undefined) t.w = Math.max(30, Number(patch.w || 0));
   if (patch.h !== undefined) t.h = Math.max(30, Number(patch.h || 0));
-  if (patch.zone !== undefined) t.zone = String(patch.zone || "SalИn").slice(0, 32);
+  if (patch.zone !== undefined) t.zone = String(patch.zone || "SalÃƒÆ’Ã†â€™Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“n").slice(0, 32);
   if (patch.shape !== undefined) t.shape = (String(patch.shape) === "round") ? "round" : "square";
   if (patch.capacity !== undefined) t.capacity = Math.max(1, Math.min(20, Number(patch.capacity || 0)));
   t.updatedAt = now();
@@ -3414,12 +3414,12 @@ function setTablesCount(newCount) {
         y: pos.y,
         w: pos.w,
         h: pos.h,
-        zone: "SalИn",
+        zone: "SalÃƒÆ’Ã†â€™Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“n",
         updatedAt: now(),
       });
     }
   } else {
-    // quitar solo si están libres y sin ticket
+    // quitar solo si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡n libres y sin ticket
     DB.tables = DB.tables.slice(0, newCount);
   }
   const tableIds = new Set(DB.tables.map(t=>String(t.id)));
@@ -3635,7 +3635,7 @@ function computeDayReport(dateKey) {
 }
 
 
-// ------------------ Estadísticas (semana/mes) ------------------
+// ------------------ EstadÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­sticas (semana/mes) ------------------
 function dateKeyToMs(dateKey){
   const s = String(dateKey||ymd());
   const d = new Date(s + 'T00:00:00');
@@ -3761,9 +3761,9 @@ function closeDay({ dateKey, closingCash = 0, note = "", closedBy = "" } = {}) {
   const counted = Number(closingCash || 0);
   const diff = counted - expected;
 
-  // cierra caja si hay sesión abierta
+  // cierra caja si hay sesiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n abierta
   const openSes = DB.cash && Array.isArray(DB.cash.sessions) ? DB.cash.sessions.find(s => s.dateKey === dateKeySafe && !s.closedAt) : null;
-  if (openSes) cashClose(counted, note || "Cierre del día", dateKeySafe);
+  if (openSes) cashClose(counted, note || "Cierre del dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a", dateKeySafe);
 
   // ajuste por diferencia (queda registrado)
   if (Number.isFinite(diff) && Math.abs(diff) >= 0.01) {
@@ -3774,7 +3774,7 @@ function closeDay({ dateKey, closingCash = 0, note = "", closedBy = "" } = {}) {
       type: diff > 0 ? "in" : "out",
       method: "efectivo",
       amount: Math.abs(diff),
-      note: `Ajuste cierre del día (${diff > 0 ? "sobrante" : "faltante"})${detail}`,
+      note: `Ajuste cierre del dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a (${diff > 0 ? "sobrante" : "faltante"})${detail}`,
     });
   }
 
@@ -3863,7 +3863,7 @@ function demoGenerateSales({ count = 25 } = {}) {
     const sale = {
       id: uid(),
       dateKey,
-      at: now() - rint(0, 10 * 60 * 60 * 1000), // dentro del día
+      at: now() - rint(0, 10 * 60 * 60 * 1000), // dentro del dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a
       ticketId: "demo-" + uid(),
       channel: rand(channels),
       tableId: null,
@@ -4362,7 +4362,7 @@ function handleApi(req, res, url) {
 
 
 if (url.pathname === "/api/public/menu") {
-  // Menú público: solo lo necesario para clientes (sin caja/ventas/etc.)
+  // MenÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblico: solo lo necesario para clientes (sin caja/ventas/etc.)
   return send(res, 200, JSON.stringify(publicMenuPayload()), "application/json; charset=utf-8");
 }
 
@@ -4797,7 +4797,7 @@ if (url.pathname === "/api/restaurants/leave" && req.method === "POST") {
   return send(res, 200, JSON.stringify({ ok: true, role: ses.role }), "application/json; charset=utf-8");
 }
 if (url.pathname === "/api/customer/requestBill" && req.method === "POST") {
-  // Cliente solicita "la cuenta" desde el menú público. No requiere login.
+  // Cliente solicita "la cuenta" desde el menÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblico. No requiere login.
   let body = "";
   req.on("data", c => { body += c.toString(); if (body.length > 100_000) req.destroy(); });
   req.on("end", () => {
@@ -5035,7 +5035,7 @@ if (url.pathname === "/api/fiscalDocs") {
       const incoming = safeJsonParse(body, null);
       if (!incoming || typeof incoming !== "object") return send(res, 400, JSON.stringify({ error: "invalid_json" }), "application/json; charset=utf-8");
 
-      // normalización mínima (mantener compatibilidad)
+      // normalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nima (mantener compatibilidad)
       const menu = MENU;
       const base = initDbFromMenu(menu);
       const merged = { ...base, ...incoming };
@@ -5071,7 +5071,7 @@ if (url.pathname === "/api/fiscalDocs") {
         }
         if (t.w === undefined) t.w = 120;
         if (t.h === undefined) t.h = 80;
-        if (t.zone === undefined) t.zone = "Salón";
+        if (t.zone === undefined) t.zone = "SalÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n";
       }
 
       merged.version = 9;
@@ -5132,14 +5132,14 @@ function roleForPath(fp) {
   if (fp === "/index.html" || fp === "/panel.html" || fp === "/pro.html" || fp === "/admin_stats.html") return "admin";
   if (fp.startsWith("/admin_")) return "admin";
 
-  // Configuración: si no hay admin creado, permitimos setup; si no, admin.
+  // ConfiguraciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n: si no hay admin creado, permitimos setup; si no, admin.
   if (fp === "/config.html") return "admin";
   if (fp === "/profile.html") return "account";
 
   // Personal
   if (fp === "/mozo.html") return "mozo";
   if (fp === "/cocina.html" || fp === "/salon_pc.html" || fp === "/print.html" || fp === "/print_fiscal.html") return "admin";
-  return null; // público
+  return null; // pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblico
 }
 
 const needRole = roleForPath(filePath);
@@ -5636,7 +5636,7 @@ case "attendance:checkOut": {
         note: String(payload.note || ""),
         closedBy: String(payload.closedBy || ws.name || ""),
       });
-      if (closure) notify(`Cierre guardado: ${closure.fromKey} → ${closure.toKey}`, "info", { action: "period:close", closureId: closure.id }, by);
+      if (closure) notify(`Cierre guardado: ${closure.fromKey} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ ${closure.toKey}`, "info", { action: "period:close", closureId: closure.id }, by);
       broadcastState();
       return;
     }
@@ -5670,9 +5670,9 @@ wss.on("connection", (ws, req) => {
   ws.role = ses ? String(ses.role || "cliente").slice(0, 16) : "cliente";
   ws.restaurantId = ses ? String(ses.restaurantId || "") : "";
   ws.restaurantName = ses ? String(ses.restaurantName || "") : "";
-  ws.name = (ses && ses.name) ? String(ses.name).slice(0, 24) : (ws.role === "admin" ? "Admin" : (ws.role === "mozo" ? "Mozo" : "Anónimo"));
+  ws.name = (ses && ses.name) ? String(ses.name).slice(0, 24) : (ws.role === "admin" ? "Admin" : (ws.role === "mozo" ? "Mozo" : "Anonimo"));
 
-  // snapshot al conectar (según rol)
+  // snapshot al conectar (segun rol)
   sendWsState(ws);
 
   ws.on("message", async (raw) => {
@@ -5722,7 +5722,7 @@ wss.on("connection", (ws, req) => {
     ensureAuthDefaults();
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ PC: http://localhost:${PORT}`);
+  console.log(`ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ PC: http://localhost:${PORT}`);
   console.log(`Storage: ${STORAGE && STORAGE.mode === "postgres" ? "postgres" : "file"}`);
   const ips = getLocalIPv4s();
   const urls = buildUrls(ips);
@@ -5735,7 +5735,7 @@ server.listen(PORT, "0.0.0.0", () => {
     console.log(`Cocina:            ${pref}/cocina.html`);
     console.log(`Admin (panel):     ${pref}/panel.html`);
   } else {
-    console.log("⚠️ No pude detectar IP local. Usa ipconfig para ver tu IPv4.");
+    console.log("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â No pude detectar IP local. Usa ipconfig para ver tu IPv4.");
   }
 });
   } catch (err) {

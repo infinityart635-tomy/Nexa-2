@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
@@ -837,7 +837,7 @@
             <button id="btnViewAccount" class="btn profileNavBtn" type="button">Datos de la cuenta</button>
             <button id="btnViewFirstSteps" class="btn profileNavBtn warm" type="button">Primeros pasos</button>
             <button id="btnViewRestaurants" class="btn profileNavBtn emphasis active" type="button">Restaurantes</button>
-            <button id="btnViewTrash" class="btn profileNavBtn dangerish iconOnlyBtn" type="button" title="Papelera" aria-label="Papelera"><span class="trashIcon">ðŸ—‘</span><span class="navBadge" id="trashCountBadge"></span></button>
+            <button id="btnViewTrash" class="btn profileNavBtn dangerish iconOnlyBtn" type="button" title="Papelera" aria-label="Papelera"><span class="trashIcon">TR</span><span class="navBadge" id="trashCountBadge"></span></button>
           </div>
 
           <div class="msgBox" id="sideMsg"></div>
@@ -1017,17 +1017,17 @@
               <div class="wizardStep active">
                 <div class="wizardStepNum">1</div>
                 <div class="wizardStepTitle">Nombre</div>
-                <div class="wizardStepText">ElegÃ­ cÃ³mo se va a llamar tu restaurante dentro del sistema.</div>
+                <div class="wizardStepText">Elegi como se va a llamar tu restaurante dentro del sistema.</div>
               </div>
               <div class="wizardStep active">
                 <div class="wizardStepNum">2</div>
-                <div class="wizardStepTitle">RevisiÃ³n</div>
-                <div class="wizardStepText">ConfirmÃ¡s el nombre y ves quÃ© queda listo apenas lo creÃ¡s.</div>
+                <div class="wizardStepTitle">Revision</div>
+                <div class="wizardStepText">Confirmas el nombre y ves que queda listo apenas lo creas.</div>
               </div>
               <div class="wizardStep active">
                 <div class="wizardStepNum">3</div>
                 <div class="wizardStepTitle">Siguiente etapa</div>
-                <div class="wizardStepText">DespuÃ©s podÃ©s entrar y completar carta, caja, fiscal y demÃ¡s mÃ³dulos.</div>
+                <div class="wizardStepText">Despues podes entrar y completar carta, caja, comprobantes y demas modulos.</div>
               </div>
             </div>
 
@@ -1035,7 +1035,7 @@
               <div class="field full">
                 <label class="small" for="createRestaurantName">Nombre del restaurante</label>
                 <input id="createRestaurantName" class="input" placeholder="Ej: Maxirest Centro"/>
-                <div class="fieldHint">UsÃ¡ un nombre claro. Si ya existe uno igual, el sistema no lo va a dejar crear.</div>
+                <div class="fieldHint">Usa un nombre claro. Si ya existe uno igual, el sistema no lo va a dejar crear.</div>
               </div>
             </div>
 
@@ -1048,8 +1048,8 @@
                   <span>Tu restaurante queda registrado a tu nombre y aparece en la lista de tus restaurantes.</span>
                 </div>
                 <div class="wizardInfoCard">
-                  <strong>Lo configuras despuÃ©s</strong>
-                  <span>Cuando quieras podÃ©s entrar para cargar productos, QR, caja, fiscal y permisos del equipo.</span>
+                  <strong>Lo configuras despues</strong>
+                  <span>Cuando quieras podes entrar para cargar productos, QR, caja, comprobantes y permisos del equipo.</span>
                 </div>
               </div>
             </div>
@@ -1175,13 +1175,13 @@
         .replace(/'/g, "&#39;");
     }
 
-    function restaurantEmojiSeed(value) {
-      const emojis = ["ðŸ½ï¸", "ðŸ•", "ðŸ”", "ðŸ£", "ðŸœ", "ðŸŒ®", "ðŸ¥©", "ðŸ", "ðŸ—", "ðŸ¥˜", "ðŸ¤", "ðŸ¥ª"];
-      const text = String(value || "");
-      let hash = 0;
-      for (let i = 0; i < text.length; i++) hash = ((hash * 31) + text.charCodeAt(i)) >>> 0;
-      return emojis[hash % emojis.length];
+    function restaurantAvatarText(value) {
+      const text = String(value || "").trim();
+      const parts = text.split(/\s+/).filter(Boolean).slice(0, 2);
+      if (parts.length) return parts.map(part => part[0]).join("").toUpperCase();
+      return "NX";
     }
+
 
     function roleText(role, restaurantRole, restaurantName) {
       if (!role || role === "account") return "Cuenta";
@@ -1381,7 +1381,7 @@
       box.innerHTML = items.map((item) => {
         const commerceName = escapeHtml(item.name || "Comercio");
         const ownerName = escapeHtml(item.ownerName || state.profile.user.name || "");
-        const avatar = escapeHtml(restaurantEmojiSeed(item.name || ""));
+        const avatar = escapeHtml(restaurantAvatarText(item.name || ""));
         const isOwner = item.viewRole === "owner";
         const accessLabel = isOwner ? "Administrador" : "Mozo";
         const actionRole = isOwner ? "admin" : "mozo";

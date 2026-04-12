@@ -1,4 +1,4 @@
-/* NEXA POS Wi‑Fi · v9
+/* NEXA POS Wi-Fi - v9
    Frontend helper: WebSocket sync + small utilities.
 */
 (function(){
@@ -207,7 +207,7 @@
   markActivity();
 
   function connect(role, name){
-    hello = { role: role || "anon", name: name || "Anónimo" };
+    hello = { role: role || "anon", name: name || "Anonimo" };
     if(ws && (ws.readyState === 0 || ws.readyState === 1)) return;
 
     ws = new WebSocket(WS_URL);
@@ -525,7 +525,7 @@
           list.innerHTML = arr.slice(0,40).map(n=>{
             return `<div class="notifRow ${esc(n.kind||"")}" style="margin:6px 0;">
               <div style="font-weight:800;">${esc(n.text)}</div>
-              <div class="small">${esc(formatWhen(n.at))} · ${esc(n.by||"")}</div>
+              <div class="small">${esc(formatWhen(n.at))} - ${esc(n.by||"")}</div>
             </div>`;
           }).join("");
         }
@@ -566,7 +566,7 @@
   }
   window.RestoApp = { connect, onState, onMessage, sendAction, money, byId, esc, toast, getNotifications, clearNotifications, setTheme, getTheme, themes: THEMES.slice() };
 
-  // Chequeo periódico (todas las pantallas)
+  // Chequeo periodico (todas las pantallas)
   setTimeout(checkCashOpenNotice, 1200);
   setInterval(checkCashOpenNotice, 60000);
 })();
