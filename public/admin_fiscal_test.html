@@ -112,10 +112,19 @@
       grid-template-columns:1fr 1fr;
       gap:10px;
     }
+    .fiscalRangeRow[hidden]{
+      display:none !important;
+    }
     .fiscalExportGrid{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:10px;
+    }
+    .fiscalTopActions{
+      display:grid;
+      gap:12px;
+      padding-top:8px;
+      border-top:1px solid rgba(255,255,255,.08);
     }
     .fiscalPresetRow,
     .fiscalInlineStats{
@@ -232,6 +241,23 @@
     .asideLinks{
       display:grid;
       gap:8px;
+    }
+    .historyList{
+      display:grid;
+      gap:8px;
+      max-height:50vh;
+      overflow:auto;
+    }
+    .historyItem{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.02);
+      display:grid;
+      gap:4px;
+    }
+    .historyItem strong{
+      font-size:13px;
     }
     .asideLink{
       display:flex;
@@ -395,6 +421,27 @@
           <div class="mini" id="turnLimitNote"></div>
           <div class="mini" id="reconGuardNote"></div>
           <div class="row" id="reconDayChips" style="gap:6px; flex-wrap:wrap;"></div>
+          <div class="fiscalTopActions">
+            <div class="fiscalSectionHead">
+              <div>
+                <h2>Exportar resultados</h2>
+                <p>Usa el mismo periodo y filtros del buscador. Por ahora exporta todo lo filtrado.</p>
+              </div>
+            </div>
+            <div class="exportTypeList">
+              <label class="exportTypeOption"><input type="radio" name="exportType" value="sales" checked/> Borradores</label>
+              <label class="exportTypeOption"><input type="radio" name="exportType" value="pending"/> Pendientes</label>
+              <label class="exportTypeOption"><input type="radio" name="exportType" value="pay"/> Medios de pago</label>
+              <label class="exportTypeOption"><input type="radio" name="exportType" value="close"/> Cierres</label>
+              <label class="exportTypeOption"><input type="radio" name="exportType" value="bonif"/> Bonificaciones</label>
+              <label class="exportTypeOption"><input type="radio" name="exportType" value="annul"/> Anulaciones</label>
+            </div>
+            <div class="buttonRow">
+              <button id="btnExportSelected" class="btn primary" type="button">Exportar</button>
+            </div>
+            <div class="mini" id="expSummary"></div>
+            <div class="mini" id="expGuardNote"></div>
+          </div>
         </section>
 
         <div class="fiscalInlineStats">
@@ -445,30 +492,8 @@
           <div class="asideLinks">
             <a class="asideLink" href="/profile.html"><span>Perfil fiscal</span><span>&rsaquo;</span></a>
             <a class="asideLink" href="/admin_caja_test.html"><span>Caja y cierres</span><span>&rsaquo;</span></a>
+            <button id="btnOpenExportHistory" class="asideLink" type="button"><span>Historial de exportaciones</span><span>&rsaquo;</span></button>
           </div>
-        </section>
-
-        <section class="fiscalSection">
-          <div class="fiscalSectionHead">
-            <div>
-              <h2>Exportaciones</h2>
-              <p>Usalo solo cuando necesites sacar archivos.</p>
-            </div>
-          </div>
-          <div class="mini">Usa el mismo periodo que elegiste en "Buscar borradores".</div>
-          <div class="exportTypeList">
-            <label class="exportTypeOption"><input type="radio" name="exportType" value="sales" checked/> Borradores</label>
-            <label class="exportTypeOption"><input type="radio" name="exportType" value="pending"/> Pendientes</label>
-            <label class="exportTypeOption"><input type="radio" name="exportType" value="pay"/> Medios de pago</label>
-            <label class="exportTypeOption"><input type="radio" name="exportType" value="close"/> Cierres</label>
-            <label class="exportTypeOption"><input type="radio" name="exportType" value="bonif"/> Bonificaciones</label>
-            <label class="exportTypeOption"><input type="radio" name="exportType" value="annul"/> Anulaciones</label>
-          </div>
-          <div class="buttonRow">
-            <button id="btnExportSelected" class="btn primary" type="button">Exportar</button>
-          </div>
-          <div class="mini" id="expSummary"></div>
-          <div class="mini" id="expGuardNote"></div>
         </section>
       </aside>
     </div>
@@ -528,6 +553,21 @@
     </div>
   </div>
 
+  <div class="modalOverlay" id="exportHistoryModal" style="display:none;">
+    <div class="modal" style="width:min(720px, 100%);">
+      <div class="modalHeader">
+        <h3>Historial de exportaciones</h3>
+        <button class="btn" type="button" id="btnExportHistoryClose">Cerrar</button>
+      </div>
+      <div class="hr"></div>
+      <div class="mini" id="exportHistorySummary"></div>
+      <div id="exportHistoryList" class="historyList" style="margin-top:10px;"></div>
+      <div class="modalFooter">
+        <button class="btn" type="button" id="btnClearExportHistory">Borrar historial</button>
+      </div>
+    </div>
+  </div>
+
   <input id="attachInput" type="file" accept="application/pdf,image/*" style="display:none;"/>
 
   <script src="/app.js"></script>
@@ -540,6 +580,7 @@
     let currentSaleId = null;
     let pendingAttachSaleId = null;
     let autoGenerated = false;
+    const EXPORT_HISTORY_KEY = "nexa_export_history_v1";
 
     const STATUS = {
       pending: "pendiente_carga",
@@ -708,7 +749,51 @@
       return out.join("\n");
     }
 
-    function downloadCsv(filename, content){
+    function readExportHistory(){
+      try{
+        const raw = localStorage.getItem(EXPORT_HISTORY_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+      }catch{
+        return [];
+      }
+    }
+
+    function saveExportHistory(list){
+      try{
+        localStorage.setItem(EXPORT_HISTORY_KEY, JSON.stringify(Array.isArray(list) ? list.slice(0, 50) : []));
+      }catch{}
+    }
+
+    function pushExportHistory(entry){
+      const list = readExportHistory();
+      list.unshift(entry);
+      saveExportHistory(list);
+    }
+
+    function renderExportHistory(){
+      const list = readExportHistory();
+      $("exportHistorySummary").textContent = list.length ? `${list.length} exportaciones guardadas en este navegador.` : "Todavia no hay exportaciones guardadas.";
+      $("exportHistoryList").innerHTML = list.length ? list.map(item=>`
+        <div class="historyItem">
+          <strong>${item.label || item.filename || "Exportacion"}</strong>
+          <div class="small">Archivo: ${item.filename || "-"}</div>
+          <div class="small">Periodo: ${item.rangeText || "-"}</div>
+          <div class="small">Fecha: ${item.atText || "-"}</div>
+        </div>
+      `).join("") : '<div class="emptyResults">Todavia no hay exportaciones.<br/>Cuando exportes desde esta vista, van a aparecer aca.</div>';
+    }
+
+    function openExportHistory(){
+      renderExportHistory();
+      $("exportHistoryModal").style.display = "flex";
+    }
+
+    function closeExportHistory(){
+      $("exportHistoryModal").style.display = "none";
+    }
+
+    function downloadCsv(filename, content, meta){
       const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -718,6 +803,20 @@
       a.click();
       a.remove();
       setTimeout(()=>URL.revokeObjectURL(url), 500);
+      pushExportHistory({
+        filename,
+        label: meta && meta.label ? meta.label : filename,
+        rangeText: meta && meta.rangeText ? meta.rangeText : "-",
+        at: Date.now(),
+        atText: new Date().toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" }),
+      });
+    }
+
+    function exportRangeText(range){
+      if (!range) return "-";
+      if (range.from && range.to && range.from === range.to) return range.from;
+      if (range.from || range.to) return `${range.from || "..."} a ${range.to || "..."}`;
+      return "-";
     }
 
     function getExportRange(){
@@ -1120,6 +1219,14 @@
 
     $("btnEmitClose").addEventListener("click", closeEmitModal);
     $("emitModal").addEventListener("click", (e)=>{ if (e.target.id === "emitModal") closeEmitModal(); });
+    $("btnOpenExportHistory").addEventListener("click", openExportHistory);
+    $("btnExportHistoryClose").addEventListener("click", closeExportHistory);
+    $("exportHistoryModal").addEventListener("click", (e)=>{ if (e.target.id === "exportHistoryModal") closeExportHistory(); });
+    $("btnClearExportHistory").addEventListener("click", ()=>{
+      saveExportHistory([]);
+      renderExportHistory();
+      if (toast) toast("Historial borrado");
+    });
 
     function saleShortInfo(sale){
       if (!sale) return "";
@@ -1272,7 +1379,7 @@
         ];
       });
       const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Total","Medio","Estado","Tipo sugerido","Borrador","Oficial","CAE"]);
-      downloadCsv(`pre_facturacion_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      downloadCsv(`pre_facturacion_${range.from || "all"}_${range.to || "all"}.csv`, csv, { label: "Borradores", rangeText: exportRangeText(range) });
     }
 
     function exportByPayment(){
@@ -1291,7 +1398,7 @@
       const curCode = (currentDb.settings && currentDb.settings.currency) || "ARS";
       const rows = Array.from(map.entries()).map(([k, v])=>[k, v.count, fmtMoney(v.total, curCode)]);
       const csv = toCsv(rows, ["Medio","Cantidad","Total"]);
-      downloadCsv(`por_medio_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      downloadCsv(`por_medio_${range.from || "all"}_${range.to || "all"}.csv`, csv, { label: "Medios de pago", rangeText: exportRangeText(range) });
     }
 
     function exportBonifications(){
@@ -1315,7 +1422,7 @@
         ]);
       });
       const csv = toCsv(rows, ["Fecha","Hora","Pedido","Mesa","Total","Descuento","Medio"]);
-      downloadCsv(`bonificaciones_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      downloadCsv(`bonificaciones_${range.from || "all"}_${range.to || "all"}.csv`, csv, { label: "Bonificaciones", rangeText: exportRangeText(range) });
     }
 
     function exportAnnulled(){
@@ -1342,7 +1449,7 @@
         ]);
       });
       const csv = toCsv(rows, ["Fecha","Hora","Pedido","Mesa","Total","Descuento","Medio"]);
-      downloadCsv(`anulaciones_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      downloadCsv(`anulaciones_${range.from || "all"}_${range.to || "all"}.csv`, csv, { label: "Anulaciones", rangeText: exportRangeText(range) });
     }
 
     function exportClosures(){
@@ -1393,7 +1500,7 @@
         ]);
       });
       const csv = toCsv(rows, ["Fecha","Turno","Cajero","Apertura","Cierre","Apertura efectivo","Cierre efectivo","Entradas","Salidas","No efectivo","Diferencia"]);
-      downloadCsv(`cierres_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      downloadCsv(`cierres_${range.from || "all"}_${range.to || "all"}.csv`, csv, { label: "Cierres", rangeText: exportRangeText(range) });
     }
 
     function exportPending(){
@@ -1420,7 +1527,7 @@
         ];
       });
       const csv = toCsv(rows, ["Fecha","Hora","Mesa","Pedido","Borrador","Tipo sugerido","Total","Medio"]);
-      downloadCsv(`pendientes_arca_${range.from || "all"}_${range.to || "all"}.csv`, csv);
+      downloadCsv(`pendientes_arca_${range.from || "all"}_${range.to || "all"}.csv`, csv, { label: "Pendientes", rangeText: exportRangeText(range) });
     }
 
     $("btnExportSelected").addEventListener("click", exportSelected);
