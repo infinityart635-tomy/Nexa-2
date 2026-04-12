@@ -7,6 +7,17 @@
   <title>NEXA - Comprobantes</title>
   <link rel="stylesheet" href="/style.css"/>
   <style>
+    .top .wrap.fiscalTopWrap,
+    .fiscalWrap{
+      max-width:none;
+      width:100%;
+      padding-left:clamp(16px, 2vw, 30px);
+      padding-right:clamp(16px, 2vw, 30px);
+    }
+    .top .wrap.fiscalTopWrap{
+      padding-top:12px;
+      padding-bottom:12px;
+    }
     .fiscalWrap{
       display:grid;
       gap:12px;
@@ -194,7 +205,7 @@
 </head>
 <body>
   <header class="top">
-    <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+    <div class="wrap fiscalTopWrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
       <div class="brand">
         <div>
           <h1>NEXA</h1>
