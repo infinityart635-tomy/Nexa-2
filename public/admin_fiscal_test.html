@@ -130,6 +130,12 @@
       padding-top:8px;
       border-top:1px solid rgba(255,255,255,.08);
     }
+    .exportCompactRow{
+      display:grid;
+      grid-template-columns:minmax(220px, 1fr) auto;
+      gap:10px;
+      align-items:end;
+    }
     .fiscalPresetRow,
     .fiscalInlineStats{
       display:flex;
@@ -197,22 +203,6 @@
     .reconActions .btn{
       padding:7px 10px;
       font-size:11px;
-    }
-    .exportTypeList{
-      display:grid;
-      gap:8px;
-    }
-    .exportTypeOption{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:8px;
-      background:rgba(255,255,255,.02);
-    }
-    .exportTypeOption input{
-      margin:0;
     }
     .emptyResults{
       border:1px dashed rgba(255,255,255,.14);
@@ -306,6 +296,9 @@
       .fiscalRangeRow{
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
+      .exportCompactRow{
+        grid-template-columns:minmax(0,1fr);
+      }
     }
     @media (max-width: 640px){
       .fiscalFilterGrid{
@@ -313,6 +306,9 @@
       }
       .fiscalExportGrid,
       .fiscalRangeRow{
+        grid-template-columns:minmax(0,1fr);
+      }
+      .exportCompactRow{
         grid-template-columns:minmax(0,1fr);
       }
       .fiscalTitle{
@@ -433,16 +429,21 @@
                 <p>Usa el mismo periodo y filtros del buscador. Por ahora exporta todo lo filtrado.</p>
               </div>
             </div>
-            <div class="exportTypeList">
-              <label class="exportTypeOption"><input type="radio" name="exportType" value="sales" checked/> Borradores</label>
-              <label class="exportTypeOption"><input type="radio" name="exportType" value="pending"/> Pendientes</label>
-              <label class="exportTypeOption"><input type="radio" name="exportType" value="pay"/> Medios de pago</label>
-              <label class="exportTypeOption"><input type="radio" name="exportType" value="close"/> Cierres</label>
-              <label class="exportTypeOption"><input type="radio" name="exportType" value="bonif"/> Bonificaciones</label>
-              <label class="exportTypeOption"><input type="radio" name="exportType" value="annul"/> Anulaciones</label>
-            </div>
-            <div class="buttonRow">
+            <div class="exportCompactRow">
+              <div>
+                <div class="small">Tipo de exportacion</div>
+                <select id="exportType" class="input">
+                  <option value="sales">Borradores</option>
+                  <option value="pending">Pendientes</option>
+                  <option value="pay">Medios de pago</option>
+                  <option value="close">Cierres</option>
+                  <option value="bonif">Bonificaciones</option>
+                  <option value="annul">Anulaciones</option>
+                </select>
+              </div>
+              <div class="buttonRow">
               <button id="btnExportSelected" class="btn primary" type="button">Exportar</button>
+              </div>
             </div>
             <div class="mini" id="expSummary"></div>
             <div class="mini" id="expGuardNote"></div>
@@ -1239,8 +1240,7 @@
     }
 
     function exportSelected(){
-      const selected = document.querySelector('input[name="exportType"]:checked');
-      const key = selected ? selected.value : "sales";
+      const key = ($("exportType") && $("exportType").value) ? $("exportType").value : "sales";
       if (key === "sales") return exportSales();
       if (key === "pending") return exportPending();
       if (key === "pay") return exportByPayment();
