@@ -105,10 +105,6 @@
           </div>
         </div>
       </div>
-      <div class="menuIntroMeta">
-        <div class="menuPill">Mesa <strong id="tablePill">-</strong></div>
-        <div class="menuPill">Productos <strong id="heroCount">0</strong></div>
-      </div>
     </section>
 
     <div class="menuBoard">
@@ -119,7 +115,6 @@
       <div class="menuContent">
         <div class="menuTop">
           <div class="menuTitle" id="menuTitle">Todo</div>
-          <div class="badge2">Productos <strong id="menuCount">0</strong></div>
         </div>
         <div class="menuGrid" id="grid"></div>
       </div>
@@ -156,11 +151,8 @@
     const $sub = document.getElementById('sub');
     const $langToggle = document.getElementById('langToggle');
     const $menuTitle = document.getElementById('menuTitle');
-    const $menuCount = document.getElementById('menuCount');
-    const $heroCount = document.getElementById('heroCount');
     const $menuHeroTitle = document.getElementById('menuHeroTitle');
     const $menuHeroText = document.getElementById('menuHeroText');
-    const $tablePill = document.getElementById('tablePill');
     const $restaurantContextValue = document.getElementById('restaurantContextValue');
     const $tableContextValue = document.getElementById('tableContextValue');
     const $billInput = document.getElementById('billTable');
@@ -170,7 +162,6 @@
       $billInput.value = tableParam;
       if($billHint) $billHint.textContent = "Mesa detectada desde el QR.";
     }
-    if($tablePill) $tablePill.textContent = tableParam || "-";
     if($tableContextValue) $tableContextValue.textContent = tableParam || "-";
 
     let state = {categories:[], products:[], currency:'ARS'};
@@ -330,8 +321,7 @@
       $cats.innerHTML = cats.map(c => {
         const active = (c.id === currentCat) ? 'active' : '';
         const style = (c.id !== 'all' && c.color) ? ` style="${catStyle(c.color)}"` : '';
-        const count = c.id === 'all' ? (state.products||[]).length : (counts.get(String(c.id)) || 0);
-        return `<button class="menuCat ${active}" type="button" data-id="${c.id}"${style}><span>${catTitle(c)}</span><strong>${count}</strong></button>`;
+        return `<button class="menuCat ${active}" type="button" data-id="${c.id}"${style}><span>${catTitle(c)}</span></button>`;
       }).join('');
       [...$cats.querySelectorAll('.menuCat')].forEach(el => {
         el.addEventListener('click', () => {
@@ -344,8 +334,6 @@
 
     function renderGrid(){
       const list = (state.products||[]).filter(p => currentCat==='all' || String(p.categoryId||'')===String(currentCat));
-      if($menuCount) $menuCount.textContent = String(list.length);
-      if($heroCount) $heroCount.textContent = String((state.products||[]).length);
       if (!list.length){
         $grid.innerHTML = `<div class="menuEmpty small muted">${t('noProducts')}</div>`;
         return;
