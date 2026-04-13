@@ -7,6 +7,23 @@
   <title>NEXA ? Estad?sticas</title>
   <link rel="stylesheet" href="/style.css"/>
   <style>
+    html{overflow:auto}
+    body.statsPage{overflow:auto;min-height:100dvh}
+    body.statsPage::-webkit-scrollbar{width:12px}
+    body.statsPage::-webkit-scrollbar-track{background:#101114}
+    body.statsPage::-webkit-scrollbar-thumb{background:linear-gradient(180deg, rgba(243,179,97,.78), rgba(120,190,255,.45));border:3px solid #101114;border-radius:999px}
+    body.statsPage::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg, rgba(243,179,97,.95), rgba(120,190,255,.7))}
+    body.statsPage > .top .wrap{max-width:none;width:100%;padding-left:18px;padding-right:18px}
+    body.statsPage > main.wrap.statsWrap{max-width:none;width:100%;height:auto;min-height:calc(100dvh - var(--app-top-height));overflow:visible;padding:18px 24px 40px}
+    .statsLayout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.55fr);gap:14px;align-items:start}
+    .statsMain,.statsAside{min-width:0}
+    .statsAside{display:grid;gap:14px;position:sticky;top:calc(var(--app-top-height) + 14px)}
+    .statsAside .kpi{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .statsAside .card,.statsAside .analysisCard{border-radius:18px}
+    @media (max-width:1180px){
+      .statsLayout{grid-template-columns:1fr}
+      .statsAside{position:static}
+    }
     .controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
     .controls .btn{padding:10px 12px}
     .kpi{display:grid; gap:10px; grid-template-columns:1fr 1fr}
@@ -23,7 +40,7 @@
     .right{text-align:right}
     .tag{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.04); font-size:11px; color:var(--muted)}
     .analysisBoard{
-      margin-top:12px;
+      margin-top:0;
       border-radius:28px;
       border:1px solid rgba(255,255,255,.12);
       background:
@@ -39,7 +56,7 @@
     .analysisControls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px}
     .analysisKpis{margin-top:12px}
     .analysisChartRow{display:grid; gap:14px; margin-top:12px}
-    @media (min-width: 980px){ .analysisChartRow{grid-template-columns: 1.4fr .9fr;} }
+    @media (min-width: 980px){ .analysisChartRow{grid-template-columns: minmax(0,1fr) minmax(280px,.45fr);} }
     .analysisCard{border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px; background:rgba(0,0,0,.26)}
     .analysisCard h3{margin:0; font-size:13px; letter-spacing:.18em; text-transform:uppercase}
     .analysisCard .hint{margin-top:6px; font-size:12px; color:var(--muted)}
@@ -110,7 +127,12 @@
       background:rgba(0,0,0,.18);
       max-height:520px;
       overflow:auto;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(243,179,97,.75) rgba(255,255,255,.06);
     }
+    .historyList::-webkit-scrollbar{width:10px}
+    .historyList::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:999px}
+    .historyList::-webkit-scrollbar-thumb{background:linear-gradient(180deg, rgba(243,179,97,.85), rgba(120,190,255,.5));border:2px solid rgba(0,0,0,.35);border-radius:999px}
     .historyItem{
       display:flex;
       justify-content:space-between;
@@ -134,7 +156,7 @@
     .summaryMini .value{font-size:20px; font-weight:900}
   </style>
 </head>
-<body>
+<body class="statsPage">
   <header class="top">
     <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
       <div class="brand">
@@ -181,8 +203,10 @@
     </div>
   </header>
 
-  <main class="wrap" style="padding:18px 0 40px;">
+  <main class="wrap statsWrap">
     
+    <div class="statsLayout">
+      <div class="statsMain">
 
     <section class="analysisBoard">
       <div class="analysisHeader">
@@ -364,8 +388,10 @@
         </div>
       </section>
     </section>
+      </div>
 
-      <section class="analysisCard" style="margin-top:12px;">
+      <aside class="statsAside">
+      <section class="analysisCard">
       <div class="chartHead">
         <div>
           <h3>Cierres guardados</h3>
@@ -415,6 +441,8 @@
         <button class="btn" id="btnDayDemo" type="button" style="flex:1">Simular ventas</button>
       </div>
     </section>
+      </aside>
+    </div>
 
   </main>
 

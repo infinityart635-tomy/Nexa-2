@@ -15,7 +15,6 @@
     .qrHeroCard{padding:18px;border-radius:8px;background:linear-gradient(180deg, rgba(24,25,29,.96), rgba(17,18,22,.96));border:1px solid rgba(255,255,255,.10);box-shadow:none}
     .qrHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:14px;margin-bottom:16px}
     .qrHeader .h2{font-size:18px;letter-spacing:.08em;text-transform:uppercase}
-    .qrGeneralGrid{display:grid;grid-template-columns:repeat(2,minmax(260px,1fr));gap:16px}
     .qrGrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:4px}
     .qrCard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:16px;border-radius:8px;background:#17181c;border:1px solid rgba(255,255,255,.10);box-shadow:none;min-width:0}
     .qrImg{width:220px;height:220px;max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:#fff;padding:8px;object-fit:contain}
@@ -26,7 +25,6 @@
     @media (max-width:760px){
       body.qrAdmin > main.wrap{padding:12px}
       .qrHeader{flex-direction:column}
-      .qrGeneralGrid{grid-template-columns:1fr}
       .qrImg{width:190px;height:190px}
     }
     @media print{
@@ -76,29 +74,14 @@
 
   <main class="wrap">
     <div class="qrPage">
-    <section class="qrHeroCard">
-      <div class="qrHeader">
-        <div>
-          <div class="h2">QR generales</div>
-          <div class="mini muted">Menu cliente y acceso Mozo</div>
-        </div>
-        <button id="btnDownload" class="btn" type="button">Descargar todos</button>
+    <div class="qrHeader">
+      <div>
+        <div class="h2">QR por mesa</div>
+        <div class="mini muted">Codigos individuales para cada mesa</div>
       </div>
-      <div class="qrGeneralGrid">
-        <div class="qrCard">
-          <div class="qrTitle">QR Carta</div>
-          <img id="qrMenuImg" class="qrImg" alt="QR Carta" width="180" height="180"/>
-          <a id="qrMenuDl" class="btn" download="qr-carta.png">Descargar PNG</a>
-        </div>
-        <div class="qrCard">
-          <div class="qrTitle">QR Mozo</div>
-          <img id="qrMozoImg" class="qrImg" alt="QR Mozo" width="180" height="180"/>
-          <a id="qrMozoDl" class="btn" download="qr-mozo.png">Descargar PNG</a>
-        </div>
-      </div>
-    </section>
-
-    <div id="qrStatus" class="mini muted" style="margin-top:10px;"></div>
+      <button id="btnDownload" class="btn" type="button">Descargar todos</button>
+    </div>
+    <div id="qrStatus" class="mini muted"></div>
     <div id="qrGrid" class="qrGrid"></div>
     </div>
   </main>
@@ -258,16 +241,6 @@
         baseUrl = pickBaseUrl(info) || ("http://localhost:" + info.port);
         if (qrBaseInput) qrBaseInput.value = getBaseOverride() || baseUrl;
         if(qrBase) qrBase.textContent = "URL base: " + baseUrl;
-        const menuUrl = buildMenuUrl("");
-        const mozoUrl = baseUrl + "/login.html?role=mozo&next=" + encodeURIComponent("/mozo.html");
-        const qrMenuImg = $("qrMenuImg");
-        const qrMozoImg = $("qrMozoImg");
-        const qrMenuDl = $("qrMenuDl");
-        const qrMozoDl = $("qrMozoDl");
-        if(qrMenuImg) qrMenuImg.src = "/qr.png?u=" + encodeURIComponent(menuUrl);
-        if(qrMozoImg) qrMozoImg.src = "/qr.png?u=" + encodeURIComponent(mozoUrl);
-        if(qrMenuDl) qrMenuDl.href = "/qr.png?u=" + encodeURIComponent(menuUrl);
-        if(qrMozoDl) qrMozoDl.href = "/qr.png?u=" + encodeURIComponent(mozoUrl);
       }catch(e){
         baseUrl = "";
       }

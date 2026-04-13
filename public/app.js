@@ -327,6 +327,12 @@
   function isInstallEligibleContext(){
     return location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
   }
+  function registerAppCache(){
+    if(!isInstallEligibleContext() || !("serviceWorker" in navigator)) return;
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("/sw.js").catch(()=>{});
+    }, { once: true });
+  }
   function ensurePwaHead(){
     if(!document.querySelector('link[rel="manifest"]')){
       const link = document.createElement("link");
@@ -396,12 +402,8 @@
   }
   function registerPwa(){
     ensurePwaHead();
+    registerAppCache();
     if(!isInstallEligibleContext() || isStandaloneApp()) return;
-    if("serviceWorker" in navigator){
-      window.addEventListener("load", ()=>{
-        navigator.serviceWorker.register("/sw.js").catch(()=>{});
-      }, { once: true });
-    }
     window.addEventListener("beforeinstallprompt", (ev)=>{
       ev.preventDefault();
       installPromptEvent = ev;
