@@ -7,7 +7,8 @@
   <title>Menu - NEXA</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body{background:#111214;color:#f7f3e8}
+    html{overflow-y:auto}
+    body{background:#111214;color:#f7f3e8;overflow-y:auto}
     .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 40px;overflow-x:hidden}
     .topbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:14px}
     .topbar > div:first-child{display:none}
@@ -71,8 +72,8 @@
       .menuIntro{padding:14px}
       .menuBoard{width:100%;max-width:100%;overflow:hidden}
       .menuContent{padding:8px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
-      .menuGrid{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:100%;overflow:hidden}
-      .menuTile{flex:0 0 calc(50% - 4px);width:calc(50% - 4px);max-width:calc(50% - 4px);padding:7px;min-width:0;box-sizing:border-box}
+      .menuGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;max-width:100%;overflow:visible}
+      .menuTile{width:100%;max-width:100%;padding:7px;min-width:0;box-sizing:border-box}
       .menuTile *{max-width:100%;box-sizing:border-box}
       .menuTileThumb{height:92px;width:100%;box-sizing:border-box}
       .menuTileName{font-size:13px;overflow-wrap:anywhere}
