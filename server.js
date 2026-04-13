@@ -518,6 +518,14 @@ function getDefaultRestaurantId(root = ROOT_DB){
   return first ? String(first.id || "") : "";
 }
 
+function getPublicRestaurantId(value){
+  const id = String(value || "").trim();
+  if(!id) return "";
+  const meta = getRestaurantMetaById(id);
+  if(!meta || Number(meta.trashedAt || 0)) return "";
+  return String(meta.id || "");
+}
+
 function getRestaurantOwnerName(restaurantId){
   const meta = getRestaurantMetaById(restaurantId);
   if(!meta || !meta.ownerUserId) return "";
@@ -4363,7 +4371,10 @@ function handleApi(req, res, url) {
 
 if (url.pathname === "/api/public/menu") {
   // MenÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblico: solo lo necesario para clientes (sin caja/ventas/etc.)
-  return send(res, 200, JSON.stringify(publicMenuPayload()), "application/json; charset=utf-8");
+  const publicRestaurantId = getPublicRestaurantId(url.searchParams.get("restaurantId") || url.searchParams.get("rest") || url.searchParams.get("r"));
+  return runWithRestaurantContext(publicRestaurantId || getRestaurantContextId(), () => (
+    send(res, 200, JSON.stringify(publicMenuPayload()), "application/json; charset=utf-8")
+  ));
 }
 
 
@@ -4823,23 +4834,25 @@ if (url.pathname === "/api/customer/requestBill" && req.method === "POST") {
   req.on("data", c => { body += c.toString(); if (body.length > 100_000) req.destroy(); });
   req.on("end", () => {
     const data = safeJsonParse(body, {});
-    const table = String(data.table || data.mesa || data.where || "").slice(0, 40);
-    const name = String(data.name || "").slice(0, 40);
-    const reqObj = {
-      id: uid(),
-      type: "bill",
-      at: now(),
-      table,
-      name,
-      ip: String((req.socket && req.socket.remoteAddress) || "").slice(0, 80),
-      ua: String((req.headers && req.headers["user-agent"]) || "").slice(0, 120),
-      status: "new"
-    };
-    DB.customerRequests = Array.isArray(DB.customerRequests) ? DB.customerRequests : [];
-    DB.customerRequests.unshift(reqObj);
-    DB.customerRequests = DB.customerRequests.slice(0, 200);
-    DB.updatedAt = now();
-    scheduleSave();
+    const publicRestaurantId = getPublicRestaurantId(data.restaurantId || data.rest || data.r);
+    return runWithRestaurantContext(publicRestaurantId || getRestaurantContextId(), () => {
+      const table = String(data.table || data.mesa || data.where || "").slice(0, 40);
+      const name = String(data.name || "").slice(0, 40);
+      const reqObj = {
+        id: uid(),
+        type: "bill",
+        at: now(),
+        table,
+        name,
+        ip: String((req.socket && req.socket.remoteAddress) || "").slice(0, 80),
+        ua: String((req.headers && req.headers["user-agent"]) || "").slice(0, 120),
+        status: "new"
+      };
+      DB.customerRequests = Array.isArray(DB.customerRequests) ? DB.customerRequests : [];
+      DB.customerRequests.unshift(reqObj);
+      DB.customerRequests = DB.customerRequests.slice(0, 200);
+      DB.updatedAt = now();
+      scheduleSave();
       // Aviso a personal
       broadcastMinRole("mozo", { type: "customer:request", request: reqObj });
       const who = name ? ` (${name})` : "";
@@ -4848,6 +4861,7 @@ if (url.pathname === "/api/customer/requestBill" && req.method === "POST") {
       notify(`${mesa} pide la cuenta${who}`, "info", { table, name, requestId: reqObj.id }, "Cliente");
       return send(res, 200, JSON.stringify({ ok: true, id: reqObj.id }), "application/json; charset=utf-8");
     });
+  });
     return;
   }
 

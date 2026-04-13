@@ -71,6 +71,8 @@
     const qs = new URLSearchParams(location.search);
     const tableParamRaw = qs.get('mesa') || qs.get('table') || '';
     const tableParam = tableParamRaw ? tableParamRaw.trim().slice(0, 40) : '';
+    const restaurantParam = (qs.get('restaurantId') || qs.get('rest') || qs.get('r') || '').trim().slice(0, 80);
+    const branchParam = (qs.get('branchId') || qs.get('branch') || qs.get('b') || '').trim().slice(0, 80);
     const qrMode = qs.get('qr') === '1' || qs.get('kiosk') === '1';
     if(qrMode){
       document.body.setAttribute('data-menu-mode', tableParam ? 'qr-table' : 'qr');
@@ -171,7 +173,7 @@
         const r = await fetch('/api/customer/requestBill', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ table })
+          body: JSON.stringify({ table, restaurantId: restaurantParam, branchId: branchParam })
         });
         const j = await r.json().catch(()=>({}));
         if(!r.ok) throw new Error((j && j.error) ? j.error : t('billErr'));
@@ -272,7 +274,11 @@
 
     async function boot(){
       try{
-        const r = await fetch('/api/public/menu', { cache:'no-store' });
+        const params = new URLSearchParams();
+        if(restaurantParam) params.set('restaurantId', restaurantParam);
+        if(branchParam) params.set('branchId', branchParam);
+        const publicMenuUrl = '/api/public/menu' + (params.toString() ? ('?' + params.toString()) : '');
+        const r = await fetch(publicMenuUrl, { cache:'no-store' });
         const data = await r.json();
         state = data;
         document.title = `${lang === 'en' ? 'Menu' : 'Menu'} - ${data.restaurantName || 'NEXA'}`;

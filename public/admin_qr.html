@@ -121,6 +121,8 @@
     const qrBaseInput = $("qrBaseInput");
     let baseUrl = "";
     let tables = [];
+    let restaurantId = "";
+    let branchId = "";
 
     function normalizeBaseUrl(raw){
       const v = String(raw || "").trim();
@@ -158,6 +160,15 @@
 
     function getTableLabel(t){
       return (t && t.name) ? t.name : (t && t.id ? t.id : "");
+    }
+
+    function buildMenuUrl(tableLabel){
+      const params = new URLSearchParams();
+      params.set("qr", "1");
+      if(restaurantId) params.set("restaurantId", restaurantId);
+      if(branchId) params.set("branchId", branchId);
+      if(tableLabel) params.set("mesa", tableLabel);
+      return baseUrl + "/menu.html?" + params.toString();
     }
 
     function buildGroups(list, groupLinks){
@@ -209,7 +220,7 @@
         const names = g.tables.map(getTableLabel).filter(Boolean);
         const label = names.join(" + ");
         const safeLabel = label ? label.slice(0, 40) : ("Mesa " + (idx + 1));
-        const menuUrl = baseUrl + "/menu.html?qr=1&mesa=" + encodeURIComponent(safeLabel);
+        const menuUrl = buildMenuUrl(safeLabel);
         const qrSrc = "/qr.png?u=" + encodeURIComponent(menuUrl);
         const ids = g.tables.map(t=>t.id).filter(Boolean).join(", ");
         const zones = Array.from(new Set(g.tables.map(t=>t.zone).filter(Boolean)));
@@ -245,10 +256,13 @@
     async function loadData(){
       try{
         const info = await fetch("/api/info", {cache:"no-store"}).then(r=>r.json());
+        const me = await fetch("/api/auth/me", {cache:"no-store"}).then(r=>r.json()).catch(()=>null);
+        restaurantId = me && me.restaurantId ? String(me.restaurantId) : "";
+        branchId = me && me.branchId ? String(me.branchId) : "";
         baseUrl = pickBaseUrl(info) || ("http://localhost:" + info.port);
         if (qrBaseInput) qrBaseInput.value = getBaseOverride() || baseUrl;
         if(qrBase) qrBase.textContent = "URL base: " + baseUrl;
-        const menuUrl = baseUrl + "/menu.html?qr=1";
+        const menuUrl = buildMenuUrl("");
         const mozoUrl = baseUrl + "/login.html?role=mozo&next=" + encodeURIComponent("/mozo.html");
         const qrMenuUrl = $("qrMenuUrl");
         const qrMozoUrl = $("qrMozoUrl");
