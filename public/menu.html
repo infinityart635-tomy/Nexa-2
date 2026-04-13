@@ -7,23 +7,69 @@
   <title>Menu - NEXA</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .wrap{max-width:1120px;margin:0 auto;padding:22px 16px 40px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .brand{font-weight:900;letter-spacing:.18em;text-transform:uppercase}
-    .sub{color:var(--muted);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+    body{background:#111214;color:#f7f3e8}
+    .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 40px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .brand{font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    .sub{color:#b7b0a3;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
     .muted{color:var(--muted)}
     .right{display:flex;align-items:center;gap:10px}
-    .right a{color:var(--muted);text-decoration:none}
-    .right a:hover{color:var(--text)}
-    .langBtn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700;letter-spacing:.06em}
-    .menuTileDesc{color:var(--muted);font-size:12px;line-height:1.35;margin-top:6px}
-    .menuEmpty{padding:12px}
-    .menuRequest{margin-top:14px}
+    .right a{color:#d8cfbd;text-decoration:none}
+    .right a:hover{color:#fff7e5}
+    .langBtn{border:1px solid rgba(247,243,232,.18);background:#191a1d;color:#fff7e5;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:800;letter-spacing:.04em}
+    .menuIntro{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;padding:18px;border:1px solid rgba(247,243,232,.12);border-radius:8px;background:linear-gradient(135deg,#17181b,#20211f 58%,#1c2420)}
+    .menuKicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#9fd3a9;font-weight:900}
+    .menuIntro h1{margin:6px 0 0;font-size:clamp(28px,6vw,56px);line-height:.95;letter-spacing:0;text-transform:none;color:#fff7e5}
+    .menuIntro p{margin:10px 0 0;color:#d7cfbf;max-width:58ch;line-height:1.45}
+    .menuIntroMeta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .menuPill{border:1px solid rgba(247,243,232,.14);background:#111214;color:#fff7e5;border-radius:8px;padding:9px 11px;font-weight:850;font-size:12px}
+    .menuPill strong{color:#9fd3a9}
+    .menuTileDesc{color:#c7beb0;font-size:13px;line-height:1.4;margin-top:2px}
+    .menuEmpty{padding:18px;border:1px dashed rgba(247,243,232,.18);border-radius:8px;background:#17181b;color:#d7cfbf}
+    .menuRequest{margin-top:14px;border-radius:8px;background:#17181b;border-color:rgba(159,211,169,.28)}
+    .menuRequest .menuTitle{color:#fff7e5}
+    .menuRequest .input{border-radius:8px}
+    .menuRequest .btn{border-radius:8px}
+    .menuBoard{grid-template-columns:210px 1fr;gap:14px}
+    .menuSidebar{border-radius:8px;background:#17181b;border-color:rgba(247,243,232,.12);padding:12px;box-shadow:none}
+    .menuSidebar #cats{display:flex;flex-direction:column;gap:8px}
+    .menuSideTitle{color:#9fd3a9;font-weight:900;letter-spacing:.16em}
+    .menuCat{border-radius:8px;padding:12px;border-color:var(--cat-border, rgba(247,243,232,.12));background:var(--cat-bg, #202124);box-shadow:none;font-weight:850;color:#fff7e5;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .menuCat span{overflow:hidden;text-overflow:ellipsis}
+    .menuCat.active{box-shadow:0 0 0 2px var(--cat-ring, rgba(159,211,169,.14));background:#24251f}
+    .menuContent{border-radius:8px;background:#151619;border-color:rgba(247,243,232,.12);padding:14px;box-shadow:none}
+    .menuTop{border-bottom:1px solid rgba(247,243,232,.1);padding-bottom:12px}
+    .menuTitle{font-size:14px;letter-spacing:.12em;color:#fff7e5}
+    .menuGrid{margin-top:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+    .menuTile{border-radius:8px;background:#1b1c1f;border-color:rgba(247,243,232,.12);box-shadow:none;padding:10px;gap:10px;min-height:0;overflow:hidden}
+    .menuTileThumb{height:150px;border-radius:8px;border:1px solid rgba(247,243,232,.12);background:#252622;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#9fd3a9;font-weight:950;font-size:34px}
+    .menuTileInfo{display:flex;flex-direction:column;gap:6px}
+    .menuTileHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .menuTileName{font-weight:900;font-size:16px;line-height:1.18;color:#fff7e5}
+    .menuTilePrice{flex:0 0 auto;border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:6px 8px;font-weight:950;font-size:13px}
+    .menuTileMeta{font-size:12px;color:#9fd3a9;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    @media (max-width:900px){
+      .menuIntro{align-items:flex-start;flex-direction:column}
+      .menuIntroMeta{justify-content:flex-start}
+      .menuBoard{grid-template-columns:1fr}
+      .menuSidebar{position:static}
+      .menuSidebar #cats{display:flex;flex-direction:row;overflow-x:auto;padding-bottom:3px;scroll-snap-type:x proximity}
+      .menuCat{flex:0 0 auto;min-width:136px;scroll-snap-align:start}
+    }
+    @media (max-width:560px){
+      .wrap{padding:14px 10px 28px}
+      .menuIntro{padding:14px}
+      .menuGrid{grid-template-columns:1fr}
+      .menuTile{display:grid;grid-template-columns:112px 1fr;align-items:stretch}
+      .menuTileThumb{height:100%;min-height:112px}
+      .menuTileHead{flex-direction:column}
+      .menuTilePrice{width:max-content}
+    }
     body[data-menu-mode="qr"] .topbar{display:none}
     body[data-menu-mode="qr"] .menuRequest{display:none}
-    body[data-menu-mode="qr"] .wrap{padding-top:16px}
+    body[data-menu-mode="qr"] .wrap{padding-top:12px}
     body[data-menu-mode="qr-table"] .topbar{display:none}
-    body[data-menu-mode="qr-table"] .wrap{padding-top:16px}
+    body[data-menu-mode="qr-table"] .wrap{padding-top:12px}
   </style>
 </head>
 <body>
@@ -38,6 +84,18 @@
         <a href="/profile.html" title="Acceso personal">Usuarios</a>
       </div>
     </div>
+
+    <section class="menuIntro">
+      <div>
+        <div class="menuKicker" id="menuKicker">Carta</div>
+        <h1 id="menuHeroTitle">Menu</h1>
+        <p id="menuHeroText">Elegí tranquilo. Si estás en la mesa, podés pedir la cuenta desde acá.</p>
+      </div>
+      <div class="menuIntroMeta">
+        <div class="menuPill">Mesa <strong id="tablePill">-</strong></div>
+        <div class="menuPill">Productos <strong id="heroCount">0</strong></div>
+      </div>
+    </section>
 
     <div class="menuBoard">
       <div class="menuSidebar">
@@ -85,6 +143,10 @@
     const $langToggle = document.getElementById('langToggle');
     const $menuTitle = document.getElementById('menuTitle');
     const $menuCount = document.getElementById('menuCount');
+    const $heroCount = document.getElementById('heroCount');
+    const $menuHeroTitle = document.getElementById('menuHeroTitle');
+    const $menuHeroText = document.getElementById('menuHeroText');
+    const $tablePill = document.getElementById('tablePill');
     const $billInput = document.getElementById('billTable');
     const $billHint = document.getElementById('billHint');
 
@@ -92,6 +154,7 @@
       $billInput.value = tableParam;
       if($billHint) $billHint.textContent = "Mesa detectada desde el QR.";
     }
+    if($tablePill) $tablePill.textContent = tableParam || "-";
 
     let state = {categories:[], products:[], currency:'ARS'};
     let currentCat = 'all';
@@ -111,7 +174,9 @@
         noProducts: "No hay productos en esta categoria.",
         catalog: "Catalogo",
         access: "Acceso",
-        rubros: "Rubros"
+        rubros: "Rubros",
+        intro: "Elegí tranquilo. Si estás en la mesa, podés pedir la cuenta desde acá.",
+        menuKicker: "Carta"
       },
       en: {
         all: "All",
@@ -126,7 +191,9 @@
         noProducts: "No products in this category.",
         catalog: "Catalog",
         access: "Access",
-        rubros: "Categories"
+        rubros: "Categories",
+        intro: "Take your time. If you are at the table, you can ask for the bill here.",
+        menuKicker: "Menu"
       }
     };
 
@@ -152,6 +219,9 @@
       if($sub) $sub.textContent = t('catalog');
       const rubroTitle = document.querySelector('.menuSideTitle');
       if(rubroTitle) rubroTitle.textContent = t('rubros');
+      const kicker = document.getElementById('menuKicker');
+      if(kicker) kicker.textContent = t('menuKicker');
+      if($menuHeroText) $menuHeroText.textContent = t('intro');
     }
 
     const $toast = document.getElementById('toast');
@@ -226,11 +296,17 @@
     }
 
     function renderCats(){
+      const counts = new Map();
+      (state.products||[]).forEach(p=>{
+        const key = String(p.categoryId || '');
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
       const cats = [{id:'all', title:t('all')}].concat(state.categories||[]);
       $cats.innerHTML = cats.map(c => {
         const active = (c.id === currentCat) ? 'active' : '';
         const style = (c.id !== 'all' && c.color) ? ` style="${catStyle(c.color)}"` : '';
-        return `<button class="menuCat ${active}" type="button" data-id="${c.id}"${style}>${catTitle(c)}</button>`;
+        const count = c.id === 'all' ? (state.products||[]).length : (counts.get(String(c.id)) || 0);
+        return `<button class="menuCat ${active}" type="button" data-id="${c.id}"${style}><span>${catTitle(c)}</span><strong>${count}</strong></button>`;
       }).join('');
       [...$cats.querySelectorAll('.menuCat')].forEach(el => {
         el.addEventListener('click', () => {
@@ -243,6 +319,8 @@
 
     function renderGrid(){
       const list = (state.products||[]).filter(p => currentCat==='all' || String(p.categoryId||'')===String(currentCat));
+      if($menuCount) $menuCount.textContent = String(list.length);
+      if($heroCount) $heroCount.textContent = String((state.products||[]).length);
       if (!list.length){
         $grid.innerHTML = `<div class="menuEmpty small muted">${t('noProducts')}</div>`;
         return;
@@ -251,18 +329,27 @@
       const currentCatObj = catMap.get(String(currentCat));
       const title = currentCat === 'all' ? t('all') : (currentCatObj ? catTitle(currentCatObj) : t('all'));
       if($menuTitle) $menuTitle.textContent = title;
-      if($menuCount) $menuCount.textContent = String(list.length);
 
       $grid.innerHTML = list.map(p => {
         const catObj = catMap.get(String(p.categoryId||""));
         const catLabel = catObj ? catTitle(catObj) : "Otros";
         const desc = (lang==='en' && p.descriptionEn) ? p.descriptionEn : p.description;
+        const name = (lang==='en' && p.nameEn) ? p.nameEn : p.name;
+        const initial = String(name || "P").trim().slice(0, 1).toUpperCase();
+        const thumb = p.imageUrl
+          ? `<div class="menuTileThumb" style="background-image:url('${escapeHtml(p.imageUrl)}')" aria-label="${escapeHtml(name)}"></div>`
+          : `<div class="menuTileThumb" aria-hidden="true">${escapeHtml(initial)}</div>`;
         return `
           <div class="menuTile">
-            ${p.imageUrl ? `<div class="menuTileThumb" style="background-image:url('${escapeHtml(p.imageUrl)}')"></div>` : ''}
-            <div class="menuTileName">${escapeHtml((lang==='en' && p.nameEn) ? p.nameEn : p.name)}</div>
-            <div class="menuTileMeta">${escapeHtml(catLabel)} - ${money(p.price)}</div>
-            ${desc ? `<div class="menuTileDesc">${escapeHtml(desc)}</div>` : ''}
+            ${thumb}
+            <div class="menuTileInfo">
+              <div class="menuTileMeta">${escapeHtml(catLabel)}</div>
+              <div class="menuTileHead">
+                <div class="menuTileName">${escapeHtml(name)}</div>
+                <div class="menuTilePrice">${money(p.price)}</div>
+              </div>
+              ${desc ? `<div class="menuTileDesc">${escapeHtml(desc)}</div>` : ''}
+            </div>
           </div>
         `;
       }).join('');
@@ -283,6 +370,7 @@
         state = data;
         document.title = `${lang === 'en' ? 'Menu' : 'Menu'} - ${data.restaurantName || 'NEXA'}`;
         $resto.textContent = (data.restaurantName || 'Menu').toUpperCase();
+        if($menuHeroTitle) $menuHeroTitle.textContent = data.restaurantName || 'Menu';
         $sub.textContent = t('catalog');
         applyLang();
         renderCats();
