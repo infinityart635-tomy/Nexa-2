@@ -4,15 +4,31 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="theme-color" content="#121212"/>
-  <title>NEXA ?? QR Mesas</title>
+  <title>NEXA - QR Mesas</title>
   <link rel="stylesheet" href="/style.css"/>
   <style>
-    .qrGrid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); margin-top:14px;}
-    .qrCard{display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;}
-    .qrImg{width:180px; height:180px; border-radius:12px; border:1px solid var(--line); background:#0b0b0d;}
-    .qrTitle{font-weight:800;}
-    .qrMeta{font-size:.82em;}
+    html{overflow:auto}
+    body.qrAdmin{overflow:auto;min-height:100dvh}
+    body.qrAdmin > .top .wrap{max-width:none;width:100%;padding-left:18px;padding-right:18px}
+    body.qrAdmin > main.wrap{max-width:none;width:100%;height:auto;min-height:calc(100dvh - var(--app-top-height));overflow:visible;padding:18px 24px 34px}
+    .qrPage{display:flex;flex-direction:column;gap:18px}
+    .qrHeroCard{padding:18px;border-radius:8px;background:linear-gradient(180deg, rgba(24,25,29,.96), rgba(17,18,22,.96));border:1px solid rgba(255,255,255,.10);box-shadow:none}
+    .qrHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:14px;margin-bottom:16px}
+    .qrHeader .h2{font-size:18px;letter-spacing:.08em;text-transform:uppercase}
+    .qrGeneralGrid{display:grid;grid-template-columns:repeat(2,minmax(260px,1fr));gap:16px}
+    .qrGrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:4px}
+    .qrCard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:16px;border-radius:8px;background:#17181c;border:1px solid rgba(255,255,255,.10);box-shadow:none;min-width:0}
+    .qrImg{width:220px;height:220px;max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:#fff;padding:8px;object-fit:contain}
+    .qrTitle{font-weight:900;font-size:15px;letter-spacing:.04em}
+    .qrMeta{display:none}
+    .qrActions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
     .qrControls{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    @media (max-width:760px){
+      body.qrAdmin > main.wrap{padding:12px}
+      .qrHeader{flex-direction:column}
+      .qrGeneralGrid{grid-template-columns:1fr}
+      .qrImg{width:190px;height:190px}
+    }
     @media print{
       header.top,.qrControls,#qrHint{display:none !important;}
       body{background:#fff; color:#111;}
@@ -21,13 +37,13 @@
     }
   </style>
 </head>
-<body>
+<body class="qrAdmin">
   <header class="top">
     <div class="wrap" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
       <div class="brand">
         <div>
           <h1>NEXA</h1>
-          <p>QR por mesa (menu cliente)</p>
+          <p>QR por mesa</p>
         </div>
       </div>
       <nav class="megaNav">
@@ -59,58 +75,32 @@
   </header>
 
   <main class="wrap">
-    <div class="card">
-      <div class="row" style="justify-content:space-between; align-items:center; gap:12px;">
-        <div>
-          <div class="h2">Zona QR</div>
-          <div class="mini muted">Genera QRs del menu por mesa. Si conectas mesas en Salon, podes agruparlas en un solo QR.</div>
-          <div class="mini muted" id="qrBase">URL base: -</div>
-        </div>
-        <div class="qrControls">
-          <label class="mini" style="display:flex; align-items:center; gap:8px;">
-            Base QR:
-            <input id="qrBaseInput" type="text" placeholder="http://192.168.0.10:3000" style="min-width:220px;"/>
-          </label>
-          <button id="btnBaseSave" class="btn" type="button">Usar</button>
-          <button id="btnBaseClear" class="btn" type="button">Auto</button>
-          <label class="mini" style="display:flex; align-items:center; gap:8px;">
-            <input id="groupLinks" type="checkbox" checked/>
-            Agrupar mesas conectadas
-          </label>
-          <button id="btnGenerate" class="btn primary" type="button">Generar</button>
-          <button id="btnDownload" class="btn" type="button">Descargar</button>
-        </div>
-      </div>
-      <div class="hr" style="margin-top:12px;"></div>
-      <div class="mini muted" id="qrHint">Tip: al escanear, la mesa queda pre-cargada para pedir la cuenta.</div>
-    </div>
-
-    <div class="card" style="margin-top:14px;">
-      <div class="row" style="justify-content:space-between; align-items:center; gap:12px;">
+    <div class="qrPage">
+    <section class="qrHeroCard">
+      <div class="qrHeader">
         <div>
           <div class="h2">QR generales</div>
-          <div class="mini muted">Menu cliente y acceso Mozo.</div>
+          <div class="mini muted">Menu cliente y acceso Mozo</div>
         </div>
+        <button id="btnDownload" class="btn" type="button">Descargar todos</button>
       </div>
-      <div class="hr" style="margin-top:12px;"></div>
-      <div class="row" style="gap:18px; flex-wrap:wrap;">
-        <div class="qrCard" style="min-width:220px;">
+      <div class="qrGeneralGrid">
+        <div class="qrCard">
           <div class="qrTitle">QR Carta</div>
-          <div class="mini muted qrMeta" id="qrMenuUrl">-</div>
           <img id="qrMenuImg" class="qrImg" alt="QR Carta" width="180" height="180"/>
           <a id="qrMenuDl" class="btn" download="qr-carta.png">Descargar PNG</a>
         </div>
-        <div class="qrCard" style="min-width:220px;">
+        <div class="qrCard">
           <div class="qrTitle">QR Mozo</div>
-          <div class="mini muted qrMeta" id="qrMozoUrl">-</div>
           <img id="qrMozoImg" class="qrImg" alt="QR Mozo" width="180" height="180"/>
           <a id="qrMozoDl" class="btn" download="qr-mozo.png">Descargar PNG</a>
         </div>
       </div>
-    </div>
+    </section>
 
     <div id="qrStatus" class="mini muted" style="margin-top:10px;"></div>
     <div id="qrGrid" class="qrGrid"></div>
+    </div>
   </main>
 
   <script>
@@ -246,35 +236,17 @@
         const safeLabel = label ? label.slice(0, 40) : ("Mesa " + (idx + 1));
         const menuUrl = buildMenuUrl(safeLabel);
         const qrSrc = "/qr.png?u=" + encodeURIComponent(menuUrl);
-        const ids = g.tables.map(t=>t.id).filter(Boolean).join(", ");
-        const zones = Array.from(new Set(g.tables.map(t=>t.zone).filter(Boolean)));
-        const zoneLabel = zones.length ? (zones.length === 1 ? ("Zona: " + zones[0]) : ("Zonas: " + zones.join(" ?? "))) : "";
         const fileName = ("qr-" + safeLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + ".png");
         return `
-          <div class="card qrCard">
+          <div class="qrCard">
             <div class="qrTitle">${esc(label || safeLabel)}</div>
-            <div class="mini muted qrMeta">${esc(ids)}</div>
-            ${zoneLabel ? `<div class="mini muted qrMeta">${esc(zoneLabel)}</div>` : ""}
             <img class="qrImg" src="${qrSrc}" alt="QR ${esc(label || safeLabel)}" width="180" height="180"/>
-            <div class="row" style="gap:8px; margin-top:6px; flex-wrap:wrap;">
+            <div class="qrActions">
               <a class="btn" href="${qrSrc}" download="${esc(fileName)}">Descargar PNG</a>
-              <button class="btn" type="button" data-copy="${esc(menuUrl)}">Copiar link</button>
             </div>
           </div>
         `;
       }).join("");
-
-      [...qrGrid.querySelectorAll("[data-copy]")].forEach(btn=>{
-        btn.addEventListener("click", async ()=>{
-          const url = btn.getAttribute("data-copy") || "";
-          try{
-            await navigator.clipboard.writeText(url);
-            alert("Link copiado");
-          }catch(e){
-            prompt("Copia este link:", url);
-          }
-        });
-      });
     }
 
     async function loadData(){
@@ -288,14 +260,10 @@
         if(qrBase) qrBase.textContent = "URL base: " + baseUrl;
         const menuUrl = buildMenuUrl("");
         const mozoUrl = baseUrl + "/login.html?role=mozo&next=" + encodeURIComponent("/mozo.html");
-        const qrMenuUrl = $("qrMenuUrl");
-        const qrMozoUrl = $("qrMozoUrl");
         const qrMenuImg = $("qrMenuImg");
         const qrMozoImg = $("qrMozoImg");
         const qrMenuDl = $("qrMenuDl");
         const qrMozoDl = $("qrMozoDl");
-        if(qrMenuUrl) qrMenuUrl.textContent = menuUrl;
-        if(qrMozoUrl) qrMozoUrl.textContent = mozoUrl;
         if(qrMenuImg) qrMenuImg.src = "/qr.png?u=" + encodeURIComponent(menuUrl);
         if(qrMozoImg) qrMozoImg.src = "/qr.png?u=" + encodeURIComponent(mozoUrl);
         if(qrMenuDl) qrMenuDl.href = "/qr.png?u=" + encodeURIComponent(menuUrl);
