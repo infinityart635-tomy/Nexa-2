@@ -28,25 +28,25 @@
     .menuContextItem strong{color:#fff7e5;font-size:14px}
     .menuTileDesc{color:#c7beb0;font-size:12px;line-height:1.35;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .menuEmpty{padding:18px;border:1px dashed rgba(247,243,232,.18);border-radius:8px;background:#17181b;color:#d7cfbf}
-    .menuBoard{grid-template-columns:210px 1fr;gap:14px}
+    .menuBoard{grid-template-columns:210px 1fr;gap:14px;min-width:0}
     .menuSidebar{border-radius:8px;background:#17181b;border-color:rgba(247,243,232,.12);padding:12px;box-shadow:none}
     .menuSidebar #cats{display:flex;flex-direction:column;gap:8px}
     .menuSideTitle{color:#9fd3a9;font-weight:900;letter-spacing:.16em}
     .menuCat{border-radius:8px;padding:12px;border-color:var(--cat-border, rgba(247,243,232,.12));background:var(--cat-bg, #202124);box-shadow:none;font-weight:850;color:#fff7e5;display:flex;justify-content:space-between;align-items:center;gap:10px}
     .menuCat span{overflow:hidden;text-overflow:ellipsis}
     .menuCat.active{box-shadow:0 0 0 2px var(--cat-ring, rgba(159,211,169,.14));background:#24251f}
-    .menuContent{border-radius:8px;background:#151619;border-color:rgba(247,243,232,.12);padding:14px;box-shadow:none}
+    .menuContent{border-radius:8px;background:#151619;border-color:rgba(247,243,232,.12);padding:14px;box-shadow:none;min-width:0;overflow:hidden}
     .menuTop{border-bottom:1px solid rgba(247,243,232,.1);padding-bottom:12px}
     .menuTitle{font-size:14px;letter-spacing:.12em;color:#fff7e5}
-    .menuGrid{margin-top:14px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-    .menuTile{border-radius:8px;background:#1b1c1f;border-color:rgba(247,243,232,.12);box-shadow:none;padding:8px;gap:8px;min-height:0;overflow:hidden;cursor:pointer;text-align:left;width:100%;color:inherit}
+    .menuGrid{margin-top:14px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;min-width:0}
+    .menuTile{border-radius:8px;background:#1b1c1f;border-color:rgba(247,243,232,.12);box-shadow:none;padding:8px;gap:8px;min-height:0;min-width:0;max-width:100%;overflow:hidden;cursor:pointer;text-align:left;width:100%;color:inherit}
     .menuTile::before{display:none}
     .menuTile:focus{outline:2px solid rgba(159,211,169,.55);outline-offset:2px}
     .menuTileThumb{height:104px;border-radius:8px;border:1px solid rgba(247,243,232,.12);background:#252622;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#9fd3a9;font-weight:950;font-size:28px}
-    .menuTileInfo{display:flex;flex-direction:column;gap:5px}
-    .menuTileHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-    .menuTileName{font-weight:900;font-size:14px;line-height:1.15;color:#fff7e5}
-    .menuTilePrice{flex:0 0 auto;border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:5px 7px;font-weight:950;font-size:12px}
+    .menuTileInfo{display:flex;flex-direction:column;gap:5px;min-width:0}
+    .menuTileHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}
+    .menuTileName{font-weight:900;font-size:14px;line-height:1.15;color:#fff7e5;min-width:0}
+    .menuTilePrice{flex:0 1 auto;border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:5px 7px;font-weight:950;font-size:12px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .menuTileMeta{font-size:10px;color:#9fd3a9;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
     .productModal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.68)}
     .productModal.open{display:flex}
@@ -70,13 +70,13 @@
       .wrap{padding:14px 10px 28px}
       .menuIntro{padding:14px}
       .menuContent{padding:10px}
-      .menuGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;overflow:hidden}
+      .menuGrid{display:grid;grid-template-columns:calc(50% - 4px) calc(50% - 4px);gap:8px;width:100%;max-width:100%;overflow:hidden}
       .menuTile{padding:7px;min-width:0;width:100%;box-sizing:border-box}
       .menuTileThumb{height:96px;width:100%;box-sizing:border-box}
       .menuTileName{font-size:13px;overflow-wrap:anywhere}
       .menuTileMeta{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .menuTileHead{flex-direction:column}
-      .menuTilePrice{width:max-content}
+      .menuTilePrice{width:auto;max-width:100%;font-size:11px}
       .menuTileDesc{display:none}
       .productModal{padding:8px}
       .productPanel{width:100%;max-height:96vh}
