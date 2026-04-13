@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     body{background:#111214;color:#f7f3e8}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 40px}
+    .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 40px;overflow-x:hidden}
     .topbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:14px}
     .topbar > div:first-child{display:none}
     .brand{font-weight:900;letter-spacing:.12em;text-transform:uppercase}
@@ -69,10 +69,12 @@
     @media (max-width:560px){
       .wrap{padding:14px 10px 28px}
       .menuIntro{padding:14px}
-      .menuContent{padding:10px}
-      .menuGrid{display:grid;grid-template-columns:calc(50% - 4px) calc(50% - 4px);gap:8px;width:100%;max-width:100%;overflow:hidden}
-      .menuTile{padding:7px;min-width:0;width:100%;box-sizing:border-box}
-      .menuTileThumb{height:96px;width:100%;box-sizing:border-box}
+      .menuBoard{width:100%;max-width:100%;overflow:hidden}
+      .menuContent{padding:8px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
+      .menuGrid{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:100%;overflow:hidden}
+      .menuTile{flex:0 0 calc(50% - 4px);width:calc(50% - 4px);max-width:calc(50% - 4px);padding:7px;min-width:0;box-sizing:border-box}
+      .menuTile *{max-width:100%;box-sizing:border-box}
+      .menuTileThumb{height:92px;width:100%;box-sizing:border-box}
       .menuTileName{font-size:13px;overflow-wrap:anywhere}
       .menuTileMeta{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .menuTileHead{flex-direction:column}
