@@ -9,7 +9,8 @@
   <style>
     body{background:#111214;color:#f7f3e8}
     .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 40px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .topbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:14px}
+    .topbar > div:first-child{display:none}
     .brand{font-weight:900;letter-spacing:.12em;text-transform:uppercase}
     .sub{color:#b7b0a3;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
     .muted{color:var(--muted)}
@@ -17,23 +18,16 @@
     .right a{color:#d8cfbd;text-decoration:none}
     .right a:hover{color:#fff7e5}
     .langBtn{border:1px solid rgba(247,243,232,.18);background:#191a1d;color:#fff7e5;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:800;letter-spacing:.04em}
+    #notifDock{display:none !important}
     .menuIntro{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;padding:18px;border:1px solid rgba(247,243,232,.12);border-radius:8px;background:linear-gradient(135deg,#17181b,#20211f 58%,#1c2420)}
     .menuKicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#9fd3a9;font-weight:900}
     .menuIntro h1{margin:6px 0 0;font-size:clamp(28px,6vw,56px);line-height:.95;letter-spacing:0;text-transform:none;color:#fff7e5}
-    .menuIntro p{margin:10px 0 0;color:#d7cfbf;max-width:58ch;line-height:1.45}
     .menuContext{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
     .menuContextItem{border:1px solid rgba(247,243,232,.12);background:#111214;border-radius:8px;padding:9px 11px;color:#d7cfbf;font-size:13px}
     .menuContextItem span{display:block;color:#9fd3a9;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:950;margin-bottom:3px}
     .menuContextItem strong{color:#fff7e5;font-size:14px}
-    .menuIntroMeta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .menuPill{border:1px solid rgba(247,243,232,.14);background:#111214;color:#fff7e5;border-radius:8px;padding:9px 11px;font-weight:850;font-size:12px}
-    .menuPill strong{color:#9fd3a9}
-    .menuTileDesc{color:#c7beb0;font-size:13px;line-height:1.4;margin-top:2px}
+    .menuTileDesc{color:#c7beb0;font-size:12px;line-height:1.35;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .menuEmpty{padding:18px;border:1px dashed rgba(247,243,232,.18);border-radius:8px;background:#17181b;color:#d7cfbf}
-    .menuRequest{margin-top:14px;border-radius:8px;background:#17181b;border-color:rgba(159,211,169,.28)}
-    .menuRequest .menuTitle{color:#fff7e5}
-    .menuRequest .input{border-radius:8px}
-    .menuRequest .btn{border-radius:8px}
     .menuBoard{grid-template-columns:210px 1fr;gap:14px}
     .menuSidebar{border-radius:8px;background:#17181b;border-color:rgba(247,243,232,.12);padding:12px;box-shadow:none}
     .menuSidebar #cats{display:flex;flex-direction:column;gap:8px}
@@ -44,17 +38,28 @@
     .menuContent{border-radius:8px;background:#151619;border-color:rgba(247,243,232,.12);padding:14px;box-shadow:none}
     .menuTop{border-bottom:1px solid rgba(247,243,232,.1);padding-bottom:12px}
     .menuTitle{font-size:14px;letter-spacing:.12em;color:#fff7e5}
-    .menuGrid{margin-top:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-    .menuTile{border-radius:8px;background:#1b1c1f;border-color:rgba(247,243,232,.12);box-shadow:none;padding:10px;gap:10px;min-height:0;overflow:hidden}
-    .menuTileThumb{height:150px;border-radius:8px;border:1px solid rgba(247,243,232,.12);background:#252622;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#9fd3a9;font-weight:950;font-size:34px}
-    .menuTileInfo{display:flex;flex-direction:column;gap:6px}
-    .menuTileHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .menuTileName{font-weight:900;font-size:16px;line-height:1.18;color:#fff7e5}
-    .menuTilePrice{flex:0 0 auto;border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:6px 8px;font-weight:950;font-size:13px}
-    .menuTileMeta{font-size:12px;color:#9fd3a9;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .menuGrid{margin-top:14px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+    .menuTile{border-radius:8px;background:#1b1c1f;border-color:rgba(247,243,232,.12);box-shadow:none;padding:8px;gap:8px;min-height:0;overflow:hidden;cursor:pointer;text-align:left;width:100%;color:inherit}
+    .menuTile:focus{outline:2px solid rgba(159,211,169,.55);outline-offset:2px}
+    .menuTileThumb{height:104px;border-radius:8px;border:1px solid rgba(247,243,232,.12);background:#252622;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#9fd3a9;font-weight:950;font-size:28px}
+    .menuTileInfo{display:flex;flex-direction:column;gap:5px}
+    .menuTileHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .menuTileName{font-weight:900;font-size:14px;line-height:1.15;color:#fff7e5}
+    .menuTilePrice{flex:0 0 auto;border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:5px 7px;font-weight:950;font-size:12px}
+    .menuTileMeta{font-size:10px;color:#9fd3a9;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .productModal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.68)}
+    .productModal.open{display:flex}
+    .productPanel{width:min(560px,100%);max-height:92vh;overflow:auto;border:1px solid rgba(247,243,232,.16);border-radius:8px;background:#17181b;color:#fff7e5;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+    .productHero{height:280px;background:#252622;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#9fd3a9;font-weight:950;font-size:58px}
+    .productBody{padding:14px;display:flex;flex-direction:column;gap:10px}
+    .productTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .productTitle{font-size:24px;line-height:1.05;font-weight:950}
+    .productPrice{border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:8px 10px;font-weight:950}
+    .productCat{font-size:11px;color:#9fd3a9;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+    .productDesc{color:#d7cfbf;line-height:1.45}
+    .productClose{width:100%;border-radius:8px}
     @media (max-width:900px){
       .menuIntro{align-items:flex-start;flex-direction:column}
-      .menuIntroMeta{justify-content:flex-start}
       .menuBoard{grid-template-columns:1fr}
       .menuSidebar{position:static}
       .menuSidebar #cats{display:flex;flex-direction:row;overflow-x:auto;padding-bottom:3px;scroll-snap-type:x proximity}
@@ -63,14 +68,15 @@
     @media (max-width:560px){
       .wrap{padding:14px 10px 28px}
       .menuIntro{padding:14px}
-      .menuGrid{grid-template-columns:1fr}
-      .menuTile{display:grid;grid-template-columns:112px 1fr;align-items:stretch}
-      .menuTileThumb{height:100%;min-height:112px}
+      .menuGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .menuTile{padding:7px}
+      .menuTileThumb{height:94px}
       .menuTileHead{flex-direction:column}
       .menuTilePrice{width:max-content}
+      .menuTileDesc{display:none}
+      .productHero{height:240px}
     }
     body[data-menu-mode="qr"] .topbar{display:none}
-    body[data-menu-mode="qr"] .menuRequest{display:none}
     body[data-menu-mode="qr"] .wrap{padding-top:12px}
     body[data-menu-mode="qr-table"] .topbar{display:none}
     body[data-menu-mode="qr-table"] .wrap{padding-top:12px}
@@ -93,12 +99,7 @@
       <div>
         <div class="menuKicker" id="menuKicker">Carta</div>
         <h1 id="menuHeroTitle">Menu</h1>
-        <p id="menuHeroText">Elegí tranquilo. Si estás en la mesa, podés pedir la cuenta desde acá.</p>
         <div class="menuContext">
-          <div class="menuContextItem">
-            <span id="restaurantContextLabel">Restaurante</span>
-            <strong id="restaurantContextValue">-</strong>
-          </div>
           <div class="menuContextItem">
             <span id="tableContextLabel">Mesa</span>
             <strong id="tableContextValue">-</strong>
@@ -120,14 +121,19 @@
       </div>
     </div>
 
-    <div class="card menuRequest">
-      <div class="menuTitle" id="billTitle">Pedir la cuenta</div>
-      <div class="menuTileDesc" id="billDesc">Avisamos al personal. Opcional: indica mesa o ubicacion.</div>
-      <div class="row" style="margin-top:10px;">
-        <input id="billTable" class="input" placeholder="Mesa (opcional)" style="flex:1; min-width:180px"/>
-        <button id="btnBill" class="btn primary" type="button">Pedir</button>
+    <div class="productModal" id="productModal" aria-hidden="true">
+      <div class="productPanel" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+        <div class="productHero" id="productModalHero"></div>
+        <div class="productBody">
+          <div class="productCat" id="productModalCat"></div>
+          <div class="productTop">
+            <div class="productTitle" id="productModalTitle"></div>
+            <div class="productPrice" id="productModalPrice"></div>
+          </div>
+          <div class="productDesc" id="productModalDesc"></div>
+          <button class="btn productClose" id="productModalClose" type="button">Cerrar</button>
+        </div>
       </div>
-      <div class="muted" id="billHint" style="font-size:.85em; margin-top:8px;">No hace falta iniciar sesion.</div>
     </div>
 
     <div id="toast" class="toast" style="display:none"></div>
@@ -152,16 +158,15 @@
     const $langToggle = document.getElementById('langToggle');
     const $menuTitle = document.getElementById('menuTitle');
     const $menuHeroTitle = document.getElementById('menuHeroTitle');
-    const $menuHeroText = document.getElementById('menuHeroText');
-    const $restaurantContextValue = document.getElementById('restaurantContextValue');
     const $tableContextValue = document.getElementById('tableContextValue');
-    const $billInput = document.getElementById('billTable');
-    const $billHint = document.getElementById('billHint');
+    const $productModal = document.getElementById('productModal');
+    const $productModalHero = document.getElementById('productModalHero');
+    const $productModalCat = document.getElementById('productModalCat');
+    const $productModalTitle = document.getElementById('productModalTitle');
+    const $productModalPrice = document.getElementById('productModalPrice');
+    const $productModalDesc = document.getElementById('productModalDesc');
+    const $productModalClose = document.getElementById('productModalClose');
 
-    if(tableParam && $billInput){
-      $billInput.value = tableParam;
-      if($billHint) $billHint.textContent = "Mesa detectada desde el QR.";
-    }
     if($tableContextValue) $tableContextValue.textContent = tableParam || "-";
 
     let state = {categories:[], products:[], currency:'ARS'};
@@ -171,41 +176,25 @@
     const i18n = {
       es: {
         all: "Todo",
-        billTitle: "Pedir la cuenta",
-        billDesc: "Avisamos al personal. Opcional: indica mesa o ubicacion.",
-        billPlaceholder: "Mesa (opcional)",
-        billBtn: "Pedir",
-        billHint: "No hace falta iniciar sesion.",
-        billSent: "Listo: avisamos al personal",
-        billErr: "No se pudo enviar",
         menuFail: "No se pudo cargar el menu.",
         noProducts: "No hay productos en esta categoria.",
         catalog: "Catalogo",
         access: "Acceso",
         rubros: "Rubros",
-        intro: "Elegí tranquilo. Si estás en la mesa, podés pedir la cuenta desde acá.",
         menuKicker: "Carta",
-        restaurantLabel: "Restaurante",
-        tableLabel: "Mesa"
+        tableLabel: "Mesa",
+        close: "Cerrar"
       },
       en: {
         all: "All",
-        billTitle: "Ask for the bill",
-        billDesc: "We notify staff. Optional: add your table or location.",
-        billPlaceholder: "Table (optional)",
-        billBtn: "Request",
-        billHint: "No login required.",
-        billSent: "Done: we notified staff",
-        billErr: "Could not send",
         menuFail: "Could not load the menu.",
         noProducts: "No products in this category.",
         catalog: "Catalog",
         access: "Access",
         rubros: "Categories",
-        intro: "Take your time. If you are at the table, you can ask for the bill here.",
         menuKicker: "Menu",
-        restaurantLabel: "Restaurant",
-        tableLabel: "Table"
+        tableLabel: "Table",
+        close: "Close"
       }
     };
 
@@ -215,16 +204,6 @@
 
     function applyLang(){
       document.documentElement.lang = lang;
-      const billTitle = document.getElementById('billTitle');
-      if(billTitle) billTitle.textContent = t('billTitle');
-      const billDesc = document.getElementById('billDesc');
-      if(billDesc) billDesc.textContent = t('billDesc');
-      const billHint = document.getElementById('billHint');
-      if(billHint) billHint.textContent = t('billHint');
-      const billInput = document.getElementById('billTable');
-      if(billInput) billInput.placeholder = t('billPlaceholder');
-      const billBtn = document.getElementById('btnBill');
-      if(billBtn) billBtn.textContent = t('billBtn');
       const access = document.querySelector('.right a');
       if(access) access.textContent = t('access');
       if($langToggle) $langToggle.textContent = (lang === 'es' ? 'EN' : 'ES');
@@ -233,11 +212,9 @@
       if(rubroTitle) rubroTitle.textContent = t('rubros');
       const kicker = document.getElementById('menuKicker');
       if(kicker) kicker.textContent = t('menuKicker');
-      const restaurantLabel = document.getElementById('restaurantContextLabel');
-      if(restaurantLabel) restaurantLabel.textContent = t('restaurantLabel');
       const tableLabel = document.getElementById('tableContextLabel');
       if(tableLabel) tableLabel.textContent = t('tableLabel');
-      if($menuHeroText) $menuHeroText.textContent = t('intro');
+      if($productModalClose) $productModalClose.textContent = t('close');
     }
 
     const $toast = document.getElementById('toast');
@@ -250,30 +227,6 @@
       if(toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(()=>{ $toast.classList.remove('show'); $toast.style.display='none'; }, 2600);
     }
-
-    async function requestBill(){
-      const table = (document.getElementById('billTable')?.value || '').trim().slice(0,40);
-      const btn = document.getElementById('btnBill');
-      if(btn) btn.disabled = true;
-      try{
-        const r = await fetch('/api/customer/requestBill', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ table, restaurantId: restaurantParam, branchId: branchParam })
-        });
-        const j = await r.json().catch(()=>({}));
-        if(!r.ok) throw new Error((j && j.error) ? j.error : t('billErr'));
-        toast(t('billSent') + (table ? (' - ' + table) : ''));
-        const inp = document.getElementById('billTable');
-        if(inp) inp.value = '';
-      }catch(e){
-        toast('Error: ' + (e.message || 'offline'));
-      }finally{
-        if(btn) btn.disabled = false;
-      }
-    }
-
-    document.getElementById('btnBill')?.addEventListener('click', requestBill);
 
     function money(n){
       const v = Number(n||0);
@@ -311,12 +264,47 @@
       return `--cat-bg:${bg}; --cat-border:${border}; --cat-ring:${ring};`;
     }
 
+    function getProductView(p){
+      const catMap = new Map((state.categories||[]).map(c=>[String(c.id), c]));
+      const catObj = catMap.get(String(p && p.categoryId || ""));
+      const name = (lang==='en' && p && p.nameEn) ? p.nameEn : (p && p.name) || "";
+      const desc = (lang==='en' && p && p.descriptionEn) ? p.descriptionEn : (p && p.description) || "";
+      return {
+        name,
+        desc,
+        catLabel: catObj ? catTitle(catObj) : ((p && p.categoryTitle) || "Otros"),
+        initial: String(name || "P").trim().slice(0, 1).toUpperCase(),
+        imageUrl: String((p && p.imageUrl) || ""),
+        price: money(p && p.price)
+      };
+    }
+
+    function openProduct(productId){
+      const product = (state.products || []).find(p => String(p.id || "") === String(productId || ""));
+      if(!product || !$productModal) return;
+      const view = getProductView(product);
+      if($productModalHero){
+        $productModalHero.textContent = view.imageUrl ? "" : view.initial;
+        $productModalHero.style.backgroundImage = view.imageUrl ? `url('${view.imageUrl.replace(/'/g, "%27")}')` : "";
+      }
+      if($productModalCat) $productModalCat.textContent = view.catLabel;
+      if($productModalTitle) $productModalTitle.textContent = view.name;
+      if($productModalPrice) $productModalPrice.textContent = view.price;
+      if($productModalDesc) $productModalDesc.textContent = view.desc || "";
+      $productModal.classList.add("open");
+      $productModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      if($productModalClose) $productModalClose.focus();
+    }
+
+    function closeProduct(){
+      if(!$productModal) return;
+      $productModal.classList.remove("open");
+      $productModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
     function renderCats(){
-      const counts = new Map();
-      (state.products||[]).forEach(p=>{
-        const key = String(p.categoryId || '');
-        counts.set(key, (counts.get(key) || 0) + 1);
-      });
       const cats = [{id:'all', title:t('all')}].concat(state.categories||[]);
       $cats.innerHTML = cats.map(c => {
         const active = (c.id === currentCat) ? 'active' : '';
@@ -344,28 +332,27 @@
       if($menuTitle) $menuTitle.textContent = title;
 
       $grid.innerHTML = list.map(p => {
-        const catObj = catMap.get(String(p.categoryId||""));
-        const catLabel = catObj ? catTitle(catObj) : "Otros";
-        const desc = (lang==='en' && p.descriptionEn) ? p.descriptionEn : p.description;
-        const name = (lang==='en' && p.nameEn) ? p.nameEn : p.name;
-        const initial = String(name || "P").trim().slice(0, 1).toUpperCase();
-        const thumb = p.imageUrl
-          ? `<div class="menuTileThumb" style="background-image:url('${escapeHtml(p.imageUrl)}')" aria-label="${escapeHtml(name)}"></div>`
-          : `<div class="menuTileThumb" aria-hidden="true">${escapeHtml(initial)}</div>`;
+        const view = getProductView(p);
+        const thumb = view.imageUrl
+          ? `<div class="menuTileThumb" style="background-image:url('${escapeHtml(view.imageUrl)}')" aria-label="${escapeHtml(view.name)}"></div>`
+          : `<div class="menuTileThumb" aria-hidden="true">${escapeHtml(view.initial)}</div>`;
         return `
-          <div class="menuTile">
+          <button class="menuTile" type="button" data-product="${escapeHtml(p.id)}">
             ${thumb}
             <div class="menuTileInfo">
-              <div class="menuTileMeta">${escapeHtml(catLabel)}</div>
+              <div class="menuTileMeta">${escapeHtml(view.catLabel)}</div>
               <div class="menuTileHead">
-                <div class="menuTileName">${escapeHtml(name)}</div>
-                <div class="menuTilePrice">${money(p.price)}</div>
+                <div class="menuTileName">${escapeHtml(view.name)}</div>
+                <div class="menuTilePrice">${view.price}</div>
               </div>
-              ${desc ? `<div class="menuTileDesc">${escapeHtml(desc)}</div>` : ''}
+              ${view.desc ? `<div class="menuTileDesc">${escapeHtml(view.desc)}</div>` : ''}
             </div>
-          </div>
+          </button>
         `;
       }).join('');
+      [...$grid.querySelectorAll("[data-product]")].forEach(btn=>{
+        btn.addEventListener("click", ()=>openProduct(btn.getAttribute("data-product") || ""));
+      });
     }
 
     function escapeHtml(s){
@@ -385,7 +372,6 @@
         const restaurantName = data.restaurantName || 'Menu';
         $resto.textContent = restaurantName.toUpperCase();
         if($menuHeroTitle) $menuHeroTitle.textContent = restaurantName;
-        if($restaurantContextValue) $restaurantContextValue.textContent = restaurantName;
         $sub.textContent = t('catalog');
         applyLang();
         renderCats();
@@ -405,6 +391,16 @@
         document.title = `${lang === 'en' ? 'Menu' : 'Menu'} - ${state.restaurantName || 'NEXA'}`;
       });
     }
+
+    if($productModalClose) $productModalClose.addEventListener("click", closeProduct);
+    if($productModal){
+      $productModal.addEventListener("click", (event)=>{
+        if(event.target === $productModal) closeProduct();
+      });
+    }
+    window.addEventListener("keydown", (event)=>{
+      if(event.key === "Escape") closeProduct();
+    });
 
     applyLang();
     boot();
