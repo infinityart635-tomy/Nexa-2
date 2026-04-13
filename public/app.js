@@ -23,6 +23,15 @@
   let currentBuildId = "";
   let pendingBuildId = "";
 
+  function roleRank(role){
+    role = String(role || "anon");
+    if(role === "admin") return 4;
+    if(role === "mozo") return 3;
+    if(role === "account") return 2;
+    if(role === "cliente") return 1;
+    return 0;
+  }
+
   function isAuthScreen(){
     const path = (location && location.pathname ? location.pathname : "").toLowerCase();
     return path === "/login.html" || path === "/login" || path === "/";
@@ -233,6 +242,26 @@
       if(msg.type === "public" && msg.menu){
         publicState = msg.menu;
         emit();
+        return;
+      }
+      if(msg.type === "hello:ok"){
+        window.dispatchEvent(new CustomEvent("resto:hello", { detail: msg }));
+        if(roleRank(msg.role) < roleRank(hello.role)){
+          toast("Tu sesion no tiene permiso para esta pantalla. Vuelve a entrar al restaurante.", "warn");
+        }
+        return;
+      }
+      if(msg.type === "action:error"){
+        const need = msg.needRole ? ` (${msg.needRole})` : "";
+        const text = msg.error === "forbidden"
+          ? `No tienes permiso para guardar esta accion${need}.`
+          : `No se pudo guardar: ${msg.error || "error"}.`;
+        toast(text, "warn");
+        window.dispatchEvent(new CustomEvent("resto:action-error", { detail: msg }));
+        return;
+      }
+      if(msg.type === "action:ok"){
+        window.dispatchEvent(new CustomEvent("resto:action-ok", { detail: msg }));
         return;
       }
       if(msg.type === "notify" && msg.text){

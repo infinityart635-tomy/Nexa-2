@@ -256,7 +256,23 @@
     const { connect, onState, sendAction, money, esc, toast } = window.RestoApp;
     const $ = (id)=>document.getElementById(id);
     const LS = "resto_v5_admin_name";
-    connect("admin", localStorage.getItem(LS) || "Admin");
+    async function ensureAdminSession(){
+      try{
+        const me = await fetch("/api/auth/me", { cache: "no-store" }).then(r=>r.json());
+        if(me && me.role === "admin" && me.restaurantId){
+          connect("admin", localStorage.getItem(LS) || me.name || "Admin");
+          return true;
+        }
+        $("list").innerHTML = '<div class="small">Tu sesion no esta activa como administrador. Entra al restaurante otra vez para cargar productos.</div>';
+        $("wsStatus").textContent = "sin permiso";
+        setTimeout(()=>{ location.href = "/profile.html"; }, 1200);
+      }catch(e){
+        $("list").innerHTML = '<div class="small">No se pudo verificar la sesion.</div>';
+        $("wsStatus").textContent = "offline";
+      }
+      return false;
+    }
+    ensureAdminSession();
     let statusFilter = "all";
     let sortBy = "category";
 
