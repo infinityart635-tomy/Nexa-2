@@ -39,7 +39,7 @@
     .menuContent{border-radius:8px;background:#151619;border-color:rgba(247,243,232,.12);padding:14px;box-shadow:none;min-width:0;overflow:hidden}
     .menuTop{border-bottom:1px solid rgba(247,243,232,.1);padding-bottom:12px}
     .menuTitle{font-size:14px;letter-spacing:.12em;color:#fff7e5}
-    .menuGrid{margin-top:14px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;min-width:0}
+    .menuGrid{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;width:100%;max-width:100%;overflow:visible}
     .menuTile{border-radius:8px;background:#1b1c1f;border-color:rgba(247,243,232,.12);box-shadow:none;padding:8px;gap:8px;min-height:0;min-width:0;max-width:100%;overflow:hidden;cursor:pointer;text-align:left;width:100%;color:inherit}
     .menuTile::before{display:none}
     .menuTile:focus{outline:2px solid rgba(159,211,169,.55);outline-offset:2px}
@@ -49,6 +49,7 @@
     .menuTileName{font-weight:900;font-size:14px;line-height:1.15;color:#fff7e5;min-width:0}
     .menuTilePrice{flex:0 1 auto;border:1px solid rgba(159,211,169,.3);background:#112018;color:#bdf0c5;border-radius:8px;padding:5px 7px;font-weight:950;font-size:12px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .menuTileMeta{font-size:10px;color:#9fd3a9;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .menuEmpty{grid-column:1/-1}
     .productModal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.68)}
     .productModal.open{display:flex}
     .productPanel{width:min(720px,100%);max-height:94vh;overflow:auto;border:1px solid rgba(247,243,232,.16);border-radius:8px;background:#17181b;color:#fff7e5;box-shadow:0 24px 80px rgba(0,0,0,.45)}
@@ -72,7 +73,7 @@
       .menuIntro{padding:14px}
       .menuBoard{width:100%;max-width:100%;overflow:hidden}
       .menuContent{padding:8px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
-      .menuGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;max-width:100%;overflow:visible}
+      .menuGrid{gap:8px}
       .menuTile{width:100%;max-width:100%;padding:7px;min-width:0;box-sizing:border-box}
       .menuTile *{max-width:100%;box-sizing:border-box}
       .menuTileThumb{height:92px;width:100%;box-sizing:border-box}
@@ -89,6 +90,8 @@
     body[data-menu-mode="qr"] .wrap{padding-top:12px}
     body[data-menu-mode="qr-table"] .topbar{display:none}
     body[data-menu-mode="qr-table"] .wrap{padding-top:12px}
+    body[data-menu-mode="qr"] .menuGrid,
+    body[data-menu-mode="qr-table"] .menuGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
   </style>
 </head>
 <body>
