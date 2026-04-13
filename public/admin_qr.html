@@ -131,14 +131,39 @@
       return ("http://" + v).replace(/\/+$/,"");
     }
 
+    function isPrivateBaseUrl(raw){
+      try{
+        const u = new URL(String(raw || ""));
+        const h = u.hostname.toLowerCase();
+        return h === "localhost" ||
+          h === "127.0.0.1" ||
+          h.startsWith("127.") ||
+          h.startsWith("10.") ||
+          h.startsWith("192.168.") ||
+          /^172\.(1[6-9]|2\d|3[01])\./.test(h);
+      }catch(e){
+        return false;
+      }
+    }
+
     function getBaseOverride(){
       const params = new URLSearchParams(location.search);
       const fromQuery = normalizeBaseUrl(params.get("base"));
+      const publicHttps = location && location.protocol === "https:";
       if (fromQuery) {
+        if(publicHttps && isPrivateBaseUrl(fromQuery)){
+          localStorage.removeItem("qrBaseUrl");
+          return "";
+        }
         localStorage.setItem("qrBaseUrl", fromQuery);
         return fromQuery;
       }
-      return normalizeBaseUrl(localStorage.getItem("qrBaseUrl"));
+      const saved = normalizeBaseUrl(localStorage.getItem("qrBaseUrl"));
+      if(publicHttps && isPrivateBaseUrl(saved)){
+        localStorage.removeItem("qrBaseUrl");
+        return "";
+      }
+      return saved;
     }
 
     function pickBaseUrl(info){
@@ -147,9 +172,8 @@
       const origin = (location && location.origin) ? location.origin : "";
       const pref = info && info.preferred ? String(info.preferred) : "";
       const urls = (info && Array.isArray(info.urls)) ? info.urls.map(String) : [];
-      const candidates = [pref, ...urls, origin].filter(Boolean);
-      const bad = (u)=>/localhost|127\.0\.0\.1/.test(u);
-      return candidates.find(u=>!bad(u)) || candidates[0] || "";
+      const candidates = [origin, pref, ...urls].filter(Boolean);
+      return candidates.find(u=>!isPrivateBaseUrl(u)) || candidates[0] || "";
     }
 
     function esc(str){
