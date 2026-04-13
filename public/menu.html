@@ -334,6 +334,12 @@
 
     function renderGrid(){
       const list = (state.products||[]).filter(p => currentCat==='all' || String(p.categoryId||'')===String(currentCat));
+      $grid.style.display = "grid";
+      $grid.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+      $grid.style.gap = "8px";
+      $grid.style.width = "100%";
+      $grid.style.maxWidth = "100%";
+      $grid.style.overflow = "visible";
       if (!list.length){
         $grid.innerHTML = `<div class="menuEmpty small muted">${t('noProducts')}</div>`;
         return;
@@ -363,6 +369,10 @@
         `;
       }).join('');
       [...$grid.querySelectorAll("[data-product]")].forEach(btn=>{
+        btn.style.width = "100%";
+        btn.style.maxWidth = "100%";
+        btn.style.minWidth = "0";
+        btn.style.flex = "initial";
         btn.addEventListener("click", ()=>openProduct(btn.getAttribute("data-product") || ""));
       });
     }
