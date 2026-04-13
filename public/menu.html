@@ -21,6 +21,10 @@
     .menuKicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#9fd3a9;font-weight:900}
     .menuIntro h1{margin:6px 0 0;font-size:clamp(28px,6vw,56px);line-height:.95;letter-spacing:0;text-transform:none;color:#fff7e5}
     .menuIntro p{margin:10px 0 0;color:#d7cfbf;max-width:58ch;line-height:1.45}
+    .menuContext{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .menuContextItem{border:1px solid rgba(247,243,232,.12);background:#111214;border-radius:8px;padding:9px 11px;color:#d7cfbf;font-size:13px}
+    .menuContextItem span{display:block;color:#9fd3a9;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:950;margin-bottom:3px}
+    .menuContextItem strong{color:#fff7e5;font-size:14px}
     .menuIntroMeta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .menuPill{border:1px solid rgba(247,243,232,.14);background:#111214;color:#fff7e5;border-radius:8px;padding:9px 11px;font-weight:850;font-size:12px}
     .menuPill strong{color:#9fd3a9}
@@ -90,6 +94,16 @@
         <div class="menuKicker" id="menuKicker">Carta</div>
         <h1 id="menuHeroTitle">Menu</h1>
         <p id="menuHeroText">Elegí tranquilo. Si estás en la mesa, podés pedir la cuenta desde acá.</p>
+        <div class="menuContext">
+          <div class="menuContextItem">
+            <span id="restaurantContextLabel">Restaurante</span>
+            <strong id="restaurantContextValue">-</strong>
+          </div>
+          <div class="menuContextItem">
+            <span id="tableContextLabel">Mesa</span>
+            <strong id="tableContextValue">-</strong>
+          </div>
+        </div>
       </div>
       <div class="menuIntroMeta">
         <div class="menuPill">Mesa <strong id="tablePill">-</strong></div>
@@ -147,6 +161,8 @@
     const $menuHeroTitle = document.getElementById('menuHeroTitle');
     const $menuHeroText = document.getElementById('menuHeroText');
     const $tablePill = document.getElementById('tablePill');
+    const $restaurantContextValue = document.getElementById('restaurantContextValue');
+    const $tableContextValue = document.getElementById('tableContextValue');
     const $billInput = document.getElementById('billTable');
     const $billHint = document.getElementById('billHint');
 
@@ -155,6 +171,7 @@
       if($billHint) $billHint.textContent = "Mesa detectada desde el QR.";
     }
     if($tablePill) $tablePill.textContent = tableParam || "-";
+    if($tableContextValue) $tableContextValue.textContent = tableParam || "-";
 
     let state = {categories:[], products:[], currency:'ARS'};
     let currentCat = 'all';
@@ -176,7 +193,9 @@
         access: "Acceso",
         rubros: "Rubros",
         intro: "Elegí tranquilo. Si estás en la mesa, podés pedir la cuenta desde acá.",
-        menuKicker: "Carta"
+        menuKicker: "Carta",
+        restaurantLabel: "Restaurante",
+        tableLabel: "Mesa"
       },
       en: {
         all: "All",
@@ -193,7 +212,9 @@
         access: "Access",
         rubros: "Categories",
         intro: "Take your time. If you are at the table, you can ask for the bill here.",
-        menuKicker: "Menu"
+        menuKicker: "Menu",
+        restaurantLabel: "Restaurant",
+        tableLabel: "Table"
       }
     };
 
@@ -221,6 +242,10 @@
       if(rubroTitle) rubroTitle.textContent = t('rubros');
       const kicker = document.getElementById('menuKicker');
       if(kicker) kicker.textContent = t('menuKicker');
+      const restaurantLabel = document.getElementById('restaurantContextLabel');
+      if(restaurantLabel) restaurantLabel.textContent = t('restaurantLabel');
+      const tableLabel = document.getElementById('tableContextLabel');
+      if(tableLabel) tableLabel.textContent = t('tableLabel');
       if($menuHeroText) $menuHeroText.textContent = t('intro');
     }
 
@@ -369,8 +394,10 @@
         const data = await r.json();
         state = data;
         document.title = `${lang === 'en' ? 'Menu' : 'Menu'} - ${data.restaurantName || 'NEXA'}`;
-        $resto.textContent = (data.restaurantName || 'Menu').toUpperCase();
-        if($menuHeroTitle) $menuHeroTitle.textContent = data.restaurantName || 'Menu';
+        const restaurantName = data.restaurantName || 'Menu';
+        $resto.textContent = restaurantName.toUpperCase();
+        if($menuHeroTitle) $menuHeroTitle.textContent = restaurantName;
+        if($restaurantContextValue) $restaurantContextValue.textContent = restaurantName;
         $sub.textContent = t('catalog');
         applyLang();
         renderCats();
