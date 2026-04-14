@@ -4148,6 +4148,7 @@ function requestMozoAccess(user, restaurantId){
     existing.updatedAt = now();
     ROOT_DB.updatedAt = now();
     scheduleSave();
+    notifyMozoAccessRequest(meta, user, existing);
     return { membership: existing };
   }
   const membership = {
@@ -4162,7 +4163,26 @@ function requestMozoAccess(user, restaurantId){
   ROOT_DB.restaurantMemberships.unshift(membership);
   ROOT_DB.updatedAt = now();
   scheduleSave();
+  notifyMozoAccessRequest(meta, user, membership);
   return { membership };
+}
+
+function notifyMozoAccessRequest(meta, user, membership){
+  if(!meta || !user || !membership) return;
+  const requester = String(user.name || user.username || user.email || "Un usuario").trim() || "Un usuario";
+  const restaurant = String(meta.name || "tu comercio").trim() || "tu comercio";
+  notifyUser(String(meta.ownerUserId || ""), {
+    id: "mozo-request:" + String(membership.id || ""),
+    text: `${requester} solicito acceso como mozo a ${restaurant}`,
+    kind: "warn",
+    data: {
+      action: "mozo:request",
+      requestId: String(membership.id || ""),
+      restaurantId: String(meta.id || ""),
+      userId: String(user.id || "")
+    },
+    by: "NEXA"
+  });
 }
 
 function decideMozoRequest(ownerUserId, membershipId, approve){
@@ -5278,6 +5298,25 @@ function notify(text, kind, data, by){
   broadcastMinRole("mozo", payload);
 }
 
+function notifyUser(userId, payload){
+  const target = String(userId || "");
+  if(!target) return;
+  const msg = JSON.stringify({
+    type: "notify",
+    id: String((payload && payload.id) || uid()),
+    text: String((payload && payload.text) || "").slice(0, 200),
+    kind: String((payload && payload.kind) || "info"),
+    data: (payload && payload.data) || {},
+    by: String((payload && payload.by) || "").slice(0, 40),
+    at: now()
+  });
+  wss.clients.forEach((client) => {
+    if (client.readyState !== WebSocket.OPEN) return;
+    if (String(client.userId || "") !== target) return;
+    client.send(msg);
+  });
+}
+
 
 
 function requiredRoleForAction(kind) {
@@ -5702,6 +5741,7 @@ case "attendance:checkOut": {
 wss.on("connection", (ws, req) => {
   // Auth por cookie (login)
   const ses = req ? authFromReq(req) : null;
+  ws.userId = ses ? String(ses.userId || "") : "";
   ws.role = ses ? String(ses.role || "cliente").slice(0, 16) : "cliente";
   ws.restaurantId = ses ? String(ses.restaurantId || "") : "";
   ws.restaurantName = ses ? String(ses.restaurantName || "") : "";

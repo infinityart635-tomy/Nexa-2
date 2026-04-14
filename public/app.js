@@ -13,6 +13,7 @@
   let connected = false;
   const NOTIF_KEY = "resto_notifications";
   const NOTIF_SEEN_KEY = "resto_notifications_seen";
+  const MOZO_REQUEST_NOTIFIED_KEY = "nexa_mozo_request_notified";
   const THEME_KEY = "nexa_theme";
   const ACTIVITY_KEY = "nexa_last_active_at";
   const PWA_DISMISSED_KEY = "nexa_pwa_install_dismissed";
@@ -50,8 +51,10 @@
     try{ localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications.slice(0,100))); }catch{}
   }
   function addNotification(n){
+    const incomingId = n && n.id ? String(n.id) : "";
+    if(incomingId && notifications.some(item => String(item && item.id || "") === incomingId)) return;
     const item = {
-      id: n.id || (Date.now()+"-"+Math.random().toString(36).slice(2,6)),
+      id: incomingId || (Date.now()+"-"+Math.random().toString(36).slice(2,6)),
       text: String(n.text||""),
       kind: String(n.kind||"info"),
       by: String(n.by||""),
@@ -327,6 +330,45 @@
   function isInstallEligibleContext(){
     return location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
   }
+  function loadMozoRequestNotified(){
+    try{
+      const arr = JSON.parse(localStorage.getItem(MOZO_REQUEST_NOTIFIED_KEY) || "[]");
+      return new Set(Array.isArray(arr) ? arr.map(String) : []);
+    }catch{
+      return new Set();
+    }
+  }
+  function saveMozoRequestNotified(set){
+    try{ localStorage.setItem(MOZO_REQUEST_NOTIFIED_KEY, JSON.stringify(Array.from(set).slice(-300))); }catch{}
+  }
+  async function syncPendingMozoRequestNotifications(){
+    try{
+      const r = await fetch("/api/auth/profile", { cache: "no-store" });
+      if(!r.ok) return;
+      const profile = await r.json();
+      const pending = Array.isArray(profile && profile.pendingRequests) ? profile.pendingRequests : [];
+      if(!pending.length) return;
+      const seen = loadMozoRequestNotified();
+      let changed = false;
+      pending.forEach(req => {
+        const id = String((req && req.id) || "");
+        if(!id || seen.has(id)) return;
+        const requesterUser = req && req.user ? req.user : {};
+        const requester = String((requesterUser && (requesterUser.name || requesterUser.username || requesterUser.email)) || "Un usuario");
+        const restaurant = String((req && req.restaurantName) || "tu comercio");
+        addNotification({
+          id: "mozo-request:" + id,
+          text: `${requester} solicito acceso como mozo a ${restaurant}`,
+          kind: "warn",
+          by: "NEXA",
+          data: { action: "mozo:request", requestId: id, restaurantId: req && req.restaurantId }
+        });
+        seen.add(id);
+        changed = true;
+      });
+      if(changed) saveMozoRequestNotified(seen);
+    }catch{}
+  }
   function registerAppCache(){
     if(!isInstallEligibleContext() || !("serviceWorker" in navigator)) return;
     window.addEventListener("load", ()=>{
@@ -586,6 +628,8 @@
   }
 
   loadNotifications();
+  setTimeout(syncPendingMozoRequestNotifications, 1800);
+  setInterval(syncPendingMozoRequestNotifications, 60000);
   if(document.readyState === "loading"){
     document.addEventListener("DOMContentLoaded", ()=>{
       ensureNotifDock();
